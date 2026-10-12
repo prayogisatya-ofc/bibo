@@ -127,6 +127,7 @@ export function ChatPanel({
         className="chat-log"
         ref={boxRef}
         data-testid="chat-log"
+        tabIndex={0}
         onScroll={(e) => {
           const el = e.currentTarget;
           nearBottom.current = el.scrollHeight - el.scrollTop - el.clientHeight < 80;

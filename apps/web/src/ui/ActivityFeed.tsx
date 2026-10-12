@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
 import type { FeedItem } from "@codepet/protocol";
-import { useLocale, useT } from "../i18n/index.js";
+import { useLocale } from "../i18n/index.js";
 import { CheckIcon, XIcon } from "./icons.js";
 import { truncate2k } from "./text-utils.js";
 
@@ -14,14 +14,14 @@ function formatDur(ms: number, locale: "id" | "en"): string {
  * (centang hijau = selesai, cincin berputar = berjalan, silang merah = gagal)
  * + durasi. Klik baris membuka detail.
  */
-export function ActivityFeed({ items }: { items: FeedItem[] }): JSX.Element {
-  const t = useT();
+export function ActivityFeed({ items }: { items: FeedItem[] }): JSX.Element | null {
   const locale = useLocale();
   const [open, setOpen] = useState<string | undefined>(undefined);
   // Waktu pertama item terlihat ≈ awal tool berjalan (untuk durasi).
   const seenAt = useRef(new Map<string, number>());
 
-  if (items.length === 0) return <div className="tool-card empty" data-testid="feed" aria-label={t.working} />;
+  // Kosong: jangan render apa-apa (hindari pergeseran layout).
+  if (items.length === 0) return null;
 
   const now = Date.now();
   return (
