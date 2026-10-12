@@ -48,3 +48,5 @@ tak ada auto-approve, tak ada persetujuan suara untuk high. Audit: `docs/securit
   bukan menyetujui/menolak).
 - Mode tersimpan di `localStorage` (`codepet.ui-mode`); pintasan **Ctrl/Cmd+.**
   berpindah mode. Riwayat percakapan dipertahankan di kedua mode.
+- Panel pengaturan dibuka dari tombol roda gigi di bar atas atau pintasan **Ctrl/Cmd+,**
+  (buka/tutup); **Esc** menutup panel.

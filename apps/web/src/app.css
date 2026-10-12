@@ -831,8 +831,27 @@ button:disabled { opacity: 0.5; cursor: default; }
   color: var(--text);
 }
 .modal-box label { display: flex; flex-direction: column; gap: 4px; font-weight: 700; font-size: 14px; }
+.modal-box label:has(> input[type="checkbox"]) { flex-direction: row; align-items: center; gap: 0.5rem; font-weight: 600; }
 .recent { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.3rem; }
 .privacy { color: var(--text-2); font-size: 0.85rem; }
+
+/* Panel pengaturan berkelompok (tanpa ikon emoji; pemisah berupa header seksi) */
+.settings-panel .settings-sec {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  padding-top: 0.7rem;
+  border-top: 1px solid var(--line);
+}
+.settings-panel .settings-sec:first-of-type { border-top: 0; padding-top: 0; }
+.settings-panel .settings-sec h3 {
+  margin: 0;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-2);
+}
+.settings-panel .settings-sub { margin: 0.3rem 0 0; font-size: 0.92rem; color: var(--text-2); }
 
 /* Galeri dev (fase B) — dipertahankan */
 .dev-gallery { padding: 1rem; max-width: 1100px; margin: 0 auto; }
@@ -881,6 +900,20 @@ button:disabled { opacity: 0.5; cursor: default; }
     z-index: 20;
   }
   .perm-pop .pop-arrow { display: none; }
+  /* Panel pengaturan menjadi bottom sheet yang nyaman disentuh */
+  .settings-modal { align-items: flex-end; padding: 0; }
+  .settings-modal .modal-box.settings-panel {
+    width: 100%;
+    max-width: none;
+    max-height: 88vh;
+    border-radius: 24px 24px 0 0;
+    border-bottom: 0;
+    padding-bottom: calc(1.2rem + env(safe-area-inset-bottom));
+  }
+  .settings-panel input, .settings-panel select, .settings-panel textarea {
+    min-height: 44px;
+    font-size: 16px; /* cegah zoom otomatis di iOS */
+  }
   .speech-bubble { font-size: 18px; padding: 14px 18px; }
 }
 

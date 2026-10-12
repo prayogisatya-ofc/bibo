@@ -210,6 +210,18 @@ function Shell({ locale, setLocale }: { locale: Locale; setLocale: (v: Locale) =
     return () => window.removeEventListener("keydown", onKey);
   }, [engine]);
 
+  // Ctrl/Cmd+, = buka/tutup panel pengaturan (tidak bentrok dengan Ctrl+M, Ctrl+.).
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent): void => {
+      if ((e.ctrlKey || e.metaKey) && e.key === ",") {
+        e.preventDefault();
+        setShowSettings((s) => !s);
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
+
   // STT engine: ?stt=fake (E2E), ?stt=none (paksa tak tersedia), atau Web Speech.
   const sttParam = new URLSearchParams(window.location.search).get("stt");
   const stt: SttEngine = useMemo(() => {
