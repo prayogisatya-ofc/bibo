@@ -46,6 +46,7 @@ test("speak: cancel menghentikan ucapan + animasi bicara", async ({ page }) => {
   const after = (await page.evaluate(() => (window.__spoken ?? []).length)) as number;
   // Maksimal 1 utterance susulan yang sudah terlanjur jalan; antrean dibuang.
   expect(after - before).toBeLessThanOrEqual(1);
-  const pulse = await page.evaluate(() => document.querySelector("#speech-pulse")?.getAttribute("transform"));
-  expect(pulse).toBeNull();
+  // Overlay bicara berhenti: data-speaking kembali false (bukan voice-pulse lama).
+  const speaking = await page.evaluate(() => document.querySelector('[data-testid="bibo-svg"] svg')?.getAttribute("data-speaking"));
+  expect(speaking).toBe("false");
 });

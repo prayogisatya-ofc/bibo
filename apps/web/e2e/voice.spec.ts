@@ -59,8 +59,9 @@ test("voice-bargein: mic aktif menghentikan TTS seketika", async ({ page }) => {
   await expect(page.getByTestId("avatar-caption")).toHaveText("Bibo siap", { timeout: 25000 });
   await page.waitForFunction(() => (window.__spoken ?? []).length >= 2, null, { timeout: 20000 });
   await page.waitForTimeout(1500);
-  const pulse = await page.evaluate(() => document.querySelector("#speech-pulse")?.getAttribute("transform"));
-  expect(pulse).toBeNull();
+  // Overlay bicara berhenti: data-speaking kembali false (bukan voice-pulse lama).
+  const speaking = await page.evaluate(() => document.querySelector('[data-testid="bibo-svg"] svg')?.getAttribute("data-speaking"));
+  expect(speaking).toBe("false");
 });
 
 test("voice-nomic: STT tidak tersedia", async ({ page }) => {
