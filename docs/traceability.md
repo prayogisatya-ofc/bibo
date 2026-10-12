@@ -73,7 +73,8 @@
 | FR-043 | Form generik + suara opsi tunggal + settled | FormCard + matchFormAnswer + FORM_SETTLED | cards.test + E2E safety-form |
 | FR-044 | Error manusiawi | humanError VOICE/ALWAYS/SETTLED/DIR | review |
 | FR-045 | Pengingat 60 s sekali, tanpa auto-approve | ReminderTracker + interval bridge | guard.test (fake timer) |
-| G4 | 0 high via suara/otomatis | audit: 1 jalur reply (server.ts:440), selalu via guard+log | E2E high + guard.test |
+| G4 | 0 high via suara/otomatis | audit: 1 jalur reply (server.ts:502), selalu via guard+log | E2E high + guard.test |
+| Baru | Audit kontrak baru (2026-10-13) | speaking overlay saat ucapan izin (urgent) di atas pose asking: prioritas lampu asking > speaking; voiceAllowed = risk !== 'high' (server + reducer, defense in depth) | review + safety.spec |
 
 ## M7 — Polish & rilis (P0 wajib hijau semua)
 
