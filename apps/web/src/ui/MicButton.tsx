@@ -14,6 +14,7 @@ export function MicButton({
   onDown,
   onUp,
   size = "big",
+  testId = "mic-btn",
 }: {
   listening: boolean;
   disabled: boolean;
@@ -21,6 +22,8 @@ export function MicButton({
   onUp: () => void;
   /** big = 72px (chat), huge = 88px (ngobrol), small = 44px (komposer). */
   size?: "big" | "huge" | "small";
+  /** Testid; komposer memakai "mic-input-btn" agar tak ganda dengan mic panggung. */
+  testId?: string;
 }): JSX.Element {
   const t = useT();
   const meta = useRef({ at: 0, was: false });
@@ -32,7 +35,7 @@ export function MicButton({
       disabled={disabled}
       aria-label={t.micLabel}
       aria-pressed={listening}
-      data-testid="mic-btn"
+      data-testid={testId}
       onPointerDown={() => {
         meta.current = { at: Date.now(), was: listening };
         onDown();

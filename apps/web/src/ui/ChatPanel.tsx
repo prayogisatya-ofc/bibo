@@ -190,7 +190,7 @@ export function ChatPanel({
             aria-label={inputPlaceholder}
             data-testid="chat-input"
           />
-          <MicButton size="small" listening={mic.listening} disabled={disabled || mic.disabled} onDown={mic.onDown} onUp={mic.onUp} />
+          <MicButton size="small" testId="mic-input-btn" listening={mic.listening} disabled={disabled || mic.disabled} onDown={mic.onDown} onUp={mic.onUp} />
           {busy ? (
             <button type="button" className="stop-btn" onClick={onStop} data-testid="stop-btn" aria-label={t.stop}>
               <StopIcon size={18} />

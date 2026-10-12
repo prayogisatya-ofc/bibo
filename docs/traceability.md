@@ -103,3 +103,15 @@
 | Baru | react() avatar | nod saat prompt terkirim, perk saat mic ditekan, thanks saat izin sekali, hello saat pertama terhubung (via avatar/rendererRef) | review |
 | NFR-A11Y-01 | Kontras AA tema terang+gelap | token diverifikasi: semua pasangan teks ≥4,5 (aksen hanya untuk ikon/fokus, bukan teks) | skrip cek kontras (laporan fase C) |
 | NFR-I18N-01 | Kunci baru id+en | mode, bubble, popup izin, petunjuk suara, chip, status panggung, {name} via fill() | i18n.test |
+
+## Redesain avatar+UI — fase E (2026-10-13, cabang redesign/avatar-ui)
+
+| FR-035 | Mini mode | E2E dimutakhirkan: tes mini mode dihapus; diganti mode-switch, talk-permission, talk-high, esc-minimize | e2e/m7.spec.ts |
+| Baru | Testid mic ganda | ChatMode punya 2 mic (panggung big + komposer small); komposer memakai testid "mic-input-btn", panggung tetap "mic-btn" | MicButton testId prop; e2e voice/safety |
+| FR-031 | derivePose | +5 kasus speaking-overlay (asking/offline/confused/listening/thinking tetap; prioritas lampu asking>speaking di renderer.test) | pose.test.ts |
+| Baru | useSpeechBubble | hook + timer fade 1,5 dtk (fake timers): hilang tepat waktu, speak baru batalkan timer, unmount bersih | useSpeechBubble.test.tsx |
+| FR-040..042 | ApprovalCard low | low: petunjuk suara ada (dock+popup), badge rendah, selalu-izinkan tampil | cards.test.tsx |
+| NFR-A11Y-01 | axe mode Ngobrol + popup | 0 serious/critical; focus trap Tab/Shift+Tab; Esc→chip; chip dibuka via Enter | e2e/a11y.spec.ts |
+| NFR-PERF-04 | fps avatar | galeri ?dev=avatar (9 pose × 2 tema, freeze); skrip fps/CPU 10 dtk celebrate+working | e2e/avatar.spec.ts; scripts/perf-avatar.ts; docs/reports/avatar-ui/PERF.md |
+| Visual | 3 adegan vs referensi | pixelmatch informatif (bukan gate) | scripts/visual-compare.ts; docs/reports/avatar-ui/COMPARISON.md |
+| Gherkin §13.3 | semua skenario avatar | dipetakan ke tes otomatis | docs/reports/avatar-ui/GHERKIN.md |
