@@ -62,6 +62,7 @@
 | FR-015 | Stop suara + Esc | matchCommand interrupt + TTS cancel + toast | E2E voice-stop |
 | FR-051 | Bahasa/mode/PTT | Settings (sttLang, sendMode) + persist | review |
 | FR-054 | Kamus koreksi editable | dictionary.ts (kata utuh; titik/koma tak disentuh) + editor | commands.test |
+| Baru | setMicLevel(0) di batas micStart/micStop (ADR-009) | reset level mic saat masuk/keluar listening; tanpa metering nyata (Web Speech API) | review + voice.spec |
 | Gherkin | voice sukses, barge-in, stop, no-mic, negatif ×2 | E2E stub STT/TTS | 6/6 lolos |
 
 ## M6 — Izin, form, keselamatan

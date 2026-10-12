@@ -224,6 +224,7 @@ function Shell({ locale, setLocale }: { locale: Locale; setLocale: (v: Locale) =
     if (offlineRef.current || !infoRef.current.directory) return;
     if (!headphoneRef.current) engineRef.current?.cancel(); // barge-in ≤100 ms
     rendererRef.current?.react("perk");
+    rendererRef.current?.setMicLevel(0); // reset level mic (ADR-009; tanpa metering nyata)
     setInterim("");
     sttRef.current.start({ lang: sttLangRef.current });
     setListening(true);
@@ -232,6 +233,7 @@ function Shell({ locale, setLocale }: { locale: Locale; setLocale: (v: Locale) =
 
   function micStop(): void {
     sttRef.current.stop();
+    rendererRef.current?.setMicLevel(0);
     setListening(false);
     setInterim("");
     setOrchMic(false);
