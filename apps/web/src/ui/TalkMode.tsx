@@ -47,6 +47,7 @@ export function TalkMode({
   popupOpen,
   awaitingPerm,
   onReopenPerm,
+  animateFrom,
 }: {
   pose: AvatarPose;
   variant: WorkingVariant | undefined;
@@ -71,6 +72,8 @@ export function TalkMode({
   /** True bila ada izin pending yang diminimalkan. */
   awaitingPerm: boolean;
   onReopenPerm: () => void;
+  /** Ukuran awal animasi saat baru pindah dari mode lain (px). */
+  animateFrom: number | undefined;
 }): JSX.Element {
   const t = useT();
   const asking = pose === "asking";
@@ -80,7 +83,7 @@ export function TalkMode({
     <main className="talk-screen">
       <div className={`talk-stage${asking ? " asking" : ""}`}>
         <div className="talk-bibo-wrap">
-          <AvatarStage pose={pose} variant={variant} mood={mood} level={level} theme={theme} locale={locale} size={biboSize} />
+          <AvatarStage pose={pose} variant={variant} mood={mood} level={level} theme={theme} locale={locale} size={biboSize} animateFrom={animateFrom} />
           <SpeechBubble bubble={bubble} />
         </div>
       </div>

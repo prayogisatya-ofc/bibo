@@ -2,6 +2,11 @@ import type { AvatarPose, WorkingVariant } from "@codepet/avatar";
 import { fill, type Strings } from "../i18n/index.js";
 import { character } from "../character.js";
 
+/** Ukuran avatar per mode (px) — untuk animasi pindah mode ~350ms. */
+export const CHAT_AVATAR_PX: Record<"s" | "m" | "l", number> = { s: 170, m: 250, l: 310 };
+export const TALK_AVATAR_PX = 400;
+export const TALK_AVATAR_ASKING_PX = 290;
+
 /** Judul status panggung ("Bibo sedang bekerja") — nama dari character.name + i18n. */
 export function stageTitle(pose: AvatarPose, t: Strings): string {
   const key = (

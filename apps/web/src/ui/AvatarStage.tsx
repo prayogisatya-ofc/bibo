@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { BotRenderer, type AvatarRenderer } from "@codepet/avatar";
 import type { AvatarMood, AvatarPose, WorkingVariant } from "@codepet/avatar";
 import { poseLabel } from "../orchestrator/pose.js";
@@ -18,6 +18,7 @@ export function AvatarStage({
   theme,
   locale,
   size,
+  animateFrom,
 }: {
   pose: AvatarPose;
   /** Varian Bekerja; undefined untuk pose non-working. */
@@ -29,10 +30,26 @@ export function AvatarStage({
   locale: "id" | "en";
   /** Ukuran kotak avatar (px); transisi 350ms di CSS (ganti mode). */
   size: number;
+  /** Ukuran awal saat baru pindah mode — animasi 350ms menuju `size`. */
+  animateFrom: number | undefined;
 }): JSX.Element {
   const boxRef = useRef<HTMLDivElement>(null);
   const localeRef = useRef(locale);
   localeRef.current = locale;
+
+  // Animasi pindah mode: mulai dari ukuran mode lama, lalu ke ukuran target.
+  const [animSize, setAnimSize] = useState(animateFrom ?? size);
+  useEffect(() => {
+    if (animateFrom === undefined || animateFrom === size) return;
+    let raf2 = 0;
+    const raf1 = requestAnimationFrame(() => {
+      raf2 = requestAnimationFrame(() => setAnimSize(size));
+    });
+    return () => {
+      cancelAnimationFrame(raf1);
+      cancelAnimationFrame(raf2);
+    };
+  }, [animateFrom, size]);
 
   useEffect(() => {
     const box = boxRef.current;
@@ -74,7 +91,7 @@ export function AvatarStage({
 
   const caption = poseLabel(pose, variant, locale);
   return (
-    <div className="avatar-anim" style={{ width: size, height: size }}>
+    <div className="avatar-anim" style={{ width: animSize, height: animSize }}>
       <div
         className="avatar-live avatar-box"
         ref={boxRef}

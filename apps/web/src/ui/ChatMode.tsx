@@ -7,10 +7,8 @@ import { MicButton } from "./MicButton.js";
 import { MicIcon, StopIcon } from "./icons.js";
 import { ChatPanel } from "./ChatPanel.js";
 import { ChangesCard } from "./ChangesCard.js";
-import { activityChip, stageSub, stageTitle } from "./stageText.js";
+import { activityChip, CHAT_AVATAR_PX, stageSub, stageTitle } from "./stageText.js";
 import type { DiffFile } from "../state/store.js";
-
-const AVATAR_PX: Record<"s" | "m" | "l", number> = { s: 170, m: 250, l: 310 };
 
 /**
  * Mode Chat (§C.3): kartu kiri 360px (panggung Bibo, chip aktivitas, judul
@@ -39,6 +37,7 @@ export function ChatMode({
   onStop,
   externalDraft,
   docked,
+  animateFrom,
   changes,
   onCloseChanges,
   errors,
@@ -65,6 +64,8 @@ export function ChatMode({
   onSend: (text: string, delivery: "queue" | "steer") => void;
   onStop: () => void;
   externalDraft: { text: string; key: string } | undefined;
+  /** Ukuran awal animasi saat baru pindah dari mode lain (px). */
+  animateFrom: number | undefined;
   docked: ReactNode;
   changes: DiffFile[];
   onCloseChanges: () => void;
@@ -74,13 +75,13 @@ export function ChatMode({
 }): JSX.Element {
   const t = useT();
   const chip = activityChip(pose, variant, t);
-  const size = AVATAR_PX[avatarSize];
+  const size = CHAT_AVATAR_PX[avatarSize];
 
   return (
     <main className="chat-screen">
       <div className="stage-card">
         <div className="stage-box">
-          <AvatarStage pose={pose} variant={variant} mood={mood} level={level} theme={theme} locale={locale} size={size} />
+          <AvatarStage pose={pose} variant={variant} mood={mood} level={level} theme={theme} locale={locale} size={size} animateFrom={animateFrom} />
           {chip && (
             <div className="activity-chip" data-testid="activity-chip">
               <span className="pulse-dot" aria-hidden="true" />

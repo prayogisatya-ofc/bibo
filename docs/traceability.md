@@ -91,7 +91,7 @@
 
 ## Redesain avatar+UI — fase C (2026-10-13, cabang redesign/avatar-ui)
 
-| FR-035 | Mini mode | DIHAPUS — digantikan pemilih mode Chat|Ngobrol (keputusan ADR d) | review; e2e/m7.spec.ts perlu pemutakhiran (fase E) |
+| FR-035 | Mini mode | DIHAPUS — digantikan pemilih mode Chat / Ngobrol (keputusan ADR d) | review; e2e/m7.spec.ts perlu pemutakhiran (fase E) |
 | FR-040 | Kartu izin + avatar asking + ucapan ≤1 s | ApprovalCard varian popup (panah ke Bibo, di bawah Bibo) + dock (di atas komposer); Bibo asking otomatis via orchestrator | cards.test.tsx (popup/dock/Esc) + E2E safety-medium/high |
 | FR-041 | Sekali/tolak/selalu-klik | tidak berubah (selalu 2 langkah + peringatan; high tanpa selalu) | cards.test.tsx |
 | FR-042 | Risiko + aturan suara | high: "Konfirmasi lewat layar" + ketik OK; petunjuk suara hanya bila voiceAllowed (di bawah kartu popup) | cards.test.tsx |

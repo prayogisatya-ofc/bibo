@@ -17,6 +17,7 @@ import { ApprovalCard } from "./ui/ApprovalCard.js";
 import { FormCard } from "./ui/FormCard.js";
 import { useUiMode } from "./ui/useUiMode.js";
 import { useSpeechBubble } from "./ui/useSpeechBubble.js";
+import { CHAT_AVATAR_PX, TALK_AVATAR_ASKING_PX, TALK_AVATAR_PX } from "./ui/stageText.js";
 import { rendererRef } from "./avatar/rendererRef.js";
 import { humanError } from "./ui/errors.js";
 
@@ -374,6 +375,19 @@ function Shell({ locale, setLocale }: { locale: Locale; setLocale: (v: Locale) =
   const sessionTitle = sessions.find((s) => s.sessionID === info.sessionID)?.title || t.newSession;
   const agentLabel = `agent: ${info.agent ?? "—"}`;
 
+  // Animasi pindah mode ~350ms: ukuran awal = ukuran avatar di mode sebelumnya.
+  const prevModeRef = useRef(mode);
+  const prevMode = prevModeRef.current;
+  prevModeRef.current = mode;
+  const animateFrom =
+    prevMode === mode
+      ? undefined
+      : prevMode === "chat"
+        ? CHAT_AVATAR_PX[avatarSize]
+        : snap.pose === "asking"
+          ? TALK_AVATAR_ASKING_PX
+          : TALK_AVATAR_PX;
+
   // Talk mode: popup izin/form di bawah Bibo (bisa diminimalkan ke chip).
   const visiblePerms = agent.pendingPermissions.filter((p) => !minimizedPerm[p.requestID]);
   const visibleForms = agent.pendingForms.filter((f) => !minimizedForm[f.formID]);
@@ -465,6 +479,7 @@ function Shell({ locale, setLocale }: { locale: Locale; setLocale: (v: Locale) =
             send({ type: "agent.interrupt" });
           }}
           externalDraft={voiceDraft}
+          animateFrom={animateFrom}
           docked={
             <>
               {agent.pendingPermissions.map((p) => (
@@ -531,6 +546,7 @@ function Shell({ locale, setLocale }: { locale: Locale; setLocale: (v: Locale) =
             </>
           }
           popupOpen={popupOpen}
+          animateFrom={animateFrom}
           awaitingPerm={awaitingChip}
           onReopenPerm={() => {
             setMinimizedPerm({});
