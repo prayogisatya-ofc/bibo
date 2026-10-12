@@ -53,7 +53,7 @@ test("a11y: mode ngobrol + popup izin (axe, focus trap, Esc)", async ({ page }) 
   // Focus trap: Tab dari elemen terakhir membungkus ke pertama.
   const box = await popup.boundingBox();
   expect(box).not.toBeNull();
-  await expect(popup.locator('[role="alertdialog"]')).toHaveCount(1);
+  await expect(popup).toHaveAttribute("role", "alertdialog");
   const focusables = popup.locator("button:not([disabled])");
   const n = await focusables.count();
   expect(n).toBeGreaterThan(1);
