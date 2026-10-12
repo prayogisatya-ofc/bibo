@@ -90,11 +90,11 @@
 | NFR-A11Y-01 | axe tanpa serius | 0 serious/critical (halaman, settings, kartu) | e2e/a11y.spec.ts |
 | NFR-I18N-01 | id/en tanpa ubah kode | locales + switch + frasa bridge | i18n.test + speech.test |
 | NFR-SEC/PRIV | audit ulang | docs/security-audit-m7.md | op-usage + verify |
-| DoD M7 | check + smoke:real hijau; Gherkin semua | semua P0 hijau; smoke:real OK vs 2.0.16 | laporan M7 |
+| DoD M7 | check + smoke:real hijau; Gherkin semua | semua P0 hijau; smoke:mock OK (ws-cli→bridge→mock: state idle, speak+text final diterima); smoke:real butuh server OpenCode nyata (tak tersedia di lingkungan ini; terakhir OK vs 2.0.16 pada MVP awal) | laporan M7 |
 
 ## Redesain avatar+UI — fase C (2026-10-13, cabang redesign/avatar-ui)
 
-| FR-035 | Mini mode | DIHAPUS — digantikan pemilih mode Chat / Ngobrol (keputusan ADR d) | review; e2e/m7.spec.ts perlu pemutakhiran (fase E) |
+| FR-035 | Mini mode | DIHAPUS PERMANEN (keputusan owner 2026-10-13) — digantikan pemilih mode Chat / Ngobrol (keputusan ADR d); tidak ada sisa kode (verifikasi grep) | review; e2e mode-switch |
 | FR-040 | Kartu izin + avatar asking + ucapan ≤1 s | ApprovalCard varian popup (panah ke Bibo, di bawah Bibo) + dock (di atas komposer); Bibo asking otomatis via orchestrator | cards.test.tsx (popup/dock/Esc) + E2E safety-medium/high |
 | FR-041 | Sekali/tolak/selalu-klik | tidak berubah (selalu 2 langkah + peringatan; high tanpa selalu) | cards.test.tsx |
 | FR-042 | Risiko + aturan suara | high: "Konfirmasi lewat layar" + ketik OK; petunjuk suara hanya bila voiceAllowed (di bawah kartu popup) | cards.test.tsx |

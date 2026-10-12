@@ -1,12 +1,17 @@
 # Changelog
 
-## v0.1.0 (2026-10-12) — MVP
+## v0.1.0 (2026-10-13) — MVP
 
 - Chat teks + suara (STT/TTS browser, id-ID) melawan OpenCode v2 nyata.
-- Avatar robot Bibo (14 pose + voice-pulse) + orkestrasi XState.
-- Izin & form: klasifikasi risiko fail-safe, guard suara-high, kartu persetujuan,
-  pengingat 60 detik, tanpa auto-approve.
-- i18n id/en, tema gelap/terang/otomatis, mini mode, ganti sesi, ukuran avatar.
+- Avatar robot Bibo baru (9 pose + 6 varian working + overlay bicara mulut
+  parametris; kontrak `AvatarRenderer` CHARACTER.md §12 + `setMicLevel`,
+  ADR-009) + orkestrasi XState. Dua mode tampilan: Chat | Ngobrol
+  (FR-035 mini mode DIHAPUS permanen, keputusan owner 2026-10-13).
+- Izin & form: klasifikasi risiko fail-safe (49 kasus), guard suara-high
+  (`VOICE_NOT_ALLOWED`), kartu persetujuan, pengingat 60 detik, tanpa
+  auto-approve. Ringkasan lisan ≤2 kalimat (tag `<speak>` → generate →
+  heuristik); verbosity Senyap/Normal/Cerewet.
+- i18n id/en, tema terang/gelap/otomatis, ganti sesi.
 - Ketahanan: reconnect + rekonsiliasi, polling jaring pengaman, banner offline,
   degradasi rapi saat server mati.
 - Keamanan: bridge 127.0.0.1 + token + cek Origin, allowlist endpoint, log tanpa
@@ -16,6 +21,6 @@
 
 - FR-025 diff per file (butuh sumber konten diff).
 - FR-026 revert via suara+klik.
-- FR-035 mini mode: HADIR (dasar). FR-054 kamus: HADIR.
+- FR-035 mini mode: DIHAPUS permanen (keputusan owner 2026-10-13). FR-054 kamus: HADIR.
 - STT Whisper lokal, TTS natural + audio-reaktif, wake word, overlay Tauri,
   PWA remote, adapter Rive/Live2D/VRM, plugin OpenCode pendamping.

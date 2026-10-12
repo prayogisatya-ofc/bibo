@@ -10,7 +10,7 @@
 | **Bahasa produk** | Indonesia (default), Inggris (opsional) |
 | **Target OpenCode** | **OpenCode v2** (`opencode.ai/v2/docs`, paket `@opencode/*`). **Bukan v1.** |
 
-**Riwayat revisi:** v1.0 karakter kucing "Mochi" → **v1.1** karakter diganti robot "Bibo" (§8.4–8.5, §9.3, FR-030..036), mengikuti dua gambar referensi dari pemilik produk. Logika state machine tidak berubah.
+**Riwayat revisi:** v1.0 karakter kucing "Mochi" → **v1.1** karakter diganti robot "Bibo" (§8.4–8.5, §9.3, FR-030..036), mengikuti dua gambar referensi dari pemilik produk. Logika state machine tidak berubah. → **v1.2** (2026-10-13): kontrak avatar baru per CHARACTER.md §12 (mulut parametris, bukan voice-pulse; + `setMicLevel`, ADR-009); FR-035 mini mode **dihapus** (keputusan owner, digantikan pemilih mode Chat | Ngobrol); layout §11.1 = desain Chat/Ngobrol; celebrate 3 dtk.
 
 > **Cara membaca dokumen ini (untuk AI agent):** setiap kebutuhan punya ID (`FR-xxx`, `NFR-xxx`). Setiap ID wajib punya test atau bukti verifikasi. Bagian bertanda **⚠️ VERIFIKASI** berisi klaim tentang OpenCode v2 yang berasal dari sumber komunitas atau yang skemanya belum dipastikan. Agent **dilarang menebak**; verifikasi di Milestone 0 (lihat §14) lalu catat hasilnya di `docs/opencode-v2-findings.md`.
 
@@ -409,9 +409,9 @@ Prioritas: **P0** = wajib MVP, **P1** = MVP bila waktu cukup, **P2** = pasca-MVP
 | FR-030 | P0 | Avatar Bibo menampilkan 10 state (§8.1) dengan transisi halus | Setiap state terlihat berbeda; tes visual menangkap tiap state |
 | FR-031 | P0 | State dihitung dari **prioritas** sinyal (§8.2) | Tes unit untuk semua kombinasi prioritas |
 | FR-032 | P0 | Pose kerja berbeda per jenis tool (membaca/mengedit/menjalankan/mencari) | Event `tool.started` jenis edit → pose "mengetik" |
-| FR-033 | P0 | Animasi bicara (*voice-pulse*) saat TTS aktif (§9.3): badan berdenyut, tangan bergoyang, badge gelombang suara; karakter **tidak punya mulut** | Animasi aktif hanya saat TTS aktif; berhenti ≤ 100 ms setelah TTS berhenti |
+| FR-033 | P0 | Animasi bicara (overlay Berbicara) saat TTS aktif (§9.3): mulut parametris + busur suara + lampu antena 2 Hz (CHARACTER.md §6.7) | Animasi aktif hanya saat TTS aktif; mulut tertutup ≤ 100 ms setelah TTS berhenti |
 | FR-034 | P0 | Menghormati `prefers-reduced-motion` | Mode reduced: tanpa gerak besar, ganti dengan perubahan ekspresi statis |
-| FR-035 | P1 | Avatar bisa di-mute visual-nya (mode kecil/pojok) | Tombol "mini mode" 96 px |
+| FR-035 | — | **DIHAPUS** (2026-10-13, keputusan owner): digantikan pemilih mode Chat \| Ngobrol (ADR-avatar-ui-redesign keputusan d) | — |
 | FR-036 | P1 | Idle behaviors acak (berkedip tiap 3–6 s, tangan melayang naik-turun, melirik acak, tidur setelah 120 s tanpa aktivitas) | Tidak mengalahkan state lain |
 
 ### 7.5 Izin, pertanyaan, error
@@ -451,7 +451,7 @@ Tiga region **paralel** (XState `type: "parallel"`):
 | `agent` | `idle` · `thinking` · `working{reading,editing,running,searching,delegating}` · `awaiting{permission,form}` · `error` | `AgentSignal` |
 | `voice` | `mic{off,armed,listening,finalizing}` · `speech{silent,speaking}` | STT/TTS lokal |
 
-Transient (otomatis kembali): `celebrate` (±2 s setelah sukses), `acknowledge` (±0,6 s setelah perintah diterima).
+Transient (otomatis kembali): `celebrate` (±3 s setelah sukses, CHARACTER.md §6.5), `acknowledge` (±0,6 s setelah perintah diterima).
 
 **State avatar yang terlihat (10):** `offline`, `sleeping`, `idle`, `listening`, `thinking`, `working`, `speaking`, `asking`, `celebrate`, `confused`.
 
@@ -468,7 +468,7 @@ Transient (otomatis kembali): `celebrate` (±2 s setelah sukses), `acknowledge` 
 9. `idle`
 10. `sleeping` (idle > 120 s)
 
-Catatan: `speaking` boleh bertumpuk dengan `working` — pose badan dan tangan mengikuti `working`, sedangkan **voice-pulse** (denyut badan + badge gelombang) mengikuti `speaking` sebagai lapisan terpisah. Fungsi `derivePose(ctx)` murni, diuji dengan tabel kasus.
+Catatan: `speaking` adalah **overlay** (mulut parametris + busur suara + lampu 2 Hz, CHARACTER.md §6.7/§11) — bukan nilai `AvatarPose`; ia ditumpuk di atas pose dasar (mis. `idle` atau `working`) lewat `setSpeechLevel`. Fungsi `derivePose(ctx)` murni, diuji dengan tabel kasus.
 
 ### 8.3 Pemetaan sinyal → state
 
@@ -503,122 +503,58 @@ Catatan: `speaking` boleh bertumpuk dengan `working` — pose badan dan tangan m
 
 ### 8.4 Spesifikasi karakter "Bibo" (robot mungil, SVG)
 
-**Sumber kebenaran visual:** dua gambar referensi dari pemilik produk. Simpan di repo sebagai `docs/reference/character-ref-1-idle.png` (keadaan diam) dan `docs/reference/character-ref-2-thinking.png` (dengan badge biru titik tiga). Agent **wajib mencocokkan proporsi dan gaya** dua gambar itu sebelum menambah detail apa pun.
+**Sumber kebenaran: `CHARACTER.md` (+ `docs/reference/shots/`).** Bagian ini hanya
+meringkas; bila bertentangan dengan CHARACTER.md, CHARACTER.md yang menang
+(keputusan ADR-avatar-ui-redesign).
 
-**Ciri khas yang tidak boleh berubah (identitas karakter):**
-
-| # | Ciri | Aturan |
-|---|---|---|
-| 1 | **Badan = satu squircle putih** | Bentuk kotak membulat lembut, lebih lebar daripada tinggi (rasio ±1,4 : 1), tanpa leher, tanpa kaki, tanpa antena |
-| 2 | **Wajah hanya dua mata** | Dua oval hitam kecil tegak, berdekatan, sedikit di atas titik tengah. **Tidak ada mulut, hidung, alis, atau pipi** |
-| 3 | **Dua tangan melayang terpisah** | Bola putih di kiri bawah dan kapsul putih agak miring di kanan; **tidak menempel** ke badan (celah ≥ 10 px agar terasa melayang) |
-| 4 | **Badge status biru** di sudut kiri atas | Lingkaran biru yang menimpa sudut badan; isinya ikon putih. Tidak muncul saat `idle` (lihat tabel pose) |
-| 5 | Gaya | Minimalis, flat dengan gradasi halus (putih → abu sangat muda di bawah), sorot cahaya tipis di atas, bayangan lembut. Tanpa garis tepi di tema gelap |
-
-Ekspresi dibangun hanya dari: **bentuk/posisi mata, gerak badan (squash & stretch, miring), gerak dua tangan, badge, dan props kecil.** Bicara ditunjukkan dengan *voice-pulse* (§9.3), bukan gerak mulut.
-
-**Palet (CSS variables; dukung tema gelap dan terang):**
-
-| Token | Gelap (default, sesuai referensi) | Terang | Pemakaian |
-|---|---|---|---|
-| `--bibo-stage` | `#161616` | `#EEF0F5` | latar panggung avatar |
-| `--bibo-body-top` | `#FFFFFF` | `#FFFFFF` | gradasi atas badan & tangan |
-| `--bibo-body-bottom` | `#E9EBF0` | `#E4E7EE` | gradasi bawah |
-| `--bibo-body-stroke` | `none` | `#D5D9E2` (1,5 px) | tepi (hanya tema terang agar kontras) |
-| `--bibo-eye` | `#111114` | `#1A1A1F` | mata |
-| `--bibo-shadow` | `rgba(0,0,0,.40)` | `rgba(20,30,60,.18)` | bayangan di bawah |
-| `--bibo-badge` | `#2F8CFF` | `#2F8CFF` | badge normal (berpikir, bekerja, mendengar) |
-| `--bibo-badge-2` | `#1E6FE0` | `#1E6FE0` | ujung gradasi badge |
-| `--bibo-ok` | `#2EC27E` | `#1FA866` | badge sukses |
-| `--bibo-warn` | `#FFB020` | `#F59E0B` | badge menunggu izin |
-| `--bibo-bad` | `#F0524A` | `#E5453D` | badge error |
-| `--bibo-off` | `#8A8F9A` | `#8A8F9A` | badge/tubuh offline |
-| `--bibo-icon` | `#FFFFFF` | `#FFFFFF` | ikon di dalam badge |
-
-**Geometri awal (viewBox `0 0 480 320`, titik awal yang boleh disempurnakan agar cocok dengan gambar referensi):**
-
-| Elemen | Nilai awal |
-|---|---|
-| Badan (squircle) | `M120,150 C120,92 150,64 240,64 C330,64 360,92 360,150 C360,208 330,236 240,236 C150,236 120,208 120,150 Z` (±240 × 172) |
-| Mata kiri / kanan | `ellipse cx=220 / 260, cy=140, rx=6, ry=11` |
-| Tangan kiri | lingkaran `r=23` di `(72,198)` |
-| Tangan kanan | kapsul `rx=31, ry=17` di `(388,161)`, rotasi `-25°` |
-| Badge | lingkaran `r=34` di `(138,78)`; ikon titik tiga: `r=4`, jarak 12 px |
-
-**Hierarki layer (ID grup SVG wajib konsisten, agent menggambar sesuai tabel ini):**
-
-```
-svg#bibo (viewBox 0 0 480 320)
-├─ ellipse#ground-shadow
-├─ g#hand-left        (pivot: pusat tangan)   ← tangan melayang
-├─ g#hand-right
-├─ g#body-wrap        (pivot: tengah-bawah badan, 240,236)  ← squash/stretch & miring
-│  ├─ path#body
-│  ├─ path#body-highlight
-│  └─ g#face          (translate untuk arah pandang)
-│     └─ g#eyes → g#eye-left, g#eye-right
-│          masing-masing berisi varian: .e-open .e-blink .e-happy(^) .e-focus
-│          .e-wide .e-worried .e-sleep(—) .e-flat(—, offline)
-├─ g#badge            (pivot: pusat badge; scale 0 saat tersembunyi)
-│  ├─ circle#badge-bg
-│  └─ g#badge-icon → .bi-dots .bi-wave .bi-mic .bi-code .bi-terminal .bi-eye
-│                    .bi-globe .bi-gear .bi-question .bi-exclaim .bi-check
-│                    .bi-zzz .bi-offline
-└─ g#props            (ikon kecil putih/biru di dekat tangan)
-   ├─ .prop-magnifier .prop-keyboard .prop-terminal .prop-globe
-   ├─ .prop-minibot (robot mini 30% ukuran)  .prop-sparkles
-   ├─ .prop-sweat .prop-signal (busur gelombang di samping badan)
-```
-
-Hanya satu varian mata (`.e-*`) dan satu ikon badge (`.bi-*`) tampil pada satu waktu. Props dan badge menjadi satu-satunya "dekorasi"; jangan menambah elemen wajah lain.
-
-**Tabel pose per state:**
-
-| State | Mata | Badge | Tangan | Badan | Props | Loop |
-|---|---|---|---|---|---|---|
-| `idle` | `.e-open`, berkedip tiap 3–6 s (`scaleY .1`, 120 ms) | **tersembunyi** | melayang naik-turun ±4 px, fase berbeda (±0,8 s) | napas `scaleY 1↔1.015`, 3 s; sesekali melirik acak | — | ya |
-| `sleeping` | `.e-sleep` | `.bi-zzz` abu-abu | turun mendekati badan | napas lambat 5 s; redup 15% | — | ya |
-| `listening` | `.e-wide`, pandang ke depan | `.bi-mic` biru, berdenyut | terangkat & sedikit membuka ke luar | condong ke depan 3° | `.prop-signal` bergelombang | ya |
-| `thinking` | `.e-open`, pandang kanan-atas (`x+6, y-8`) | `.bi-dots`, tiga titik menyala bergantian 0,9 s (**seperti referensi 2**) | tangan kanan naik ke "dagu" | miring `-4°` | — | ya |
-| `working.reading` | `.e-focus`, menyapu kiri↔kanan ±10 px (1,2 s) | `.bi-eye` | tangan kanan memegang kaca pembesar yang menyapu | diam | `.prop-magnifier` | ya |
-| `working.editing` | `.e-focus`, pandang ke bawah (`y+6`) | `.bi-code` | kedua tangan turun ke papan ketik, mengetik bergantian 110 ms | membungkuk 3° | `.prop-keyboard` | ya |
-| `working.running` | `.e-focus` | `.bi-terminal` (`>_`) | memegang terminal kecil | getar halus 1 px @ 8 Hz | `.prop-terminal` | ya |
-| `working.searching` | `.e-open`, pandang atas | `.bi-globe` | tangan kanan memegang globe/teropong | miring `+3°` | `.prop-globe` | ya |
-| `working.delegating` | `.e-open`, menoleh ke kanan | `.bi-dots` | tangan kanan menunjuk | diam | `.prop-minibot` muncul di kanan | ya |
-| `working.generic` | `.e-focus` | `.bi-gear` berputar | berputar kecil mengelilingi badan | diam | — | ya |
-| `speaking` | `.e-open` (menyipit tipis mengikuti level) | `.bi-wave` (3 batang, tinggi ∝ level) | melayang naik-turun, amplitudo ∝ level | **voice-pulse**: `scaleY = 1 + 0.045·level`, `scaleX = 1 − 0.02·level` | — | selama TTS |
-| `asking` | `.e-wide`, menatap pengguna | `.bi-question` kuning, berdenyut + cincin riak | tangan kanan terangkat ("angkat tangan") | condong ke arah pengguna 4° | — | ya |
-| `celebrate` | `.e-happy` (^ ^) | `.bi-check` hijau (muncul dengan *pop*) | kedua tangan naik, melambai cepat | melompat 1× (`y −24`), squash saat mendarat | `.prop-sparkles` | 2 s |
-| `confused` | `.e-worried` (oval miring ±12°) | `.bi-exclaim` merah | satu tangan menggaruk sisi badan | geleng `x ±4 px` 2× | `.prop-sweat` | 4 s |
-| `offline` | `.e-flat` | `.bi-offline` abu-abu | diam di dekat badan | desaturasi 100%, opasitas .6 | — | ya |
-
-Catatan: `speaking` adalah **overlay** (voice-pulse + badge gelombang), bukan nilai `AvatarPose`; ia ditumpuk di atas pose dasar (mis. `idle` atau `working.*`) lewat `setSpeechLevel`. Karena itu galeri uji memuat 14 pose + overlay.
-
-**Transisi:** perubahan mata 120 ms; badge muncul/hilang dengan *pop* 180 ms `cubic-bezier(.2,1.4,.4,1)` (skala 0→1.1→1); pose badan & tangan 200–300 ms `cubic-bezier(.3,.7,.4,1)`. Tidak ada transisi > 400 ms kecuali `sleeping`.
-
-**Larangan desain:** jangan menambah mulut/alis/pipi; jangan menyambungkan tangan ke badan; jangan memakai garis tepi di tema gelap; jangan memakai warna badan selain putih (warna hanya pada badge dan props); jangan menambah lebih dari satu badge sekaligus.
+- Robot putih bulat: badan squircle putih kebiruan, layar wajah gelap (visor)
+  dengan mata mint menyala, mulut kecil parametris, pipi pink, antena + lampu
+  status, dua tangan melayang terpisah di depan keyboard.
+- 9 pose (`idle`, `thinking`, `working`, `asking`, `celebrate`, `confused`,
+  `sleeping`, `listening`, `offline`) + 6 varian `working`
+  (`typing`, `reading`, `running`, `searching`, `delegating`, `generic`) +
+  overlay `speaking` (bukan nilai pose).
+- Animasi tiga lapisan via Web Animations API; semua angka waktu terpusat di
+  `packages/avatar/src/timing.ts`. Galeri uji: `/dev/avatar`.
+- Spesifikasi lama (badge biru sudut, tanpa mulut, voice-pulse badan, 14 pose
+  bertitik) **tidak berlaku lagi** sejak redesign 2026-10-12.
 
 ### 8.5 Antarmuka renderer (agar bisa ditukar ke Rive/Live2D/VRM)
 
+Kontrak `AvatarRenderer` = CHARACTER.md §12, disalin ringkas di sini
+(lihat `packages/avatar/src/types.ts` untuk sumber kebenaran kode):
+
 ```ts
-// packages/avatar/src/types.ts
 export type AvatarPose =
-  | "offline" | "sleeping" | "idle" | "listening" | "thinking"
-  | "working.reading" | "working.editing" | "working.running"
-  | "working.searching" | "working.delegating" | "working.generic"
-  | "asking" | "celebrate" | "confused";
+  | "idle" | "thinking" | "working" | "asking" | "celebrate"
+  | "confused" | "sleeping" | "listening" | "offline";
+export type WorkingVariant =
+  | "typing" | "reading" | "running" | "searching" | "delegating" | "generic";
+export type AvatarMood = "neutral" | "happy" | "wary";
 
 export interface AvatarRenderer {
-  mount(el: HTMLElement, opts: { theme: "light" | "dark"; reducedMotion: boolean }): void;
-  setPose(pose: AvatarPose): void;       // mata + badge + tangan + badan + props
-  setSpeechLevel(level: number): void;   // 0..1, voice-pulse; dipanggil ≤ 30 Hz saat bicara
-  setLook(x: number, y: number): void;   // -1..1 arah pandang (opsional)
+  mount(el: HTMLElement, opts: {
+    theme: "light" | "dark"; reducedMotion: boolean; seed?: number;
+    characterName: string;                       // wajib (aria-label, tanpa hardcode)
+    getAriaLabel?: (pose: AvatarPose, variant?: WorkingVariant) => string;
+  }): void;
+  setPose(pose: AvatarPose, opts?: { variant?: WorkingVariant; durationMs?: number }): void;
+  setSpeechLevel(level: number): void;  // 0..1; overlay speaking (mulut parametris)
+  setMicLevel(level: number): void;     // 0..1; lampu antena ikut level saat Mendengar (ADR-009)
+  setLook(x: number, y: number): void;
+  setMood(mood: AvatarMood): void;
+  react(kind: "hello" | "nod" | "perk" | "startle" | "shrug" | "thanks" | "poke"): void;
   setTheme(theme: "light" | "dark"): void;
+  setReducedMotion(on: boolean): void;
+  pause(): void; resume(): void;
   destroy(): void;
 }
 ```
 
-Aturan: logika bisnis **tidak boleh** tahu detail SVG; hanya memanggil `AvatarRenderer`. `BiboSvgRenderer` dibuat dengan Web Animations API/CSS keyframes (tanpa library animasi berat). Ukuran SVG < 40 KB; seluruh paket `avatar` < 60 KB gzip.
+Aturan: logika bisnis **tidak boleh** tahu detail SVG; hanya memanggil `AvatarRenderer`.
+Paket avatar mendefinisikan tipenya sendiri (tidak mengimpor dari `@codepet/protocol`).
+`BotRenderer` memakai Web Animations API (tanpa library animasi berat).
+Atribut tes: `svg#bot[data-pose][data-variant][data-mood][data-speaking]`.
 
 ---
 
@@ -656,7 +592,7 @@ Aturan keselamatan: (1) "selalu izinkan" **tidak ada** versi suara; (2) permissi
 - **Antrean ucapan**: prioritas `urgent` (permission/error) menyela `normal` (ringkasan). Potong per kalimat (maks ±180 karakter per utterance) agar mudah dibatalkan.
 - Pembatalan: `speechSynthesis.cancel()` saat interrupt, barge-in, mute, atau antrean usang (jawaban lama setelah prompt baru dikirim).
 - Teks sanitasi sebelum diucapkan: buang markdown/blok kode/URL panjang; path → "file `App.tsx`" (hanya nama file); angka besar dibulatkan; singkatan umum dieja (opsional).
-- **Animasi bicara / voice-pulse (MVP, tanpa analisis audio):** karakter tidak punya mulut, jadi "bicara" ditampilkan lewat badan yang berdenyut, tangan yang bergoyang, dan badge gelombang suara. Saat `onstart`→`onend`, jalankan generator level suara: `level = clamp(0.25 + 0.6*|sin(2π·f·t)| + noise, 0, 1)`, `f ≈ 3.5–5 Hz` acak per kata; pada event `boundary` beri "aksen" (level +0,2 selama 80 ms). Saat jeda antar-kalimat level turun ke 0. `setSpeechLevel` dipanggil ≤ 30 Hz via `requestAnimationFrame`.
+- **Animasi bicara (MVP, tanpa analisis audio):** "bicara" ditampilkan lewat overlay Berbicara: mulut parametris (m-open) + busur suara + lampu antena 2 Hz (CHARACTER.md §6.7). Saat `onstart`→`onend`, jalankan generator level suara: `level = clamp(0.25 + 0.6*|sin(2π·f·t)| + noise, 0, 1)`, `f ≈ 3.5–5 Hz` acak per kata; pada event `boundary` beri "aksen" (level +0,2 selama 80 ms). Saat jeda antar-kalimat level turun ke 0; `setSpeechLevel(0)` ≤ 100 ms saat stop/cancel. `setSpeechLevel` dipanggil ≤ 30 Hz via `requestAnimationFrame`.
 - **v0.2:** untuk TTS berbasis audio (Piper/ElevenLabs/dll) pakai `AnalyserNode` (RMS → `level`), tanpa mengubah `AvatarRenderer`.
 
 ### 9.4 Barge-in & echo
@@ -720,30 +656,26 @@ Aturan:
 
 ## 11. Spesifikasi UX / UI
 
-### 11.1 Layout (desktop ≥ 1024 px)
+### 11.1 Layout (dua mode, redesign 2026-10-12)
 
-```
-┌──────────────────────────────────────────────────────────────────────────┐
-│ ● Terhubung · OpenCode 2.x · ~/proyek/toko-online · agent: build   ⚙  🔇 │  ← StatusBar
-├───────────────────────────────┬──────────────────────────────────────────┤
-│                               │  Chat                                    │
-│        ┌─────────────┐        │  ┌─────────────────────────────────────┐ │
-│        │             │        │  │ Kamu: tambahkan validasi email      │ │
-│        │    BIBO     │        │  │ Bibo: Oke, kukerjakan…              │ │
-│        │  (avatar)   │        │  │  ▸ membaca LoginForm.tsx      ✓     │ │
-│        │             │        │  │  ▸ mengedit LoginForm.tsx     ⟳     │ │
-│        └─────────────┘        │  │ …                                   │ │
-│   "Aku lagi mengedit file…"   │  └─────────────────────────────────────┘ │
-│   [ caption suara / status ]  │  ┌─ Perubahan (2 file) ────────────────┐ │
-│                               │  │ LoginForm.tsx  +14 −2               │ │
-│   [🎤 Tahan untuk bicara]     │  └─────────────────────────────────────┘ │
-│   [■ Stop]                    │  [ ketik pesan…                  ] [Kirim]│
-└───────────────────────────────┴──────────────────────────────────────────┘
-        ▲ ApprovalCard / FormCard muncul menimpa area bawah avatar
-```
+TopBar 68 px: logotype, chip folder proyek, chip status koneksi, pemilih mode
+**Chat | Ngobrol**, tombol bisukan, tombol pengaturan. Tema default terang.
 
-- Mobile/sempit (< 768 px): avatar di atas (tinggi 35%), chat di bawah; kartu persetujuan sebagai bottom sheet.
-- **Mini mode** (FR-035): avatar 96 px di pojok + gelembung ucapan; chat menjadi panel yang bisa dibuka.
+**Mode Chat** (desktop ≥ 1024 px): kartu kiri 360 px (panggung Bibo ~250 px +
+latar gradasi, chip aktivitas, judul status, mic 72 px, "Hentikan Bibo") +
+kartu kanan fleksibel (header sesi + chip agent, gelembung pengguna/agent,
+kartu aktivitas tool, ChangesCard, komposer mic + kirim). ApprovalCard/FormCard
+menempel di atas komposer.
+
+**Mode Ngobrol**: hanya topbar minimal + Bibo ~400 px di tengah + mic 88 px di
+bawah. Bubble ucapan di kanan atas kepala (pop 180 ms, maks 3 baris, fade
+1,5 dtk); equalizer 3 batang mengikuti speechLevel saat TTS; caption interim
+di atas mic; saat izin Bibo mengecil ~290 px + popup ApprovalCard di bawahnya.
+
+- Mobile/sempit (< 768 px): Mode Chat bertumpuk; Bibo di atas (35% tinggi),
+  popup izin menjadi bottom sheet.
+- **Mini mode (FR-035): DIHAPUS** (2026-10-13, keputusan owner) — digantikan
+  pemilih mode Chat | Ngobrol.
 
 ### 11.2 Komponen
 
@@ -781,7 +713,7 @@ Aturan:
 - Semua ucapan juga muncul sebagai teks (caption). Daerah `aria-live="polite"` untuk status & transkrip; `assertive` untuk permission.
 - Fokus keyboard terkelola; kartu persetujuan menangkap fokus; kontras ≥ WCAG AA.
 - `prefers-reduced-motion` dan `prefers-color-scheme` dihormati.
-- Avatar punya `role="img"` + `aria-label` dinamis ("Bibo sedang mengedit file").
+- Avatar punya `role="img"` + `aria-label` dinamis dari `character.name` + i18n (mis. "Bibo: sedang mengedit" — nama tidak di-hardcode di komponen).
 
 ---
 
@@ -939,7 +871,7 @@ Tugas:
 
 ### M4 — Suara keluar (TTS) + ringkasan lisan
 
-- [ ] `tts.ts` (antrean, sanitasi, kalimat, cancel), animasi bicara (voice-pulse), `phrases.id.ts`.
+- [ ] `tts.ts` (antrean, sanitasi, kalimat, cancel), animasi bicara via `setSpeechLevel` (≤30 Hz, overlay mulut parametris — kontrak baru, bukan voice-pulse), `phrases.id.ts` (varian kalimat di `apps/bridge/src/speech/summarize.ts`).
 - [ ] Bridge: `parse-speak.ts`, `summarize.ts` (auto: tag → generate → heuristik), injeksi instruksi (§9.5).
 - [ ] FR-022, 023, 033, 050, 052, 053.
 
@@ -962,7 +894,7 @@ Tugas:
 
 ### M7 — Polish & rilis MVP
 
-- [ ] Reconnect/rekonsiliasi lengkap, mode silent-events, error matrix, a11y (axe), i18n id/en, reduced motion, mini mode, tema.
+- [ ] Reconnect/rekonsiliasi lengkap, mode silent-events, error matrix, a11y (axe), i18n id/en, reduced motion, tema. (Mini mode dilewati — FR-035 dihapus permanen 2026-10-13.)
 - [ ] README (setup 10 menit), `bun run start` satu perintah, `bun run smoke:real`.
 - [ ] Traceability FR→tes, CHANGELOG, tag `v0.1.0`.
 
