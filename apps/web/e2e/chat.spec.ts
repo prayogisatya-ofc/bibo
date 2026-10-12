@@ -40,8 +40,8 @@ test("edit-files: feed tool + kartu perubahan", async ({ page }) => {
   await onboard(page, "/tmp/e2e-edit");
   await page.getByTestId("chat-input").fill("tambah catatan");
   await page.getByTestId("send-btn").click();
-  // feed tool muncul
-  await expect(page.getByTestId("feed").locator("li").first()).toBeVisible({ timeout: 30000 });
+  // feed tool muncul (baris tool baru: .tool-row, bukan li)
+  await expect(page.getByTestId("feed").locator(".tool-row").first()).toBeVisible({ timeout: 30000 });
   // kartu perubahan muncul dengan +/- baris
   const changes = page.getByTestId("changes");
   await expect(changes).toBeVisible({ timeout: 30000 });

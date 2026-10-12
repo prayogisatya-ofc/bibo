@@ -498,6 +498,7 @@ function Shell({ locale, setLocale }: { locale: Locale; setLocale: (v: Locale) =
           }
           changes={diffs}
           onCloseChanges={clearDiffs}
+          feed={feed}
           errors={errors.map((e) => humanError(e.split(":")[0] ?? "", e, locale))}
           toast={toast}
           chatCount={chat.length}

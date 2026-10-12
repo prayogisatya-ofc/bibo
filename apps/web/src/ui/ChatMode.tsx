@@ -7,8 +7,10 @@ import { MicButton } from "./MicButton.js";
 import { MicIcon, StopIcon } from "./icons.js";
 import { ChatPanel } from "./ChatPanel.js";
 import { ChangesCard } from "./ChangesCard.js";
+import { ActivityFeed } from "./ActivityFeed.js";
 import { activityChip, CHAT_AVATAR_PX, stageSub, stageTitle } from "./stageText.js";
 import type { DiffFile } from "../state/store.js";
+import type { FeedItem } from "@codepet/protocol";
 
 /**
  * Mode Chat (§C.3): kartu kiri 360px (panggung Bibo, chip aktivitas, judul
@@ -40,6 +42,7 @@ export function ChatMode({
   animateFrom,
   changes,
   onCloseChanges,
+  feed,
   errors,
   toast,
   chatCount,
@@ -69,6 +72,8 @@ export function ChatMode({
   docked: ReactNode;
   changes: DiffFile[];
   onCloseChanges: () => void;
+  /** Item aktivitas tool untuk kartu aktivitas (fase C §C.3). */
+  feed: FeedItem[];
   errors: string[];
   toast: { msg: string; key: number } | undefined;
   chatCount: number;
@@ -131,6 +136,7 @@ export function ChatMode({
         docked={docked}
         afterLog={
           <>
+            <ActivityFeed items={feed} />
             <ChangesCard files={changes} onClose={onCloseChanges} />
             {errors.length > 0 && (
               <ul className="errors" aria-live="assertive">
