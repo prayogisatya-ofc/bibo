@@ -26,24 +26,54 @@ function getAriaLabel(pose: AvatarPose, variant?: WorkingVariant): string {
 
 const MOODS: readonly AvatarMood[] = ["neutral", "happy", "wary"];
 
+/** Baca state awal dari query string (untuk screenshot deterministik fase E). */
+function initialFromUrl(): {
+  pose: AvatarPose;
+  variant: WorkingVariant;
+  theme: "dark" | "light";
+  speech: number;
+  mood: AvatarMood;
+  seed: number;
+  freeze: number | null;
+} {
+  const q = new URLSearchParams(window.location.search);
+  const pose = q.get("pose");
+  const variant = q.get("variant");
+  const theme = q.get("theme");
+  const mood = q.get("mood");
+  return {
+    pose: AVATAR_POSES.includes(pose as AvatarPose) ? (pose as AvatarPose) : "idle",
+    variant: WORKING_VARIANTS.includes(variant as WorkingVariant)
+      ? (variant as WorkingVariant)
+      : "typing",
+    theme: theme === "light" ? "light" : "dark",
+    speech: Number(q.get("speech")) || 0,
+    mood: (MOODS as readonly string[]).includes(mood ?? "") ? (mood as AvatarMood) : "neutral",
+    seed: Number(q.get("seed")) || 1234,
+    freeze: q.get("freeze") === null ? null : Number(q.get("freeze")) || 0,
+  };
+}
+
 export function DevAvatar(): JSX.Element {
-  const [pose, setPose] = useState<AvatarPose>("idle");
-  const [variant, setVariant] = useState<WorkingVariant>("typing");
-  const [theme, setTheme] = useState<"dark" | "light">("dark");
+  const init = useRef(initialFromUrl()).current;
+  const [pose, setPose] = useState<AvatarPose>(init.pose);
+  const [variant, setVariant] = useState<WorkingVariant>(init.variant);
+  const [theme, setTheme] = useState<"dark" | "light">(init.theme);
   const [reducedMotion, setReducedMotion] = useState(false);
   const [slowMo, setSlowMo] = useState(false);
-  const [speech, setSpeech] = useState(0);
-  const [mood, setMood] = useState<AvatarMood>("neutral");
-  const [seed, setSeed] = useState(1234);
+  const [speech, setSpeech] = useState(init.speech);
+  const [mood, setMood] = useState<AvatarMood>(init.mood);
+  const [seed, setSeed] = useState(init.seed);
   const boxRef = useRef<HTMLDivElement>(null);
   const rendererRef = useRef<BotRenderer | null>(null);
+  const frozen = init.freeze !== null;
 
-  const freezeRef = useRef<number | null>(null);
-  if (freezeRef.current === null) {
-    const f = new URLSearchParams(window.location.search).get("freeze");
-    freezeRef.current = f === null ? null : Number(f) || 0;
+  /** Mode beku: biarkan koreografi berjalan t ms, lalu seek & jeda. */
+  function applyFreeze(r: BotRenderer): void {
+    if (!frozen) return;
+    const t = init.freeze as number;
+    window.setTimeout(() => r.freeze(t), t);
   }
-  const frozen = freezeRef.current !== null;
 
   // Mount / remount saat tema, reduced motion, atau seed berubah.
   useEffect(() => {
@@ -60,7 +90,7 @@ export function DevAvatar(): JSX.Element {
     rendererRef.current = r;
     r.setPlaybackRate(slowMo ? 0.25 : 1);
     r.setPose(pose, { variant });
-    if (frozen) r.freeze(freezeRef.current as number);
+    applyFreeze(r);
     return () => {
       r.destroy();
       rendererRef.current = null;
@@ -73,7 +103,7 @@ export function DevAvatar(): JSX.Element {
     const r = rendererRef.current;
     if (!r) return;
     r.setPose(pose, { variant });
-    if (frozen) r.freeze(freezeRef.current as number);
+    applyFreeze(r);
   }, [pose, variant, frozen]);
 
   // Level bicara.
@@ -104,7 +134,7 @@ export function DevAvatar(): JSX.Element {
         <div ref={boxRef} data-testid="avatar-svg" style={{ width: 420 }} />
         <p data-testid="dev-caption">
           {getAriaLabel(pose, pose === "working" ? variant : undefined)} · mood {mood} · seed {seed}
-          {frozen ? ` · beku t=${freezeRef.current}ms` : ""}
+          {frozen ? ` · beku t=${init.freeze}ms` : ""}
         </p>
       </div>
       <div className="dev-controls">
