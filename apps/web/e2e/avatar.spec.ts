@@ -2,28 +2,43 @@ import { expect, test } from "@playwright/test";
 import { AVATAR_POSES } from "@codepet/avatar";
 
 /**
- * Galeri visual M3: tiap pose × tema. Hanya butuh web (tanpa bridge/mock).
- * Screenshot diamati pemilik produk (laporan M3). Hash membuat tiap
- * screenshot deterministik.
+ * Galeri visual (fase E, CHARACTER.md §14): tiap pose × tema, dibekukan
+ * (?freeze) agar deterministik. Hanya butuh web (tanpa bridge/mock).
+ * Dijalankan via `bun run e2e-gallery` (lihat package.json).
  */
 
-test("galeri 14 pose × 2 tema", async ({ page }) => {
+const WORKING_VARIANTS = ["typing", "reading", "running", "searching", "delegating", "generic"] as const;
+
+test("galeri 9 pose × 2 tema (beku, deterministik)", async ({ page }) => {
   for (const theme of ["dark", "light"] as const) {
     for (const pose of AVATAR_POSES) {
-      await page.goto(`/?dev=avatar#pose=${pose}&theme=${theme}&speech=0`);
-      await expect(page.getByTestId("dev-caption")).toContainText(pose, { timeout: 10000 });
-      await page.waitForTimeout(400); // transisi 400 ms selesai
-      await page.getByTestId("dev-stage").screenshot({ path: `gallery/${theme}-${pose.replace(".", "-")}.png` });
+      const variants = pose === "working" ? WORKING_VARIANTS : ([undefined] as const);
+      for (const variant of variants) {
+        const q = new URLSearchParams({
+          dev: "avatar",
+          pose,
+          theme,
+          speech: "0",
+          seed: "1234",
+          freeze: "1200",
+        });
+        if (variant) q.set("variant", variant);
+        await page.goto(`/?${q.toString()}`);
+        await expect(page.getByTestId("dev-caption")).toContainText(pose, { timeout: 10000 });
+        await page.waitForTimeout(1400); // freeze diterapkan setelah 1200 ms
+        const name = variant ? `${pose}-${variant}` : pose;
+        await page.getByTestId("dev-stage").screenshot({ path: `gallery/${theme}-${name}.png` });
+      }
     }
   }
-  // Overlay bicara: idle + speech 0.8.
-  await page.goto("/?dev=avatar#pose=idle&theme=dark&speech=0.8");
-  await page.waitForTimeout(400);
+  // Overlay bicara: idle + speech 0.8 (mulut parametris + busur suara).
+  await page.goto("/?dev=avatar&pose=idle&theme=dark&speech=0.8&seed=1234&freeze=1200");
+  await page.waitForTimeout(1400);
   await page.getByTestId("dev-stage").screenshot({ path: "gallery/dark-speaking.png" });
 });
 
 test("animasi berjalan ≥30fps (NFR-PERF-04, headless)", async ({ page }) => {
-  await page.goto("/?dev=avatar#pose=thinking&theme=dark&speech=0");
+  await page.goto("/?dev=avatar&pose=thinking&theme=dark&speech=0&seed=1234");
   const fps = await page.evaluate(
     () =>
       new Promise<number>((resolve) => {

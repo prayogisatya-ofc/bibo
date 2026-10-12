@@ -38,11 +38,11 @@ test("pose-edit: thinking → editing → celebrate → idle, tanpa idle di teng
   console.log(`pose-edit: ${seq.join(" | ")}`);
   // Mock cepat: faseFormats/Olahragaringkas bisa lebih singkat dari polling 300 ms.
   // Yang dijamin: ada pose kerja, akhir celebrate/idle, tanpa idle di tengah.
-  expect(seq.some((c) => /lagi|Bekerja/.test(c))).toBe(true);
-  expect(seq[seq.length - 1]).toMatch(/Beres!|Bibo siap\./);
-  // Tidak idle di tengah: "Bibo siap." hanya boleh di akhir.
+  expect(seq.some((c) => /sedang (bekerja|berpikir)/.test(c))).toBe(true);
+  expect(seq[seq.length - 1]).toMatch(/Bibo selesai!|Bibo siap/);
+  // Tidak idle di tengah: "Bibo siap" hanya boleh di akhir.
   const mid = seq.slice(1, -1);
-  expect(mid.filter((c) => c === "Bibo siap.")).toHaveLength(0);
+  expect(mid.filter((c) => c === "Bibo siap")).toHaveLength(0);
 });
 
 test("pose-permission: asking muncul dan bertahan hingga dijawab", async ({ page }) => {
@@ -50,7 +50,7 @@ test("pose-permission: asking muncul dan bertahan hingga dijawab", async ({ page
   await page.getByTestId("chat-input").fill("minta izin dulu");
   await page.getByTestId("send-btn").click();
   // Tunggu asking, lalu tahan 12 detik: tetap asking, tanpa idle palsu.
-  await expect(page.getByTestId("avatar-caption")).toHaveText("Boleh…?", { timeout: 20000 });
+  await expect(page.getByTestId("avatar-caption")).toHaveText("Bibo sedang bertanya", { timeout: 20000 });
   const seq: string[] = [];
   const start = Date.now();
   while (Date.now() - start < 12000) {
@@ -59,8 +59,8 @@ test("pose-permission: asking muncul dan bertahan hingga dijawab", async ({ page
     await page.waitForTimeout(250);
   }
   console.log(`pose-permission: ${seq.join(" | ")}`);
-  expect(seq[seq.length - 1]).toBe("Boleh…?");
-  expect(seq.filter((c) => c === "Bibo siap.")).toHaveLength(0);
+  expect(seq[seq.length - 1]).toBe("Bibo sedang bertanya");
+  expect(seq.filter((c) => c === "Bibo siap")).toHaveLength(0);
 });
 
 test("pose-silent: tetap thinking/working tanpa event, lalu idle", async ({ page }) => {
@@ -68,14 +68,14 @@ test("pose-silent: tetap thinking/working tanpa event, lalu idle", async ({ page
   const seq = await sendAndCollect(page, "halo", 15000);
   console.log(`pose-silent: ${seq.join(" | ")}`);
   expect(seq.length).toBeGreaterThan(1);
-  expect(seq.slice(1, -1).filter((c) => c === "Bibo siap.")).toHaveLength(0);
-  expect(seq[seq.length - 1]).toBe("Bibo siap.");
+  expect(seq.slice(1, -1).filter((c) => c === "Bibo siap")).toHaveLength(0);
+  expect(seq[seq.length - 1]).toBe("Bibo siap");
 });
 
 test("pose-drop: pulih dari stream putus tanpa idle palsu", async ({ page }) => {
   await onboard(page, "/tmp/e2e-pose-drop");
   const seq = await sendAndCollect(page, "halo", 20000);
   console.log(`pose-drop: ${seq.join(" | ")}`);
-  expect(seq[seq.length - 1]).toMatch(/Beres!|Bibo siap\./);
-  expect(seq.slice(1, -1).filter((c) => c === "Bibo siap.")).toHaveLength(0);
+  expect(seq[seq.length - 1]).toMatch(/Bibo selesai!|Bibo siap/);
+  expect(seq.slice(1, -1).filter((c) => c === "Bibo siap")).toHaveLength(0);
 });

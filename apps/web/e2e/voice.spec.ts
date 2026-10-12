@@ -56,7 +56,7 @@ test("voice-bargein: mic aktif menghentikan TTS seketika", async ({ page }) => {
   await micRelease(page);
   // Antrean dibuang saat cancel; ucapan ringkasan giliran boleh mulai setelahnya
   // (sah). Pastikan SETELAH semua selesai, animasi benar-benar berhenti.
-  await expect(page.getByTestId("avatar-caption")).toHaveText("Bibo siap.", { timeout: 25000 });
+  await expect(page.getByTestId("avatar-caption")).toHaveText("Bibo siap", { timeout: 25000 });
   await page.waitForFunction(() => (window.__spoken ?? []).length >= 2, null, { timeout: 20000 });
   await page.waitForTimeout(1500);
   const pulse = await page.evaluate(() => document.querySelector("#speech-pulse")?.getAttribute("transform"));
@@ -93,7 +93,7 @@ test("voice-stop: berkata berhenti menghentikan agent", async ({ page }) => {
   await micRelease(page);
   await expect(page.getByTestId("voice-toast")).toContainText("Perintah suara: berhenti", { timeout: 5000 });
   // Avatar kembali idle tanpa celebrate berkepanjangan; tidak ada bubble "berhenti".
-  await expect(page.getByTestId("avatar-caption")).toHaveText("Bibo siap.", { timeout: 15000 });
+  await expect(page.getByTestId("avatar-caption")).toHaveText("Bibo siap", { timeout: 15000 });
   await expect(page.locator(".bubble-user", { hasText: "berhenti" })).toHaveCount(0);
 });
 

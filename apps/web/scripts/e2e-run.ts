@@ -91,8 +91,8 @@ async function main(): Promise<void> {
       "/tmp/e2e-voice-ok", "/tmp/e2e-voice-barge", "/tmp/e2e-voice-nomic", "/tmp/e2e-voice-stop",
       "/tmp/e2e-voice-negyes", "/tmp/e2e-voice-negsub", "/tmp/codepet-smoke",
       "/tmp/e2e-safe-med", "/tmp/e2e-safe-high", "/tmp/e2e-safe-form",
-      "/tmp/e2e-mini", "/tmp/e2e-sess-a", "/tmp/e2e-sess-b",
-      "/tmp/e2e-a11y", "/tmp/e2e-a11y-perm", "/tmp/e2e-tts-lat",
+      "/tmp/e2e-mode", "/tmp/e2e-talk-med", "/tmp/e2e-talk-high", "/tmp/e2e-esc", "/tmp/e2e-sess-a", "/tmp/e2e-sess-b",
+      "/tmp/e2e-a11y", "/tmp/e2e-a11y-perm", "/tmp/e2e-a11y-talk", "/tmp/e2e-tts-lat",
     ]) {
       await mkdir(d, { recursive: true });
     }
