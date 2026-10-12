@@ -1,23 +1,25 @@
-import type { AvatarPose } from "@codepet/avatar";
+import type { AvatarPose, WorkingVariant } from "@codepet/avatar";
 
 /**
- * Konteks murni untuk derivePose (PRD §8.1–8.2). Bebas framework agar mudah diuji.
+ * Konteks murni untuk derivePose (PRD §8.1–8.2, pemetaan tampilan CHARACTER.md §11).
+ * Bebas framework agar mudah diuji.
  */
 export interface PoseContext {
   link: "online" | "offline";
-  /** Status agent dari bridge (agent.state). */
+  /** Status agent dari bridge (agent.state); "working" = phase busy + busyKind. */
   agent: "idle" | "thinking" | "working" | "awaiting" | "error";
   busyKind: "reading" | "editing" | "running" | "searching" | "delegating" | "thinking" | undefined;
   mic: "off" | "listening";
+  /** True bila TTS aktif — OVERLAY Berbicara, BUKAN pose (CHARACTER.md §11). */
   speaking: boolean;
-  /** True pada jendela transient (celebrate 2 s / confused 4 s). */
+  /** True pada jendela transient (celebrate 3 s / confused 4 s). */
   celebrate: boolean;
   confused: boolean;
   /** Ms sejak aktivitas terakhir (untuk sleeping > 120 s). */
   idleMs: number;
 }
 
-/** Pemetaan nama tool nyata (M0) → busyKind. TABEL DATA, fallback "thinking". */
+/** Pemetaan nama tool nyata (M0, PRD §8.3a) → busyKind. TABEL DATA, fallback "thinking". */
 export const TOOL_BUSY_KIND: Record<string, PoseContext["busyKind"]> = {
   read: "reading",
   edit: "editing",
@@ -27,59 +29,65 @@ export const TOOL_BUSY_KIND: Record<string, PoseContext["busyKind"]> = {
   webfetch: "searching",
   websearch: "searching",
   task: "delegating",
+  subagent: "delegating", // audit ADR: dulu hilang, padahal ada di PRD §8.3a
 };
 
 export function busyKindOf(tool: string): Exclude<PoseContext["busyKind"], undefined> {
   return TOOL_BUSY_KIND[tool] ?? "thinking";
 }
 
-/**
- * Prioritas pose (PRD §8.2): offline > confused > asking > listening >
- * working.* > thinking > celebrate > idle > sleeping.
- * `speaking` adalah overlay (voice-pulse), BUKAN pose — ditangani terpisah.
- */
-export function derivePose(ctx: PoseContext): AvatarPose {
-  if (ctx.link === "offline") return "offline";
-  if (ctx.confused) return "confused";
-  if (ctx.agent === "awaiting") return "asking";
-  if (ctx.mic === "listening") return "listening";
-  if (ctx.agent === "working") {
-    switch (ctx.busyKind) {
-      case "reading":
-        return "working.reading";
-      case "editing":
-        return "working.editing";
-      case "running":
-        return "working.running";
-      case "searching":
-        return "working.searching";
-      case "delegating":
-        return "working.delegating";
-      default:
-        return "working.generic";
-    }
-  }
-  if (ctx.agent === "thinking") return "thinking";
-  if (ctx.agent === "error") return "confused";
-  if (ctx.celebrate) return "celebrate";
-  if (ctx.idleMs > 120_000) return "sleeping";
-  return "idle";
+/** busyKind bridge → varian pose Bekerja (kontrak @codepet/avatar). editing → mengetik. */
+const WORKING_VARIANT: Record<"reading" | "editing" | "running" | "searching" | "delegating", WorkingVariant> = {
+  reading: "reading",
+  editing: "typing",
+  running: "running",
+  searching: "searching",
+  delegating: "delegating",
+};
+
+export interface DerivedPose {
+  pose: AvatarPose;
+  variant?: WorkingVariant;
 }
 
-/** Label status manusiawi untuk caption/avatar aria (id/en). */
-const POSE_LABEL: Record<"id" | "en", Record<AvatarPose, string>> = {
+/**
+ * Prioritas pose (PRD §8.2, tidak berubah):
+ * offline > confused > asking > [speaking: overlay] > listening >
+ * working > thinking > celebrate > idle > sleeping.
+ *
+ * `speaking` TIDAK mengubah pose — overlay Berbicara ditangani renderer
+ * (mulut parametris + busur suara; prioritas pola lampu asking > speaking >
+ * pola pose dasar, CHARACTER.md §11). Fungsi ini mengembalikan pose dasar + varian.
+ */
+export function derivePose(ctx: PoseContext): DerivedPose {
+  if (ctx.link === "offline") return { pose: "offline" };
+  if (ctx.confused || ctx.agent === "error") return { pose: "confused" };
+  if (ctx.agent === "awaiting") return { pose: "asking" };
+  if (ctx.mic === "listening") return { pose: "listening" };
+  if (ctx.agent === "working") {
+    const v = ctx.busyKind && ctx.busyKind !== "thinking" ? WORKING_VARIANT[ctx.busyKind] : "generic";
+    return { pose: "working", variant: v };
+  }
+  if (ctx.agent === "thinking") return { pose: "thinking" };
+  if (ctx.celebrate) return { pose: "celebrate" };
+  if (ctx.idleMs > 120_000) return { pose: "sleeping" };
+  return { pose: "idle" };
+}
+
+/**
+ * Label status manusiawi untuk caption/avatar aria (id/en).
+ *
+ * CATATAN fase C: string mengandung nama sementara "Bibo" (aturan PROMPT:
+ * nama hanya boleh dari character.name + i18n). Fase C akan mengganti seluruh
+ * label ini dengan i18n; jangan menambah hard-code nama baru di sini.
+ */
+const POSE_LABEL: Record<"id" | "en", Record<Exclude<AvatarPose, "working">, string>> = {
   id: {
     offline: "Luring",
     sleeping: "Tidur",
     idle: "Bibo siap.",
     listening: "Mendengarkan…",
     thinking: "Hmm, aku pikir dulu…",
-    "working.reading": "Aku lagi baca file…",
-    "working.editing": "Aku lagi mengedit file…",
-    "working.running": "Aku lagi menjalankan perintah…",
-    "working.searching": "Aku lagi mencari…",
-    "working.delegating": "Aku minta tolong robot mini…",
-    "working.generic": "Aku lagi bekerja…",
     asking: "Boleh…?",
     celebrate: "Beres!",
     confused: "Aduh, bingung…",
@@ -90,18 +98,32 @@ const POSE_LABEL: Record<"id" | "en", Record<AvatarPose, string>> = {
     idle: "Bibo is ready.",
     listening: "Listening…",
     thinking: "Hmm, let me think…",
-    "working.reading": "Reading files…",
-    "working.editing": "Editing files…",
-    "working.running": "Running commands…",
-    "working.searching": "Searching…",
-    "working.delegating": "Asking the mini robot…",
-    "working.generic": "Working…",
     asking: "May I…?",
     celebrate: "Done!",
     confused: "Oops, confused…",
   },
 };
 
-export function poseLabel(pose: AvatarPose, locale: "id" | "en" = "id"): string {
+const WORKING_LABEL: Record<"id" | "en", Record<WorkingVariant, string>> = {
+  id: {
+    reading: "Aku lagi baca file…",
+    typing: "Aku lagi mengedit file…",
+    running: "Aku lagi menjalankan perintah…",
+    searching: "Aku lagi mencari…",
+    delegating: "Aku minta tolong robot mini…",
+    generic: "Aku lagi bekerja…",
+  },
+  en: {
+    reading: "Reading files…",
+    typing: "Editing files…",
+    running: "Running commands…",
+    searching: "Searching…",
+    delegating: "Asking the mini robot…",
+    generic: "Working…",
+  },
+};
+
+export function poseLabel(pose: AvatarPose, variant: WorkingVariant | undefined, locale: "id" | "en" = "id"): string {
+  if (pose === "working") return WORKING_LABEL[locale][variant ?? "generic"];
   return POSE_LABEL[locale][pose];
 }
