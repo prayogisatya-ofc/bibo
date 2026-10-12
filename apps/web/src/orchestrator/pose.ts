@@ -75,17 +75,15 @@ export function derivePose(ctx: PoseContext): DerivedPose {
 }
 
 /**
- * Label status manusiawi untuk caption/avatar aria (id/en).
- *
- * CATATAN fase C: string mengandung nama sementara "Bibo" (aturan PROMPT:
- * nama hanya boleh dari character.name + i18n). Fase C akan mengganti seluruh
- * label ini dengan i18n; jangan menambah hard-code nama baru di sini.
+ * Label status manusiawi TANPA nama karakter (id/en) — fase C.
+ * Nama sementara hanya boleh dari `character.name` + i18n; komponen
+ * menyusun `${character.name}: ${poseLabel(…)}` untuk aria-label.
  */
 const POSE_LABEL: Record<"id" | "en", Record<Exclude<AvatarPose, "working">, string>> = {
   id: {
     offline: "Luring",
     sleeping: "Tidur",
-    idle: "Bibo siap.",
+    idle: "Siap.",
     listening: "Mendengarkan…",
     thinking: "Hmm, aku pikir dulu…",
     asking: "Boleh…?",
@@ -95,7 +93,7 @@ const POSE_LABEL: Record<"id" | "en", Record<Exclude<AvatarPose, "working">, str
   en: {
     offline: "Offline",
     sleeping: "Sleeping",
-    idle: "Bibo is ready.",
+    idle: "Ready.",
     listening: "Listening…",
     thinking: "Hmm, let me think…",
     asking: "May I…?",

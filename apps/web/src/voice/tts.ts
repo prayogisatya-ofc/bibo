@@ -111,6 +111,16 @@ export class TtsEngine {
    * parametris m-open + busur suara), 0 menonaktifkannya (mulut menutup).
    */
   onLevel: (level: number) => void = () => {};
+  /**
+   * Dipanggil saat satu chunk kalimat mulai diucapkan (fase C: bubble
+   * mengikuti TTS per kalimat). Aditif — tidak mengubah logika antrean.
+   */
+  onChunk: (id: string, chunk: string, index: number) => void = () => {};
+  /**
+   * Dipanggil saat satu utterance selesai (semua chunk habis) atau
+   * dibatalkan (fase C: bubble memudar 1,5 dtk setelah ucapan selesai).
+   */
+  onUtteranceEnd: (id: string) => void = () => {};
   /** Riwayat teks yang selesai diucapkan (untuk tes & debug). */
   readonly spoken: string[] = [];
   private queue: Job[] = [];
@@ -180,9 +190,11 @@ export class TtsEngine {
 
   /** Batal total (interrupt, mute, prompt baru). Level 0 seketika (≤100 ms) → mulut menutup. */
   cancel(): void {
+    const id = this.current?.job.id;
     this.queue = [];
     this.stopCurrent();
     this.setLevel(0);
+    if (id !== undefined) this.onUtteranceEnd(id);
   }
 
   private stopCurrent(): void {
@@ -207,12 +219,15 @@ export class TtsEngine {
     if (!cur) return;
     const text = cur.job.chunks[cur.idx];
     if (text === undefined) {
+      const id = cur.job.id;
       this.spoken.push(cur.job.chunks.join(" "));
       this.current = undefined;
       this.setLevel(0); // ucapan selesai → mulut menutup (≤100 ms)
+      this.onUtteranceEnd(id);
       this.pump();
       return;
     }
+    this.onChunk(cur.job.id, text, cur.idx);
     const u = this.makeUtterance(text);
     u.lang = "id-ID";
     u.rate = this.settings.rate;

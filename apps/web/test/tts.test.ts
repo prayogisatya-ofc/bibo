@@ -121,3 +121,27 @@ describe("antrean & prioritas", () => {
     expect(t.spoken).toHaveLength(0);
   });
 });
+
+describe("callback bubble (fase C, aditif)", () => {
+  it("onChunk per chunk; onUtteranceEnd saat selesai", () => {
+    const t = stub();
+    const chunks: Array<[string, string, number]> = [];
+    const ended: string[] = [];
+    t.eng.onChunk = (id, chunk, idx) => chunks.push([id, chunk, idx]);
+    t.eng.onUtteranceEnd = (id) => ended.push(id);
+    t.eng.speak("a", "Kalimat satu. Kalimat dua. Kalimat tiga.", "normal");
+    expect(chunks.length).toBeGreaterThan(0);
+    expect(chunks[0]?.[0]).toBe("a");
+    expect(chunks.map((c) => c[2])).toEqual(chunks.map((_, i) => i));
+    t.finish();
+    expect(ended).toEqual(["a"]);
+  });
+  it("onUtteranceEnd dipanggil saat cancel", () => {
+    const t = stub();
+    const ended: string[] = [];
+    t.eng.onUtteranceEnd = (id) => ended.push(id);
+    t.eng.speak("a", "halo dunia", "normal");
+    t.eng.cancel();
+    expect(ended).toEqual(["a"]);
+  });
+});

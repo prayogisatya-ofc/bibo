@@ -57,6 +57,20 @@ describe("TOOL_BUSY_KIND (nama nyata M0, PRD §8.3a)", () => {
   });
 });
 
+describe("poseLabel bebas nama (fase C)", () => {
+  it("tidak ada label yang me-hardcode nama karakter", () => {
+    const poses: AvatarPose[] = ["idle", "thinking", "working", "asking", "celebrate", "confused", "sleeping", "listening", "offline"];
+    const variants: Array<WorkingVariant | undefined> = [undefined, "typing", "reading", "running", "searching", "delegating", "generic"];
+    for (const locale of ["id", "en"] as const) {
+      for (const pose of poses) {
+        for (const variant of variants) {
+          expect(poseLabel(pose, variant, locale)).not.toMatch(/bibo/i);
+        }
+      }
+    }
+  });
+});
+
 describe("poseLabel (id/en)", () => {
   it("working memakai variant; non-working mengabaikan variant", () => {
     expect(poseLabel("working", "reading", "id")).toBe("Aku lagi baca file…");
@@ -65,6 +79,7 @@ describe("poseLabel (id/en)", () => {
     expect(poseLabel("working", "running", "en")).toBe("Running commands…");
     expect(poseLabel("asking", undefined, "id")).toBe("Boleh…?");
     expect(poseLabel("celebrate", undefined, "id")).toBe("Beres!");
-    expect(poseLabel("idle", undefined, "id")).toBe("Bibo siap.");
+    expect(poseLabel("idle", undefined, "id")).toBe("Siap.");
+    expect(poseLabel("idle", undefined, "en")).toBe("Ready.");
   });
 });
