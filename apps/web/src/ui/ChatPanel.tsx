@@ -39,6 +39,7 @@ export function ChatPanel({
   externalDraft,
   mic,
   docked,
+  afterLog,
 }: {
   sessionTitle: string;
   agentLabel: string;
@@ -50,6 +51,8 @@ export function ChatPanel({
   mic: { listening: boolean; disabled: boolean; onDown: () => void; onUp: () => void };
   /** Kartu izin/form yang menempel di atas komposer (mode chat). */
   docked?: ReactNode;
+  /** ChangesCard + error setelah giliran selesai (di dalam kartu kanan). */
+  afterLog?: ReactNode;
 }): JSX.Element {
   const t = useT();
   const { chat } = useApp();
@@ -173,6 +176,7 @@ export function ChatPanel({
           </div>
         </div>
       )}
+      {afterLog}
       {docked ? <div className="docked-cards">{docked}</div> : null}
       <div className="composer-zone">
         <div className="composer">

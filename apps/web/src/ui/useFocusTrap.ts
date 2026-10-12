@@ -4,7 +4,7 @@ import { useEffect, useRef } from "react";
  * Perangkap fokus di dalam dialog (role="alertdialog"): Tab berputar di
  * dalam kartu; fokus awal ke kontrol pertama; fokus dikembalikan saat lepas.
  */
-export function useFocusTrap<T extends HTMLElement>(active: boolean): React.RefObject<T | null> {
+export function useFocusTrap<T extends HTMLElement>(active: boolean): React.MutableRefObject<T | null> {
   const ref = useRef<T | null>(null);
 
   useEffect(() => {

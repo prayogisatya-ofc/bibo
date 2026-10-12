@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import type { PermissionView } from "@codepet/protocol";
 import { fill, useT } from "../i18n/index.js";
 import { character } from "../character.js";
-import { ChevronDownIcon, QuestionIcon } from "./icons.js";
+import { ChevronDownIcon, MicIcon, QuestionIcon } from "./icons.js";
 import { useFocusTrap } from "./useFocusTrap.js";
 
 /**
@@ -104,7 +104,7 @@ export function ApprovalCard({
         </pre>
       )}
       <p className="perm-note">{note}</p>
-      {variant === "dock" && voiceHint}
+      {(variant === "dock" || perm.risk === "high" || !perm.voiceAllowed) && voiceHint}
       <div className="perm-actions">
         {perm.risk !== "high" &&
           (confirmAlways ? (
@@ -160,9 +160,12 @@ export function ApprovalCard({
     return (
       <>
         {card}
-        <p className="perm-voice-hint" data-testid="perm-voice-hint">
-          {t.voiceHint}
-        </p>
+        <div className="perm-voice-hint" data-testid="perm-voice-hint">
+          <span className="voice-mic-mini" aria-hidden="true">
+            <MicIcon size={20} />
+          </span>
+          <span>{t.voiceHint}</span>
+        </div>
       </>
     );
   }

@@ -530,6 +530,7 @@ function Shell({ locale, setLocale }: { locale: Locale; setLocale: (v: Locale) =
               ))}
             </>
           }
+          popupOpen={popupOpen}
           awaitingPerm={awaitingChip}
           onReopenPerm={() => {
             setMinimizedPerm({});

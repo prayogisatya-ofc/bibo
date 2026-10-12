@@ -44,6 +44,7 @@ export function TalkMode({
   micUp,
   permPopup,
   formPopup,
+  popupOpen,
   awaitingPerm,
   onReopenPerm,
 }: {
@@ -65,6 +66,8 @@ export function TalkMode({
   permPopup: ReactNode;
   /** Popup form (atau null bila tak ada / diminimalkan). */
   formPopup: ReactNode;
+  /** True bila ada popup izin/form yang tampil (mic besar disembunyikan). */
+  popupOpen: boolean;
   /** True bila ada izin pending yang diminimalkan. */
   awaitingPerm: boolean;
   onReopenPerm: () => void;
@@ -72,7 +75,6 @@ export function TalkMode({
   const t = useT();
   const asking = pose === "asking";
   const biboSize = asking ? 290 : 400;
-  const popupOpen = permPopup !== null && permPopup !== undefined;
 
   return (
     <main className="talk-screen">

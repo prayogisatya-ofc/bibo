@@ -36,3 +36,15 @@ Browser tak pernah memegang kredensial OpenCode. Detail: `PRD.md`,
 
 Izin berisiko selalu dikonfirmasi manusia; risiko tinggi hanya lewat klik + ketik OK,
 tak ada auto-approve, tak ada persetujuan suara untuk high. Audit: `docs/security-audit-m7.md`.
+
+## Dua mode tampilan
+
+- **Chat**: kartu Bibo di kiri (panggung, chip aktivitas, judul status, mic besar,
+  tombol hentikan) + panel percakapan di kanan. Kartu izin/form menempel di atas
+  kolom ketik.
+- **Ngobrol**: hanya Bibo besar di tengah, bubble ucapan, dan kontrol mic.
+  Saat ada izin: Bibo mengecil, bubble menampilkan pertanyaan, dan kartu izin
+  muncul sebagai popup di bawah Bibo (Esc meminimalkan ke chip "Menunggu izin",
+  bukan menyetujui/menolak).
+- Mode tersimpan di `localStorage` (`codepet.ui-mode`); pintasan **Ctrl/Cmd+.**
+  berpindah mode. Riwayat percakapan dipertahankan di kedua mode.

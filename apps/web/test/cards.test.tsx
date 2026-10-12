@@ -38,8 +38,12 @@ describe("ApprovalCard (FR-040..042)", () => {
   it("popup: petunjuk suara di bawah kartu; Esc meminimalkan (bukan menolak)", () => {
     const onReply = vi.fn();
     const onMinimize = vi.fn();
-    render(<ApprovalCard perm={perm} onReply={onReply} variant="popup" directory="/tmp/x" onMinimize={onMinimize} />);
+    const { container } = render(<ApprovalCard perm={perm} onReply={onReply} variant="popup" directory="/tmp/x" onMinimize={onMinimize} />);
     expect(screen.getByTestId("perm-voice-hint")).toBeTruthy();
+    // Kait visual popup: panah ke Bibo + border izin + kotak perintah gelap.
+    expect(container.querySelector(".perm-pop .pop-arrow")).toBeTruthy();
+    expect(container.querySelector(".perm-cmd")?.textContent).toContain("$ npm test");
+    expect(container.querySelector(".risk-badge.risk-medium")).toBeTruthy();
     fireEvent.keyDown(screen.getByTestId("approval"), { key: "Escape" });
     expect(onMinimize).toHaveBeenCalledTimes(1);
     expect(onReply).not.toHaveBeenCalled();

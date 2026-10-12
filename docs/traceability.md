@@ -88,3 +88,18 @@
 | NFR-I18N-01 | id/en tanpa ubah kode | locales + switch + frasa bridge | i18n.test + speech.test |
 | NFR-SEC/PRIV | audit ulang | docs/security-audit-m7.md | op-usage + verify |
 | DoD M7 | check + smoke:real hijau; Gherkin semua | semua P0 hijau; smoke:real OK vs 2.0.16 | laporan M7 |
+
+## Redesain avatar+UI — fase C (2026-10-13, cabang redesign/avatar-ui)
+
+| FR-035 | Mini mode | DIHAPUS — digantikan pemilih mode Chat|Ngobrol (keputusan ADR d) | review; e2e/m7.spec.ts perlu pemutakhiran (fase E) |
+| FR-040 | Kartu izin + avatar asking + ucapan ≤1 s | ApprovalCard varian popup (panah ke Bibo, di bawah Bibo) + dock (di atas komposer); Bibo asking otomatis via orchestrator | cards.test.tsx (popup/dock/Esc) + E2E safety-medium/high |
+| FR-041 | Sekali/tolak/selalu-klik | tidak berubah (selalu 2 langkah + peringatan; high tanpa selalu) | cards.test.tsx |
+| FR-042 | Risiko + aturan suara | high: "Konfirmasi lewat layar" + ketik OK; petunjuk suara hanya bila voiceAllowed (di bawah kartu popup) | cards.test.tsx |
+| FR-043 | Form generik + suara opsi tunggal + settled | FormCard varian popup/dock; Esc = minimalkan, bukan batal | cards.test.tsx |
+| FR-055 | Tema auto + ukuran avatar | tema default TERANG (keputusan ADR c); ukuran avatar → ukuran panggung chat | review |
+| Baru | Mode Chat/Ngobrol + Ctrl/Cmd+. | useUiMode (localStorage codepet.ui-mode); riwayat chat dipertahankan | uiMode.test.tsx |
+| Baru | Bubble ucapan mode Ngobrol | speechBubble.ts murni (pop 180ms, 2 kalimat terakhir, fade 1,5 dtk, urgent ganti seketika, tone error) + TtsEngine.onChunk/onUtteranceEnd (aditif) | speechBubble.test.ts + tts.test.ts |
+| Baru | poseLabel tanpa nama | "Bibo" hanya dari character.name + i18n; komponen menyusun `${character.name}: …` | pose.test.ts (tanpa nama) |
+| Baru | react() avatar | nod saat prompt terkirim, perk saat mic ditekan, thanks saat izin sekali, hello saat pertama terhubung (via avatar/rendererRef) | review |
+| NFR-A11Y-01 | Kontras AA tema terang+gelap | token diverifikasi: semua pasangan teks ≥4,5 (aksen hanya untuk ikon/fokus, bukan teks) | skrip cek kontras (laporan fase C) |
+| NFR-I18N-01 | Kunci baru id+en | mode, bubble, popup izin, petunjuk suara, chip, status panggung, {name} via fill() | i18n.test |
