@@ -33,13 +33,13 @@
 
 ## M3 — Avatar + state machine
 
-| FR-030 | 10 state + transisi | BiboSvgRenderer (14 pose + overlay speaking) | galeri 29 screenshot + renderer.test |
-| FR-031 | Prioritas sinyal | derivePose murni (17 kasus) + XState paralel | pose.test.ts + machine.test.ts |
-| FR-032 | Pose per jenis tool | TOOL_BUSY_KIND (nama M0) + busyKind bridge | pose.test + E2E pose-edit |
-| FR-033 | Voice-pulse + tanpa mulut | setSpeechLevel (denyut badan + badge wave) | renderer.test + gallery speaking |
-| FR-034 | prefers-reduced-motion | media query + data-rm + skip timer | review + mount reducedMotion |
-| FR-035 | Mini mode | toggle pojok 96px + fab chat | E2E m7 mini |
-| FR-036 | Idle behaviors | kedip CSS 4,2 s, melayang, melirik 5–9 s, tidur 120 s | renderer.test (fake timer) |
+| FR-030 | 10 state + transisi | BotRenderer (9 pose + 6 varian working + overlay speaking) | galeri /dev/avatar + renderer.test |
+| FR-031 | Prioritas sinyal | derivePose murni (19 kasus) + XState paralel | pose.test.ts + machine.test.ts |
+| FR-032 | Pose per jenis tool | TOOL_BUSY_KIND (nama M0, incl. subagent→delegating) + busyKind bridge | pose.test + E2E pose-edit |
+| FR-033 | Overlay speaking + mulut parametris | setSpeechLevel 0..1 → mulut m-open + busur suara; prioritas lampu asking>speaking>pose | renderer.test + gallery speaking |
+| FR-034 | prefers-reduced-motion | mount reducedMotion + setReducedMotion; animasi diam | review + mount reducedMotion |
+| FR-035 | Mini mode | tertunda → fase C (UI baru) | — |
+| FR-036 | Idle behaviors | IdleDirector: kedip 4,2 s, melayang, melirik 5–9 s; tidur >120 s | renderer.test (fake timer) |
 | NFR-PERF-04 | Animasi ≥55fps | CSS keyframes/WAAPI, tanpa lib; terukur 60,4 headless | E2E fps probe |
 | DoD M3 | Urutan pose mock; tak idle saat aktif; galeri disetujui | E2E pose-edit/permission/silent/drop + machine.test | gallery/ (29 PNG) |
 
@@ -47,7 +47,7 @@
 
 | FR-022 | Ringkasan lisan ≤2 kalimat | summarize auto (tag→generate 8 s→heuristik) + speak summary | speech.test + trials 10/10 nyata |
 | FR-023 | Ack saat perintah diterima | phrase ack (normal/cerewet; senyap diam) | review + E2E speak |
-| FR-033 | Voice-pulse + setSpeechLevel ≤30 Hz | TTS level generator + avatar overlay; stop ≤100 ms | tts.test + E2E cancel |
+| FR-033 | Overlay speaking via setSpeechLevel ≤30 Hz | TTS level generator → mulut parametris (overlay Berbicara); setSpeechLevel(0) ≤100 ms saat stop/cancel | tts.test + E2E cancel |
 | FR-050 | Verbosity Senyap/Normal/Cerewet | bridge store + settings.update + local | review + E2E |
 | FR-052 | Suara/rate/pitch/volume/uji | SettingsPanel + pickVoice id-ID + peringatan | review |
 | FR-053 | Mute global + Ctrl+M | engine mute + cancel seketika | tts.test + review |
