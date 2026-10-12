@@ -651,6 +651,23 @@ describe("eye tracking (§9.2)", () => {
   });
 });
 
+describe("freeze (?freeze=<ms>)", () => {
+  it("one-shot → min(t, dur); infinite → t mod dur; lalu jeda", () => {
+    mount();
+    r.setPose("thinking");
+    vi.advanceTimersByTime(500);
+    r.freeze(1200);
+    const appear = recordsFor(q("dot-1"), "appear")[0];
+    expect(appear?.currentTime).toBe(180); // min(1200, 180)
+    expect(appear?.paused).toBe(true);
+    const floats = recordsFor(q("body-float"), "float-y").filter((x) => !x.cancelled);
+    const float = floats[floats.length - 1];
+    const period = float?.options.duration as number;
+    expect(float?.currentTime).toBe(1200 % period);
+    expect(float?.paused).toBe(true);
+  });
+});
+
 describe("pause/resume", () => {
   it("pause menjeda semua animasi; resume melanjutkan", () => {
     mount();

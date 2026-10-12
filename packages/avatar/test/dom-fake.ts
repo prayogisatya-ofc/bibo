@@ -17,7 +17,8 @@ export interface AnimRecord {
   finished: boolean;
   paused: boolean;
   playbackRate: number;
-  currentTime: number | null;
+  /** Live dari animasi (getter), bukan salinan. */
+  readonly currentTime: number | null;
   /** Id logis dari Animator (via __animId), bila ada. */
   readonly animId: string | undefined;
 }
@@ -29,9 +30,19 @@ class FakeAnimation {
   onfinish: ((this: Animation, ev: AnimationPlaybackEvent) => unknown) | null = null;
   oncancel: ((this: Animation, ev: AnimationPlaybackEvent) => unknown) | null = null;
   startTime: number | null = 0;
+  readonly effect: {
+    getTiming: () => { duration: unknown; iterations: unknown };
+  };
   #record: AnimRecord;
   constructor(record: AnimRecord) {
     this.#record = record;
+    const options = record.options;
+    this.effect = {
+      getTiming: () => ({
+        duration: options.duration ?? 0,
+        iterations: options.iterations ?? 1,
+      }),
+    };
   }
   cancel(): void {
     this.#record.cancelled = true;
@@ -114,7 +125,9 @@ export function installDomFakes(): void {
       finished: false,
       paused: false,
       playbackRate: 1,
-      currentTime: 0,
+      get currentTime(): number | null {
+        return (anim as unknown as { currentTime?: number | null } | undefined)?.currentTime ?? null;
+      },
       get animId(): string | undefined {
         return (anim as unknown as { __animId?: string } | undefined)?.__animId;
       },

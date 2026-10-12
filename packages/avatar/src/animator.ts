@@ -14,6 +14,7 @@ interface Tracked {
   id: string;
   layer: AnimLayer;
   anim: Animation;
+  infinite: boolean;
 }
 
 /** Animasi no-op untuk lingkungan tanpa WAAPI (tidak terjadi di browser target). */
@@ -49,7 +50,14 @@ export class Animator {
   ): Animation {
     this.stop(el, id);
     const anyEl = el as Element & { animate?: Element["animate"] };
-    const anim = typeof anyEl.animate === "function" ? anyEl.animate(keyframes, options) : noopAnimation();
+    let anim: Animation;
+    try {
+      anim =
+        typeof anyEl.animate === "function" ? anyEl.animate(keyframes, options) : noopAnimation();
+    } catch {
+      // Keyframes/options invalid di browser ini: jangan jatuhkan aplikasi.
+      anim = noopAnimation();
+    }
     anim.playbackRate = this.rate;
     // Tag untuk test-helper (hanya dibaca di test, tidak dipakai produksi).
     (anim as unknown as { __animId?: string }).__animId = id;
@@ -59,7 +67,7 @@ export class Animator {
       per = new Map();
       this.tracked.set(el, per);
     }
-    per.set(id, { id, layer, anim });
+    per.set(id, { id, layer, anim, infinite: options.iterations === Infinity });
     this.syncDataAnim(el);
     return anim;
   }
@@ -160,7 +168,7 @@ export class Animator {
       for (const t of per.values()) {
         try {
           const dur = this.effectDuration(t.anim);
-          const target = dur === null ? ms : dur === 0 ? 0 : ms % dur;
+          const target = dur === null || dur === 0 ? ms : t.infinite ? ms % dur : Math.min(ms, dur);
           t.anim.currentTime = target;
           t.anim.pause();
         } catch {

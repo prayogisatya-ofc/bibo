@@ -774,21 +774,24 @@ function confettiBurst(r: PoseOps): void {
       "burst",
       "B",
       [
-        { transform: "translate(0px, 0px) rotate(0deg) scale(0.4)", opacity: 0 },
+        { transform: "translate(0px, 0px) rotate(0deg) scale(0.4)", opacity: 0, easing: "ease-out" },
         {
           transform: `translate(${(dx * 0.35).toFixed(1)}px, ${(dy * 0.35).toFixed(1)}px) rotate(${(rot * 0.35).toFixed(0)}deg) scale(1)`,
           opacity: 1,
           offset: 0.08,
+          easing: "ease-out",
         },
         {
           transform: `translate(${dx.toFixed(1)}px, ${dy.toFixed(1)}px) rotate(${(rot * 0.6).toFixed(0)}deg)`,
           opacity: 1,
           offset: 0.35,
+          easing: T.ease.fall,
         },
         {
           transform: `translate(${dx.toFixed(1)}px, ${(dy + c.fall).toFixed(1)}px) rotate(${rot.toFixed(0)}deg)`,
           opacity: 1,
           offset: 0.7,
+          easing: T.ease.fall,
         },
         {
           transform: `translate(${dx.toFixed(1)}px, ${(dy + c.fall).toFixed(1)}px) rotate(${rot.toFixed(0)}deg)`,
@@ -797,7 +800,6 @@ function confettiBurst(r: PoseOps): void {
       ],
       {
         duration: dur,
-        easing: ["ease-out", "ease-out", T.ease.fall, T.ease.fall] as unknown as string,
         delay: (i * 17) % 120,
       },
     );
