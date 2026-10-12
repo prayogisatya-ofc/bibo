@@ -1,12 +1,19 @@
 import { assign, setup } from "xstate";
 import type { AgentState, BridgeMessage } from "@codepet/protocol";
 import { derivePose, type PoseContext } from "./pose.js";
-import type { AvatarPose } from "@codepet/avatar";
+import type { AvatarMood, AvatarPose, WorkingVariant } from "@codepet/avatar";
 
 /**
  * Orkestrator XState v5 (PRD §8.1): tiga region paralel link/agent/voice.
- * Transient: celebrate (±2 s setelah sukses), confused (±4 s setelah gagal).
+ * Transient: celebrate (±3 s setelah sukses, CHARACTER.md §11), confused
+ * (±4 s setelah gagal). Mood: happy 10 s setelah celebrate, wary 10 s
+ * setelah confused, else neutral.
  */
+
+const CELEBRATE_MS = 3000;
+const CONFUSED_MS = 4000;
+/** Jendela mood setelah transient celebrate/confused dimulai. */
+const MOOD_AFTER_MS = 10_000;
 
 interface Ctx {
   link: "online" | "offline";
@@ -38,8 +45,8 @@ export const machine = setup({
       return {
         phase: s.phase,
         busyKind: s.busyKind,
-        celebrateUntil: s.lastOutcome === "success" ? now + 2000 : context.celebrateUntil,
-        confusedUntil: s.lastOutcome === "failed" ? now + 4000 : context.confusedUntil,
+        celebrateUntil: s.lastOutcome === "success" ? now + CELEBRATE_MS : context.celebrateUntil,
+        confusedUntil: s.lastOutcome === "failed" ? now + CONFUSED_MS : context.confusedUntil,
         lastActive: now,
       };
     }),
@@ -167,7 +174,16 @@ export const machine = setup({
 
 export interface Snapshot {
   pose: AvatarPose;
+  variant?: WorkingVariant;
   speaking: boolean;
+  mood: AvatarMood;
+}
+
+/** Mood dari jendela 10 s setelah transient celebrate/confused dimulai. */
+function moodOf(c: Ctx, now: number): AvatarMood {
+  if (c.celebrateUntil > 0 && now - (c.celebrateUntil - CELEBRATE_MS) < MOOD_AFTER_MS) return "happy";
+  if (c.confusedUntil > 0 && now - (c.confusedUntil - CONFUSED_MS) < MOOD_AFTER_MS) return "wary";
+  return "neutral";
 }
 
 /** Bangun PoseContext dari konteks machine + jam. */
@@ -186,7 +202,11 @@ export function poseFromContext(c: Ctx, now: number): PoseContext {
 
 export function snapshotPose(c: Ctx, now: number): Snapshot {
   const ctx = poseFromContext(c, now);
-  return { pose: derivePose(ctx), speaking: ctx.speaking };
+  const d = derivePose(ctx);
+  const snap: Snapshot = { pose: d.pose, speaking: ctx.speaking, mood: moodOf(c, now) };
+  // exactOptionalPropertyTypes: jangan tulis variant bila tak ada (bukan undefined eksplisit).
+  if (d.variant !== undefined) snap.variant = d.variant;
+  return snap;
 }
 
 /** Terjemahkan pesan WS bridge → event machine. */
