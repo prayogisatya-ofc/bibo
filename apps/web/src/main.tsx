@@ -3,7 +3,7 @@ import { createRoot } from "react-dom/client";
 import "./app.css";
 
 // Lazy agar galeri /dev/avatar bisa dimuat tanpa memuat modul App
-// (dan sebaliknya) — App masih memakai API avatar lama hingga fase D.
+// (dan sebaliknya). Fase D: App sudah memakai kontrak AvatarRenderer baru.
 const DevAvatarLazy = React.lazy(() =>
   import("./ui/DevAvatar.js").then((m) => ({ default: m.DevAvatar })),
 );

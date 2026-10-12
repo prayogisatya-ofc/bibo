@@ -400,7 +400,14 @@ function Shell({ locale, setLocale }: { locale: Locale; setLocale: (v: Locale) =
               💬
             </button>
           )}
-          <AvatarStage pose={snap.pose} level={level} theme={effectiveTheme} locale={locale} />
+          <AvatarStage
+            pose={snap.pose}
+            variant={snap.variant}
+            mood={snap.mood}
+            level={level}
+            theme={effectiveTheme}
+            locale={locale}
+          />
           {listening && (
             <p className="mic-caption" aria-live="polite" data-testid="mic-caption">
               🎤 {interim || "Mendengarkan…"}
