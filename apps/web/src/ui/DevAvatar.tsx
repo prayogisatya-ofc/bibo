@@ -1,85 +1,207 @@
 import { useEffect, useRef, useState } from "react";
-import { AVATAR_POSES, BiboSvgRenderer, type AvatarPose } from "@codepet/avatar";
-import { poseLabel } from "../orchestrator/pose.js";
+import {
+  AVATAR_POSES,
+  AVATAR_REACTIONS,
+  WORKING_VARIANTS,
+  BotRenderer,
+  type AvatarMood,
+  type AvatarPose,
+  type ReactionKind,
+  type WorkingVariant,
+} from "@codepet/avatar";
 
 /**
- * Galeri uji visual manual (?dev=avatar): 14 pose × 2 tema + slider suara.
- * Screenshot deterministik via hash: #pose=<nama>&theme=<dark|light>&speech=<0..1>
+ * Galeri uji visual manual (?dev=avatar) — CHARACTER.md §14.
+ * Pose × varian working, reaksi, slider speechLevel, mood, tema,
+ * reduced motion, slow-mo ×0,25, seed, dan mode beku ?freeze=<ms>.
  */
+
+// Nama karakter sementara. Satu-satunya kemunculan di apps/web;
+// fase C memindahkannya ke config/character.ts (sumber tunggal).
+const CHARACTER_NAME = "Bibo";
+
+function getAriaLabel(pose: AvatarPose, variant?: WorkingVariant): string {
+  return variant ? `${CHARACTER_NAME}: ${pose} (${variant})` : `${CHARACTER_NAME}: ${pose}`;
+}
+
+const MOODS: readonly AvatarMood[] = ["neutral", "happy", "wary"];
+
 export function DevAvatar(): JSX.Element {
   const [pose, setPose] = useState<AvatarPose>("idle");
+  const [variant, setVariant] = useState<WorkingVariant>("typing");
   const [theme, setTheme] = useState<"dark" | "light">("dark");
+  const [reducedMotion, setReducedMotion] = useState(false);
+  const [slowMo, setSlowMo] = useState(false);
   const [speech, setSpeech] = useState(0);
+  const [mood, setMood] = useState<AvatarMood>("neutral");
+  const [seed, setSeed] = useState(1234);
   const boxRef = useRef<HTMLDivElement>(null);
-  const rendererRef = useRef<BiboSvgRenderer | undefined>(undefined);
+  const rendererRef = useRef<BotRenderer | null>(null);
 
-  useEffect(() => {
-    const read = (): void => {
-      const h = new URLSearchParams(window.location.hash.slice(1));
-      const p = h.get("pose");
-      const t = h.get("theme");
-      const s = h.get("speech");
-      if (p && (AVATAR_POSES as readonly string[]).includes(p)) setPose(p as AvatarPose);
-      if (t === "light" || t === "dark") setTheme(t);
-      if (s) setSpeech(Number(s) || 0);
-    };
-    read();
-    window.addEventListener("hashchange", read);
-    return () => window.removeEventListener("hashchange", read);
-  }, []);
+  const freezeRef = useRef<number | null>(null);
+  if (freezeRef.current === null) {
+    const f = new URLSearchParams(window.location.search).get("freeze");
+    freezeRef.current = f === null ? null : Number(f) || 0;
+  }
+  const frozen = freezeRef.current !== null;
 
+  // Mount / remount saat tema, reduced motion, atau seed berubah.
   useEffect(() => {
     const box = boxRef.current;
     if (!box) return;
-    const r = new BiboSvgRenderer();
-    r.mount(box, { theme, reducedMotion: false });
+    const r = new BotRenderer();
+    r.mount(box, {
+      theme,
+      reducedMotion,
+      seed,
+      characterName: CHARACTER_NAME,
+      getAriaLabel,
+    });
     rendererRef.current = r;
+    r.setPlaybackRate(slowMo ? 0.25 : 1);
+    r.setPose(pose, { variant });
+    if (frozen) r.freeze(freezeRef.current as number);
     return () => {
       r.destroy();
-      rendererRef.current = undefined;
+      rendererRef.current = null;
     };
-  }, [theme]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [theme, reducedMotion, seed]);
 
+  // Pose & varian.
   useEffect(() => {
-    rendererRef.current?.setPose(pose);
-  }, [pose]);
+    const r = rendererRef.current;
+    if (!r) return;
+    r.setPose(pose, { variant });
+    if (frozen) r.freeze(freezeRef.current as number);
+  }, [pose, variant, frozen]);
+
+  // Level bicara.
   useEffect(() => {
     rendererRef.current?.setSpeechLevel(speech);
-  }, [speech, pose]);
+  }, [speech]);
 
-  function pick(p: AvatarPose): void {
-    setPose(p);
-    window.location.hash = `pose=${p}&theme=${theme}&speech=${speech}`;
+  // Mood.
+  useEffect(() => {
+    rendererRef.current?.setMood(mood);
+  }, [mood]);
+
+  // Slow-mo.
+  useEffect(() => {
+    rendererRef.current?.setPlaybackRate(slowMo ? 0.25 : 1);
+  }, [slowMo]);
+
+  function react(kind: ReactionKind): void {
+    rendererRef.current?.react(kind);
   }
 
   return (
     <div className="dev-gallery" data-theme={theme}>
-      <h1>Bibo — galeri pose (M3)</h1>
+      <h1>
+        {CHARACTER_NAME} — galeri avatar
+      </h1>
       <div className="dev-stage" data-testid="dev-stage">
-        <div ref={boxRef} data-testid="bibo-svg" style={{ width: 480 }} />
+        <div ref={boxRef} data-testid="avatar-svg" style={{ width: 420 }} />
         <p data-testid="dev-caption">
-          {pose} — {poseLabel(pose)}
+          {getAriaLabel(pose, pose === "working" ? variant : undefined)} · mood {mood} · seed {seed}
+          {frozen ? ` · beku t=${freezeRef.current}ms` : ""}
         </p>
       </div>
       <div className="dev-controls">
         <div role="group" aria-label="pose">
           {AVATAR_POSES.map((p) => (
-            <button key={p} type="button" data-testid={`pose-${p}`} data-active={p === pose} onClick={() => pick(p)}>
+            <button
+              key={p}
+              type="button"
+              data-testid={`pose-${p}`}
+              data-active={p === pose}
+              onClick={() => setPose(p)}
+            >
               {p}
             </button>
           ))}
         </div>
-        <div role="group" aria-label="tema">
-          <button type="button" onClick={() => setTheme("dark")}>
-            gelap
+        <div role="group" aria-label="varian working">
+          {WORKING_VARIANTS.map((v) => (
+            <button
+              key={v}
+              type="button"
+              data-testid={`variant-${v}`}
+              data-active={v === variant}
+              disabled={pose !== "working"}
+              onClick={() => setVariant(v)}
+            >
+              {v}
+            </button>
+          ))}
+        </div>
+        <div role="group" aria-label="reaksi">
+          {AVATAR_REACTIONS.map((k) => (
+            <button key={k} type="button" data-testid={`react-${k}`} onClick={() => react(k)}>
+              {k}
+            </button>
+          ))}
+        </div>
+        <div role="group" aria-label="mood">
+          {MOODS.map((m) => (
+            <button
+              key={m}
+              type="button"
+              data-testid={`mood-${m}`}
+              data-active={m === mood}
+              onClick={() => setMood(m)}
+            >
+              {m}
+            </button>
+          ))}
+        </div>
+        <label>
+          speechLevel: {speech.toFixed(2)}
+          <input
+            type="range"
+            min={0}
+            max={1}
+            step={0.05}
+            value={speech}
+            data-testid="speech-slider"
+            onChange={(e) => setSpeech(Number(e.target.value))}
+          />
+        </label>
+        <div role="group" aria-label="tampilan">
+          <button
+            type="button"
+            data-testid="theme-toggle"
+            onClick={() => setTheme((t) => (t === "dark" ? "light" : "dark"))}
+          >
+            tema: {theme}
           </button>
-          <button type="button" onClick={() => setTheme("light")}>
-            terang
+          <button
+            type="button"
+            data-testid="reduced-toggle"
+            data-active={reducedMotion}
+            aria-pressed={reducedMotion}
+            onClick={() => setReducedMotion((v) => !v)}
+          >
+            reduced motion
+          </button>
+          <button
+            type="button"
+            data-testid="slowmo-toggle"
+            data-active={slowMo}
+            aria-pressed={slowMo}
+            onClick={() => setSlowMo((v) => !v)}
+          >
+            slow-mo ×0,25
           </button>
         </div>
         <label>
-          level suara: {speech.toFixed(2)}
-          <input type="range" min={0} max={1} step={0.05} value={speech} data-testid="speech-slider" onChange={(e) => setSpeech(Number(e.target.value))} />
+          seed:{" "}
+          <input
+            type="number"
+            value={seed}
+            data-testid="seed-input"
+            onChange={(e) => setSeed(Number(e.target.value) || 0)}
+          />
         </label>
       </div>
     </div>
