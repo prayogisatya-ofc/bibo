@@ -11,6 +11,13 @@ export function getStrings(locale: Locale): Strings {
   return STRINGS[locale] ?? STRINGS.id;
 }
 
+/** Isi placeholder `{name}` / `{mode}` pada string i18n (nama karakter tidak di-hardcode). */
+export function fill(tmpl: string, vars: Record<string, string>): string {
+  let out = tmpl;
+  for (const [k, v] of Object.entries(vars)) out = out.replaceAll(`{${k}}`, v);
+  return out;
+}
+
 /** Semua kunci id dan en harus sama (NFR-I18N-01). */
 const idKeys = Object.keys(id).sort();
 const enKeys = Object.keys(en).sort();
