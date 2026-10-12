@@ -58,6 +58,13 @@ export interface AvatarRenderer {
   setPose(pose: AvatarPose, opts?: AvatarPoseOptions): void;
   /** 0..1; >0 mengaktifkan overlay speaking (mulut parametris), 0 menonaktifkan. */
   setSpeechLevel(level: number): void;
+  /**
+   * 0..1; lampu antena berdenyut mengikuti level saat pose Mendengar
+   * (CHARACTER.md §4.3). Revisi kontrak yang disetujui 2026-10-13
+   * (ADR-009): menggantikan deviasi lama di mana setSpeechLevel merangkap
+   * sebagai driver mic-level saat pose listening.
+   */
+  setMicLevel(level: number): void;
   /** Arah pandang -1..1 (null-safe: nilai di-clamp). */
   setLook(x: number, y: number): void;
   setMood(mood: AvatarMood): void;

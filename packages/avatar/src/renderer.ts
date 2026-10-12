@@ -87,6 +87,9 @@ export class BotRenderer implements AvatarRenderer, PoseOps {
   private speakLevel = 0;
   private speakA = 0;
 
+  // Mic level (pose Mendengar; CHARACTER.md §4.3).
+  private micLevel = 0;
+
   // Eye tracking.
   private lookTarget = { x: 0, y: 0 };
   private lookCur = { x: 0, y: 0 };
@@ -429,13 +432,6 @@ export class BotRenderer implements AvatarRenderer, PoseOps {
     if (this.destroyed) return;
     const lv = clamp(level, 0, 1);
     this.speakLevel = lv;
-    // Di pose listening, level = level mikrofon (lampu mengikuti, bukan overlay).
-    if (this.pose === "listening") {
-      const bulb = this.el("bulb");
-      (bulb as HTMLElement).style.setProperty("scale", `${1 + 0.25 * lv}`);
-      (bulb as HTMLElement).style.opacity = String(0.7 + 0.3 * lv);
-      return;
-    }
     if (lv > 0) {
       if (this.speakStopTimer !== null) {
         window.clearTimeout(this.speakStopTimer);
@@ -449,6 +445,18 @@ export class BotRenderer implements AvatarRenderer, PoseOps {
         if (this.speakLevel === 0) this.stopSpeaking();
       }, T.speaking.mouth.stopCloseMs);
     }
+  }
+
+  setMicLevel(level: number): void {
+    if (this.destroyed) return;
+    const lv = clamp(level, 0, 1);
+    this.micLevel = lv;
+    // CHARACTER.md §4.3: pola lampu Mendengar = denyut mengikuti level mic.
+    // (ADR-009: dipindah dari setSpeechLevel agar kontrak bersih.)
+    if (this.pose !== "listening") return;
+    const bulb = this.el("bulb") as HTMLElement;
+    bulb.style.setProperty("scale", `${1 + 0.25 * lv}`);
+    bulb.style.opacity = String(0.7 + 0.3 * lv);
   }
 
   setLook(x: number, y: number): void {

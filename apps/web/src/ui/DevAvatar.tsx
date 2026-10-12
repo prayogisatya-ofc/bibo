@@ -12,8 +12,8 @@ import {
 
 /**
  * Galeri uji visual manual (?dev=avatar) — CHARACTER.md §14.
- * Pose × varian working, reaksi, slider speechLevel, mood, tema,
- * reduced motion, slow-mo ×0,25, seed, dan mode beku ?freeze=<ms>.
+ * Pose × varian working, reaksi, slider speechLevel + micLevel (ADR-009),
+ * mood, tema, reduced motion, slow-mo ×0,25, seed, dan mode beku ?freeze=<ms>.
  */
 
 // Nama karakter sementara. Satu-satunya kemunculan di apps/web;
@@ -32,6 +32,7 @@ function initialFromUrl(): {
   variant: WorkingVariant;
   theme: "dark" | "light";
   speech: number;
+  mic: number;
   mood: AvatarMood;
   seed: number;
   freeze: number | null;
@@ -48,6 +49,7 @@ function initialFromUrl(): {
       : "typing",
     theme: theme === "light" ? "light" : "dark",
     speech: Number(q.get("speech")) || 0,
+    mic: Number(q.get("mic")) || 0,
     mood: (MOODS as readonly string[]).includes(mood ?? "") ? (mood as AvatarMood) : "neutral",
     seed: Number(q.get("seed")) || 1234,
     freeze: q.get("freeze") === null ? null : Number(q.get("freeze")) || 0,
@@ -62,6 +64,7 @@ export function DevAvatar(): JSX.Element {
   const [reducedMotion, setReducedMotion] = useState(false);
   const [slowMo, setSlowMo] = useState(false);
   const [speech, setSpeech] = useState(init.speech);
+  const [mic, setMic] = useState(init.mic);
   const [mood, setMood] = useState<AvatarMood>(init.mood);
   const [seed, setSeed] = useState(init.seed);
   const boxRef = useRef<HTMLDivElement>(null);
@@ -110,6 +113,11 @@ export function DevAvatar(): JSX.Element {
   useEffect(() => {
     rendererRef.current?.setSpeechLevel(speech);
   }, [speech]);
+
+  // Level mic (ADR-009): lampu antena berdenyut mengikuti level saat pose Mendengar.
+  useEffect(() => {
+    rendererRef.current?.setMicLevel(mic);
+  }, [mic]);
 
   // Mood.
   useEffect(() => {
@@ -195,6 +203,18 @@ export function DevAvatar(): JSX.Element {
             value={speech}
             data-testid="speech-slider"
             onChange={(e) => setSpeech(Number(e.target.value))}
+          />
+        </label>
+        <label>
+          micLevel: {mic.toFixed(2)}
+          <input
+            type="range"
+            min={0}
+            max={1}
+            step={0.05}
+            value={mic}
+            data-testid="mic-slider"
+            onChange={(e) => setMic(Number(e.target.value))}
           />
         </label>
         <div role="group" aria-label="tampilan">

@@ -51,6 +51,7 @@
 | FR-050 | Verbosity Senyap/Normal/Cerewet | bridge store + settings.update + local | review + E2E |
 | FR-052 | Suara/rate/pitch/volume/uji | SettingsPanel + pickVoice id-ID + peringatan | review |
 | FR-053 | Mute global + Ctrl+M | engine mute + cancel seketika | tts.test + review |
+| Baru | setMicLevel(level) — kontrak ADR-009 | lampu antena denyut mengikuti level saat pose Mendengar (CHARACTER.md §4.3); deviasi setSpeechLevel-ganda dihapus; slider mic + ?mic= di galeri /dev/avatar | renderer.test (4) + types.ts |
 | DoD M4 | 9/10 giliran nyata bersuara; tanpa tag/kode; mute/interrupt seketika | trials vs OpenCode 2.0.16 nyata | 10/10 (tag 5, generate 4, heuristik 1) |
 
 ## M5 — Suara masuk + perintah suara

@@ -474,13 +474,37 @@ describe("listening (§7.1)", () => {
     expect(dSmall).toBe(400);
   });
 
-  it("setSpeechLevel = level mic (lampu mengikuti, bukan overlay)", () => {
+  it("setMicLevel menggerakkan lampu saat listening (ADR-009)", () => {
     mount();
     r.setPose("listening");
-    r.setSpeechLevel(0.5);
+    r.setMicLevel(0.5);
     expect(svg().dataset.speaking).toBe("false");
     expect((q("bulb") as HTMLElement).style.getPropertyValue("scale")).toBe("1.125");
     expect((q("bulb") as HTMLElement).style.getPropertyValue("opacity")).toBe("0.85");
+  });
+
+  it("setMicLevel di-clamp 0..1", () => {
+    mount();
+    r.setPose("listening");
+    r.setMicLevel(2);
+    expect((q("bulb") as HTMLElement).style.getPropertyValue("scale")).toBe("1.25");
+    r.setMicLevel(-1);
+    expect((q("bulb") as HTMLElement).style.getPropertyValue("opacity")).toBe("0.7");
+  });
+
+  it("setMicLevel di luar listening tidak mengubah visual", () => {
+    mount();
+    r.setPose("idle");
+    r.setMicLevel(0.8);
+    expect((q("bulb") as HTMLElement).style.getPropertyValue("scale")).toBe("");
+    expect(svg().dataset.speaking).toBe("false");
+  });
+
+  it("setSpeechLevel di listening kini overlay normal (deviasi lama dihapus)", () => {
+    mount();
+    r.setPose("listening");
+    r.setSpeechLevel(0.6);
+    expect(svg().dataset.speaking).toBe("true");
   });
 });
 
