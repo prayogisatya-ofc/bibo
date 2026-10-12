@@ -1,7 +1,13 @@
 /**
- * TTS browser (speechSynthesis) — MVP M4 (PRD §9.3).
+ * TTS browser (speechSynthesis) — MVP M4 (PRD §9.3), disambung ke avatar baru (fase D).
  * Antrean prioritas (urgent menyela normal), potong per kalimat ±180 karakter,
- * sanitasi sebelum ucap, level suara untuk voice-pulse (≤30 Hz), stop ≤100 ms.
+ * sanitasi sebelum ucap.
+ *
+ * Level suara 0..1 (≤30 Hz) kini menggerakkan MULUT PARAMETRIS — overlay
+ * Berbicara di renderer (CHARACTER.md §5/§11), bukan lagi "voice-pulse"
+ * (denyut badan) yang sudah dihapus. setSpeechLevel(0) wajib dipanggil saat
+ * stop/cancel/selesai agar mulut menutup ≤100 ms; renderer menonaktifkan
+ * overlay bila level 0.
  */
 
 export interface TtsVoice {
@@ -99,6 +105,11 @@ interface Job {
 }
 
 export class TtsEngine {
+  /**
+   * Callback level suara 0..1 (≤30 Hz). App meneruskannya ke
+   * renderer.setSpeechLevel: >0 mengaktifkan overlay Berbicara (mulut
+   * parametris m-open + busur suara), 0 menonaktifkannya (mulut menutup).
+   */
   onLevel: (level: number) => void = () => {};
   /** Riwayat teks yang selesai diucapkan (untuk tes & debug). */
   readonly spoken: string[] = [];
@@ -167,7 +178,7 @@ export class TtsEngine {
     this.pump();
   }
 
-  /** Batal total (interrupt, mute, prompt baru). Level 0 seketika. */
+  /** Batal total (interrupt, mute, prompt baru). Level 0 seketika (≤100 ms) → mulut menutup. */
   cancel(): void {
     this.queue = [];
     this.stopCurrent();
@@ -198,7 +209,7 @@ export class TtsEngine {
     if (text === undefined) {
       this.spoken.push(cur.job.chunks.join(" "));
       this.current = undefined;
-      this.setLevel(0);
+      this.setLevel(0); // ucapan selesai → mulut menutup (≤100 ms)
       this.pump();
       return;
     }

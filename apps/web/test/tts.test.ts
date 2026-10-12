@@ -86,7 +86,7 @@ describe("antrean & prioritas", () => {
     t.eng.cancel();
     expect(levels[levels.length - 1]).toBe(0);
   });
-  it("level di 0..1 (voice-pulse)", () => {
+  it("level di 0..1 (overlay speaking)", () => {
     const t = stub();
     const levels: number[] = [];
     t.eng.onLevel = (l) => levels.push(l);
