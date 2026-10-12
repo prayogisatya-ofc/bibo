@@ -1,5 +1,8 @@
 import { useState } from "react";
 import type { FormView } from "@codepet/protocol";
+import { useT } from "../i18n/index.js";
+import { ChevronDownIcon } from "./icons.js";
+import { useFocusTrap } from "./useFocusTrap.js";
 
 interface Field {
   key?: string;
@@ -17,16 +20,24 @@ function asFields(raw: unknown[]): Field[] {
 /**
  * Kartu form generik (FR-043): teks, pilihan tunggal/ganda, boolean.
  * Jawaban via klik/ketik; suara (nomor/label) ditangani matchFormAnswer.
+ * Dua varian seperti ApprovalCard: "popup" (di bawah Bibo, mode Ngobrol)
+ * dan "dock" (di atas komposer, mode Chat). Esc meminimalkan, bukan membatalkan.
  */
 export function FormCard({
   form,
   onReply,
   onCancel,
+  variant,
+  onMinimize,
 }: {
   form: FormView;
   onReply: (formID: string, answer: Record<string, unknown>) => void;
   onCancel: (formID: string) => void;
+  variant: "popup" | "dock";
+  onMinimize?: () => void;
 }): JSX.Element {
+  const t = useT();
+  const trapRef = useFocusTrap<HTMLDivElement>(true);
   const fields = asFields(form.fields);
   const [values, setValues] = useState<Record<string, unknown>>(() => Object.fromEntries(fields.map((f) => [f.key ?? "", f.default ?? ""])));
   const [multi, setMulti] = useState<Record<string, string[]>>({});
@@ -44,9 +55,41 @@ export function FormCard({
     });
   }
 
+  function onKeyDown(e: React.KeyboardEvent): void {
+    if (e.key === "Escape") {
+      e.preventDefault();
+      e.stopPropagation();
+      if (variant === "popup") onMinimize?.();
+    }
+  }
+
   return (
-    <div className="formcard" role="dialog" aria-live="assertive" aria-label={form.title} data-testid="formcard">
-      <strong>{form.title}</strong>
+    <div
+      className={`${variant === "popup" ? "perm-pop form-pop" : "perm-dock"}`}
+      role="alertdialog"
+      aria-live="assertive"
+      aria-label={form.title}
+      data-testid="formcard"
+      ref={trapRef}
+      onKeyDown={onKeyDown}
+    >
+      {variant === "popup" && <span className="pop-arrow" aria-hidden="true" />}
+      <div className="perm-head">
+        <strong>{form.title}</strong>
+        <span className="spacer" aria-hidden="true" />
+        {variant === "popup" && onMinimize && (
+          <button
+            type="button"
+            className="icon-btn"
+            style={{ width: 32, height: 32 }}
+            onClick={onMinimize}
+            aria-label={t.minimize}
+            data-testid="form-minimize"
+          >
+            <ChevronDownIcon size={16} />
+          </button>
+        )}
+      </div>
       {fields.map((f) => {
         const key = f.key ?? "";
         if (f.options && f.options.length > 0) {
@@ -57,7 +100,7 @@ export function FormCard({
                 <legend>
                   {f.title ?? key} {f.description ? <span className="muted">— {f.description}</span> : null}
                 </legend>
-                <p className="voice-hint">Ucapkan nomor atau nama pilihan.</p>
+                <p className="voice-hint">{t.formVoiceHint}</p>
                 {f.options.map((o, i) => (
                   <button key={o.value} type="button" onClick={() => onReply(form.formID, { [key]: o.value })} data-testid={`form-opt-${key}-${o.value}`}>
                     {i + 1}. {o.label ?? o.value}
@@ -83,7 +126,7 @@ export function FormCard({
                 </label>
               ))}
               <button type="button" onClick={() => onReply(form.formID, { [key]: multi[key] ?? [] })} data-testid={`form-send-${key}`}>
-                Jawab
+                {t.formAnswer}
               </button>
             </fieldset>
           );
@@ -99,7 +142,7 @@ export function FormCard({
               />
               {f.title ?? key}
               <button type="button" onClick={() => onReply(form.formID, { [key]: values[key] ?? false })} data-testid={`form-send-${key}`}>
-                Jawab
+                {t.formAnswer}
               </button>
             </label>
           );
@@ -114,14 +157,17 @@ export function FormCard({
               data-testid={`form-text-${key}`}
             />
             <button type="button" onClick={() => onReply(form.formID, { [key]: values[key] ?? "" })} data-testid={`form-send-${key}`}>
-              Jawab
+              {t.formAnswer}
             </button>
           </label>
         );
       })}
-      <button type="button" onClick={() => onCancel(form.formID)} data-testid="form-cancel">
-        Batal
-      </button>
+      <div className="perm-actions">
+        <span className="spacer" aria-hidden="true" />
+        <button type="button" className="btn-reject" onClick={() => onCancel(form.formID)} data-testid="form-cancel">
+          {t.cancel}
+        </button>
+      </div>
     </div>
   );
 }

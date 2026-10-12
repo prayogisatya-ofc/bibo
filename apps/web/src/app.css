@@ -792,6 +792,7 @@ button:disabled { opacity: 0.5; cursor: default; }
   box-shadow: var(--shadow-pop);
 }
 .warn { color: var(--risk-medium-text); }
+.muted { color: var(--text-2); }
 .errors { color: var(--bad); }
 .resume { align-self: center; }
 .empty { color: var(--text-2); }
