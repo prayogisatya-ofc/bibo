@@ -517,6 +517,8 @@ button:disabled { opacity: 0.5; cursor: default; }
 .talk-stage.asking { transform: translateY(-34px); }
 
 /* Bubble ucapan */
+.talk-bibo-wrap { position: relative; display: inline-block; }
+.speech-bubble-pos { position: absolute; left: 70%; top: 2%; z-index: 3; }
 .speech-bubble {
   position: absolute;
   background: var(--card);
@@ -555,6 +557,7 @@ button:disabled { opacity: 0.5; cursor: default; }
 }
 /* ekor kiri menunjuk ke kepala Bibo; di layar sempit bubble di atas kepala */
 @media (max-width: 900px) {
+  .speech-bubble-pos { left: 50%; top: -12px; transform: translateX(-50%); }
   .speech-bubble { max-width: min(340px, 80vw); }
   .speech-bubble .bubble-tail { left: 50%; bottom: auto; top: -9px; transform: translateX(-50%) rotate(45deg); }
 }

@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { useT } from "../i18n/index.js";
+import { fill, useT } from "../i18n/index.js";
+import { character } from "../character.js";
 import { type TtsEngine } from "../voice/tts.js";
 
 export type Verbosity = "silent" | "normal" | "cerewet";
@@ -68,7 +69,7 @@ export function SettingsPanel({
   if (!open) return null;
 
   function testVoice(): void {
-    engine?.speak("test", "Halo, ini Bibo. Suara test satu dua tiga.", "normal");
+    engine?.speak("test", fill(t.testVoice, { name: character.name }), "normal");
   }
 
   return (

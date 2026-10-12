@@ -1,5 +1,9 @@
 import React, { Suspense } from "react";
 import { createRoot } from "react-dom/client";
+// Nunito lokal (bobot 500/700/800) — tidak dari CDN.
+import "@fontsource/nunito/500.css";
+import "@fontsource/nunito/700.css";
+import "@fontsource/nunito/800.css";
 import "./app.css";
 
 // Lazy agar galeri /dev/avatar bisa dimuat tanpa memuat modul App

@@ -4,33 +4,30 @@ import { LocaleProvider, useT, type Locale } from "./i18n/index.js";
 import { AppProvider, useApp } from "./state/store.js";
 import { useBridge } from "./ws/client.js";
 import { useOrchestrator } from "./orchestrator/useOrchestrator.js";
-import { StatusBar } from "./ui/StatusBar.js";
-import { AvatarStage } from "./ui/AvatarStage.js";
-import { ChatPanel } from "./ui/ChatPanel.js";
-import { ActivityFeed } from "./ui/ActivityFeed.js";
-import { ChangesCard } from "./ui/ChangesCard.js";
+import { TopBar } from "./ui/TopBar.js";
+import { ChatMode } from "./ui/ChatMode.js";
+import { TalkMode } from "./ui/TalkMode.js";
 import { Onboarding, loadDirHistory, saveDirHistory } from "./ui/Onboarding.js";
 import { SettingsPanel, type Verbosity } from "./ui/Settings.js";
-import { TtsEngine, type UtteranceLike } from "./voice/tts.js";
+import { TtsEngine, chunkSentences, sanitizeForSpeech, type UtteranceLike } from "./voice/tts.js";
 import { FakeSttEngine, WebSpeechEngine, type SttEngine } from "./voice/stt.js";
 import { actionLabel, isSpeakable, matchCommand, matchFormAnswer } from "./voice/commands.js";
 import { applyDict, loadDict, saveDict } from "./voice/dictionary.js";
 import { ApprovalCard } from "./ui/ApprovalCard.js";
 import { FormCard } from "./ui/FormCard.js";
-import { MicButton } from "./ui/MicButton.js";
+import { useUiMode } from "./ui/useUiMode.js";
+import { useSpeechBubble } from "./ui/useSpeechBubble.js";
+import { rendererRef } from "./avatar/rendererRef.js";
 import { humanError } from "./ui/errors.js";
 
 const BRIDGE_KEY = "codepet.bridge-url";
 const DEFAULT_BRIDGE = "http://127.0.0.1:4317";
-
 
 function Shell({ locale, setLocale }: { locale: Locale; setLocale: (v: Locale) => void }): JSX.Element {
   const { agent, chat, feed, diffs, errors, apply, pushUser, pushSystem, clearDiffs } = useApp();
   const [bridgeHttp, setBridgeHttp] = useState(() => localStorage.getItem(BRIDGE_KEY) ?? DEFAULT_BRIDGE);
   const [info, setInfo] = useState({ ocStatus: "down" as "up" | "down", ocVersion: undefined as string | undefined, directory: "", sessionID: undefined as string | undefined, recentDirs: [] as string[], agent: undefined as string | undefined, model: undefined as string | undefined });
   const [sessions, setSessions] = useState<Extract<BridgeMessage, { type: "session.listed" }>["sessions"]>([]);
-  const [mini, setMini] = useState(() => localStorage.getItem("codepet.mini") === "1");
-  const [showChat, setShowChat] = useState(true);
   const [avatarSize, setAvatarSize] = useState<"s" | "m" | "l">(() => {
     const v = localStorage.getItem("codepet.avatar-size");
     return v === "s" || v === "l" ? v : "m";
@@ -43,7 +40,8 @@ function Shell({ locale, setLocale }: { locale: Locale; setLocale: (v: Locale) =
     return v === "silent" || v === "cerewet" ? v : "normal";
   });
   const [muted, setMutedState] = useState(() => localStorage.getItem("codepet.muted") === "1");
-  const [theme, setTheme] = useState<"dark" | "light" | "auto">("dark");
+  // ADR keputusan (c): default aplikasi TERANG (referensi yang disetujui).
+  const [theme, setTheme] = useState<"dark" | "light" | "auto">("light");
   const effectiveTheme: "dark" | "light" = theme === "auto" ? (window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark") : theme;
   const t = useT();
   const [listening, setListening] = useState(false);
@@ -57,6 +55,15 @@ function Shell({ locale, setLocale }: { locale: Locale; setLocale: (v: Locale) =
   const [dictText, setDictText] = useState(() => Object.entries(loadDict()).map(([k, v]) => `${k} -> ${v}`).join("\n"));
   const [headphone, setHeadphone] = useState(() => localStorage.getItem("codepet.headphone") === "1");
   const [micDenied, setMicDenied] = useState(false);
+  // Izin/form yang diminimalkan (talk mode) — kartu tak pernah hilang selama pending.
+  const [minimizedPerm, setMinimizedPerm] = useState<Record<string, boolean>>({});
+  const [minimizedForm, setMinimizedForm] = useState<Record<string, boolean>>({});
+
+  const { mode, setMode } = useUiMode();
+  const { bubble, dispatch: bubbleDispatch } = useSpeechBubble();
+  const bubbleRef = useRef(bubbleDispatch);
+  bubbleRef.current = bubbleDispatch;
+  const connectedOnceRef = useRef(false);
 
   const onMessage = useCallback(
     (m: BridgeMessage) => {
@@ -71,6 +78,10 @@ function Shell({ locale, setLocale }: { locale: Locale; setLocale: (v: Locale) =
           model: m.model,
         });
         if (!m.directory) setShowOnboard(true);
+        if (!connectedOnceRef.current) {
+          connectedOnceRef.current = true;
+          rendererRef.current?.react("hello");
+        }
       } else if (m.type === "bridge.status") {
         setInfo((p) => ({ ...p, ocStatus: m.opencode === "up" ? "up" : "down" }));
       } else if (m.type === "session.listed") {
@@ -79,9 +90,19 @@ function Shell({ locale, setLocale }: { locale: Locale; setLocale: (v: Locale) =
         pushSystem(humanError(m.code, m.message, localeRef.current));
       } else if (m.type === "agent.speak") {
         lastSpeakRef.current = { id: m.id, text: m.text, priority: m.priority };
+        const urgent = m.priority === "urgent";
+        const error = m.kind === "error";
+        // Bubble mengikuti TTS per kalimat: mulai dari chunk pertama.
+        const clean = sanitizeForSpeech(m.text);
+        const first = chunkSentences(clean)[0] ?? clean;
+        bubbleRef.current({ type: "speak", id: m.id, text: first, urgent, error });
         // Senyap: hanya urgent (permission/form/error). Mute: semua diam.
-        if (!mutedRef.current && (verbosityRef.current !== "silent" || m.priority === "urgent")) {
+        const willSpeak = !mutedRef.current && (verbosityRef.current !== "silent" || urgent);
+        if (willSpeak) {
           engineRef.current?.speak(m.id, m.text, m.priority);
+        } else {
+          // Tak diucapkan: bubble tetap tampil sekilas lalu memudar.
+          window.setTimeout(() => bubbleRef.current({ type: "speechend", id: m.id }), 2500);
         }
       }
       apply(m);
@@ -107,6 +128,9 @@ function Shell({ locale, setLocale }: { locale: Locale; setLocale: (v: Locale) =
       },
     );
     eng.onLevel = (l) => setLevel(l);
+    // Fase C: bubble mengikuti TTS per kalimat; memudar 1,5 dtk setelah selesai.
+    eng.onChunk = (id, chunk) => bubbleRef.current({ type: "sentence", id, text: chunk });
+    eng.onUtteranceEnd = (id) => bubbleRef.current({ type: "speechend", id });
     return eng;
   }, []);
   const { snap, feed: feedOrch, mic: setOrchMic } = useOrchestrator();
@@ -143,7 +167,7 @@ function Shell({ locale, setLocale }: { locale: Locale; setLocale: (v: Locale) =
   }, [toast]);
   useEffect(() => {
     document.documentElement.dataset.theme = effectiveTheme;
-  }, [theme]);
+  }, [effectiveTheme]);
 
   // Spasi tahan = PTT bila fokus bukan di input (FR-011).
   useEffect(() => {
@@ -198,6 +222,7 @@ function Shell({ locale, setLocale }: { locale: Locale; setLocale: (v: Locale) =
   function micStart(): void {
     if (offlineRef.current || !infoRef.current.directory) return;
     if (!headphoneRef.current) engineRef.current?.cancel(); // barge-in ≤100 ms
+    rendererRef.current?.react("perk");
     setInterim("");
     sttRef.current.start({ lang: sttLangRef.current });
     setListening(true);
@@ -292,6 +317,7 @@ function Shell({ locale, setLocale }: { locale: Locale; setLocale: (v: Locale) =
 
   function sendText(text: string, delivery: "queue" | "steer"): void {
     engineRef.current?.cancel();
+    rendererRef.current?.react("nod");
     pushUser(text);
     sendRef.current({ type: "user.message", text, source: "voice", locale: sttLangRef.current, delivery });
   }
@@ -301,6 +327,11 @@ function Shell({ locale, setLocale }: { locale: Locale; setLocale: (v: Locale) =
     localStorage.setItem("codepet.muted", m ? "1" : "0");
     engine?.setSettings({ muted: m });
     if (m) engine?.cancel();
+  }
+
+  function replyPerm(requestID: string, decision: "once" | "reject" | "always"): void {
+    if (decision === "once") rendererRef.current?.react("thanks");
+    send({ type: "permission.reply", requestID, decision, via: "click" });
   }
 
   function changeVerbosity(v: Verbosity): void {
@@ -339,26 +370,34 @@ function Shell({ locale, setLocale }: { locale: Locale; setLocale: (v: Locale) =
     send({ type: "session.list" });
   }
 
-  function toggleMini(): void {
-    const next = !mini;
-    setMini(next);
-    setShowChat(!next);
-    localStorage.setItem("codepet.mini", next ? "1" : "0");
-  }
+  const ttsActive = level > 0;
+  const sessionTitle = sessions.find((s) => s.sessionID === info.sessionID)?.title || t.newSession;
+  const agentLabel = `agent: ${info.agent ?? "—"}`;
+
+  // Talk mode: popup izin/form di bawah Bibo (bisa diminimalkan ke chip).
+  const visiblePerms = agent.pendingPermissions.filter((p) => !minimizedPerm[p.requestID]);
+  const visibleForms = agent.pendingForms.filter((f) => !minimizedForm[f.formID]);
+  const popupOpen = mode === "talk" && (visiblePerms.length > 0 || visibleForms.length > 0);
+  const awaitingChip =
+    mode === "talk" &&
+    !popupOpen &&
+    (agent.pendingPermissions.some((p) => minimizedPerm[p.requestID]) ||
+      agent.pendingForms.some((f) => minimizedForm[f.formID]));
 
   return (
-    <div className={mini ? "app mini" : "app"}>
-      <StatusBar
+    <div className="app">
+      <TopBar
         conn={status}
         ocStatus={info.ocStatus}
         ocVersion={info.ocVersion}
         directory={info.directory}
-        agent={info.agent ?? "—"}
-        model={info.model ?? "—"}
+        mode={mode}
+        setMode={setMode}
+        muted={muted}
+        onToggleMute={() => setMuted(!muted)}
         onDir={openOnboard}
         onOpenSettings={() => setShowSettings(true)}
-        onToggleMini={toggleMini}
-        mini={mini}
+        showDirChip={mode === "chat"}
       />
       {offline && (
         <div className="banner" role="alert" data-testid="offline-banner">
@@ -393,80 +432,111 @@ function Shell({ locale, setLocale }: { locale: Locale; setLocale: (v: Locale) =
           saveDict(d);
         }}
       />
-      <main className="layout">
-        <div className={`left avatar-${avatarSize}`}>
-          {mini && (
-            <button type="button" className="chat-fab" onClick={() => setShowChat((v) => !v)} data-testid="chat-fab" aria-label="chat">
-              💬
-            </button>
-          )}
-          <AvatarStage
-            pose={snap.pose}
-            variant={snap.variant}
-            mood={snap.mood}
-            level={level}
-            theme={effectiveTheme}
-            locale={locale}
-          />
-          {listening && (
-            <p className="mic-caption" aria-live="polite" data-testid="mic-caption">
-              🎤 {interim || "Mendengarkan…"}
-            </p>
-          )}
-          {!stt.supported && (
-            <p className="warn" data-testid="mic-unavailable">
-              Mic tidak tersedia — chat teks tetap jalan.
-            </p>
-          )}
-          <ActivityFeed items={feed} />
-          {agent.pendingPermissions.map((p) => (
-            <ApprovalCard key={p.requestID} perm={p} onReply={(requestID, decision) => send({ type: "permission.reply", requestID, decision, via: "click" })} />
-          ))}
-          {agent.pendingForms.map((f) => (
-            <FormCard
-              key={f.formID}
-              form={f}
-              onReply={(formID, answer) => send({ type: "form.reply", formID, answer })}
-              onCancel={(formID) => send({ type: "form.cancel", formID })}
-            />
-          ))}
-        </div>
-        {(!mini || showChat) && (
-        <div className={`right${mini && showChat ? " open" : ""}`}>
-          <ChatPanel
-            disabled={offline || !info.directory}
-            busy={busy}
-            onSend={(text, delivery) => {
-              engine?.cancel(); // antrean usang dibuang saat prompt baru
-              pushUser(text);
-              send({ type: "user.message", text, source: "chat", locale: "id-ID", delivery });
-            }}
-            onStop={() => {
-              engine?.cancel(); // interrupt menghentikan suara seketika
-              send({ type: "agent.interrupt" });
-            }}
-            externalDraft={voiceDraft}
-            mic={{ listening, disabled: !stt.supported, onDown: micStart, onUp: micStop }}
-          />
-          {toast && (
-            <p className="toast" role="status" data-testid="voice-toast">
-              {toast.msg}
-            </p>
-          )}
-          <ChangesCard files={diffs} onClose={clearDiffs} />
-          {errors.length > 0 && (
-            <ul className="errors" aria-live="assertive">
-              {errors.map((e, i) => (
-                <li key={i}>{humanError(e.split(":")[0] ?? "", e, locale)}</li>
+      {mode === "chat" ? (
+        <ChatMode
+          pose={snap.pose}
+          variant={snap.variant}
+          mood={snap.mood}
+          level={level}
+          theme={effectiveTheme}
+          locale={locale}
+          avatarSize={avatarSize}
+          listening={listening}
+          interim={interim}
+          sttSupported={stt.supported}
+          micDown={micStart}
+          micUp={micStop}
+          onStopBibo={() => {
+            engine?.cancel();
+            send({ type: "agent.interrupt" });
+          }}
+          sessionTitle={sessionTitle}
+          agentLabel={agentLabel}
+          chatDisabled={offline || !info.directory}
+          busy={busy}
+          onSend={(text, delivery) => {
+            engine?.cancel(); // antrean usang dibuang saat prompt baru
+            rendererRef.current?.react("nod");
+            pushUser(text);
+            send({ type: "user.message", text, source: "chat", locale: "id-ID", delivery });
+          }}
+          onStop={() => {
+            engine?.cancel(); // interrupt menghentikan suara seketika
+            send({ type: "agent.interrupt" });
+          }}
+          externalDraft={voiceDraft}
+          docked={
+            <>
+              {agent.pendingPermissions.map((p) => (
+                <ApprovalCard key={p.requestID} perm={p} variant="dock" directory={info.directory} onReply={replyPerm} />
               ))}
-            </ul>
-          )}
-          <span className="chat-count" data-testid="chat-count">
-            {chat.length}
-          </span>
-        </div>
-        )}
-      </main>
+              {agent.pendingForms.map((f) => (
+                <FormCard
+                  key={f.formID}
+                  form={f}
+                  variant="dock"
+                  onReply={(formID, answer) => send({ type: "form.reply", formID, answer })}
+                  onCancel={(formID) => send({ type: "form.cancel", formID })}
+                />
+              ))}
+            </>
+          }
+          changes={diffs}
+          onCloseChanges={clearDiffs}
+          errors={errors.map((e) => humanError(e.split(":")[0] ?? "", e, locale))}
+          toast={toast}
+          chatCount={chat.length}
+        />
+      ) : (
+        <TalkMode
+          pose={snap.pose}
+          variant={snap.variant}
+          mood={snap.mood}
+          level={level}
+          theme={effectiveTheme}
+          locale={locale}
+          bubble={bubble}
+          ttsActive={ttsActive}
+          listening={listening}
+          interim={interim}
+          sttSupported={stt.supported}
+          micDown={micStart}
+          micUp={micStop}
+          permPopup={
+            <>
+              {visiblePerms.map((p) => (
+                <ApprovalCard
+                  key={p.requestID}
+                  perm={p}
+                  variant="popup"
+                  directory={info.directory}
+                  onReply={replyPerm}
+                  onMinimize={() => setMinimizedPerm((m) => ({ ...m, [p.requestID]: true }))}
+                />
+              ))}
+            </>
+          }
+          formPopup={
+            <>
+              {visibleForms.map((f) => (
+                <FormCard
+                  key={f.formID}
+                  form={f}
+                  variant="popup"
+                  onReply={(formID, answer) => send({ type: "form.reply", formID, answer })}
+                  onCancel={(formID) => send({ type: "form.cancel", formID })}
+                  onMinimize={() => setMinimizedForm((m) => ({ ...m, [f.formID]: true }))}
+                />
+              ))}
+            </>
+          }
+          awaitingPerm={awaitingChip}
+          onReopenPerm={() => {
+            setMinimizedPerm({});
+            setMinimizedForm({});
+          }}
+        />
+      )}
     </div>
   );
 }
