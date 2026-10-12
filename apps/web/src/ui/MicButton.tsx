@@ -1,27 +1,36 @@
 import { useRef } from "react";
+import { useT } from "../i18n/index.js";
+import { MicIcon } from "./icons.js";
 
 /**
  * Tombol mic: tahan = PTT (lepas berhenti), klik cepat = toggle.
- * Penentu klik-vs-tahan: <250 ms.
+ * Penentu klik-vs-tahan: <250 ms. Saat `listening`, tombol berdenyut
+ * (level mic real-time tak tersedia dari Web Speech API — denyut
+ * mengikuti status listening).
  */
 export function MicButton({
   listening,
   disabled,
   onDown,
   onUp,
+  size = "big",
 }: {
   listening: boolean;
   disabled: boolean;
   onDown: () => void;
   onUp: () => void;
+  /** big = 72px (chat), huge = 88px (ngobrol), small = 44px (komposer). */
+  size?: "big" | "huge" | "small";
 }): JSX.Element {
+  const t = useT();
   const meta = useRef({ at: 0, was: false });
+  const cls = size === "huge" ? "mic-huge" : size === "small" ? "mic-small" : "mic-big";
   return (
     <button
       type="button"
-      className={listening ? "mic live" : "mic"}
+      className={`${cls}${listening ? " listening" : ""}`}
       disabled={disabled}
-      aria-label="Tahan untuk bicara"
+      aria-label={t.micLabel}
       aria-pressed={listening}
       data-testid="mic-btn"
       onPointerDown={() => {
@@ -39,7 +48,7 @@ export function MicButton({
       }}
       onContextMenu={(e) => e.preventDefault()}
     >
-      🎤
+      <MicIcon size={size === "huge" ? 36 : size === "small" ? 22 : 30} />
     </button>
   );
 }

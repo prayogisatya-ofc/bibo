@@ -1,4 +1,5 @@
 import { useT } from "../i18n/index.js";
+import { XIcon } from "./icons.js";
 import type { DiffFile } from "../state/store.js";
 
 export function ChangesCard({ files, onClose }: { files: DiffFile[]; onClose: () => void }): JSX.Element | null {
@@ -10,8 +11,8 @@ export function ChangesCard({ files, onClose }: { files: DiffFile[]; onClose: ()
         <strong>
           {t.changesTitle} ({files.length})
         </strong>
-        <button type="button" onClick={onClose} aria-label={t.close}>
-          ×
+        <button type="button" className="icon-btn" style={{ width: 32, height: 32 }} onClick={onClose} aria-label={t.close}>
+          <XIcon size={16} />
         </button>
       </div>
       <ul>

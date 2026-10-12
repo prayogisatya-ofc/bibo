@@ -3,11 +3,12 @@ import { BotRenderer, type AvatarRenderer } from "@codepet/avatar";
 import type { AvatarMood, AvatarPose, WorkingVariant } from "@codepet/avatar";
 import { poseLabel } from "../orchestrator/pose.js";
 import { character } from "../character.js";
+import { rendererRef } from "../avatar/rendererRef.js";
 
 /**
- * Panggung avatar — SEMENTARA (fase C menulis ulang total).
- * Fase D hanya memastikan ia mount dengan kontrak AvatarRenderer baru
- * (characterName wajib + pose {pose, variant} + setMood).
+ * Panggung avatar — mount BotRenderer dengan kontrak AvatarRenderer baru
+ * (theme, reducedMotion, characterName, getAriaLabel dari i18n).
+ * Instance diekspos lewat rendererRef agar App bisa memanggil react().
  */
 export function AvatarStage({
   pose,
@@ -16,6 +17,7 @@ export function AvatarStage({
   level,
   theme,
   locale,
+  size,
 }: {
   pose: AvatarPose;
   /** Varian Bekerja; undefined untuk pose non-working. */
@@ -25,28 +27,37 @@ export function AvatarStage({
   level: number;
   theme: "light" | "dark";
   locale: "id" | "en";
+  /** Ukuran kotak avatar (px); transisi 350ms di CSS (ganti mode). */
+  size: number;
 }): JSX.Element {
   const boxRef = useRef<HTMLDivElement>(null);
-  const rendererRef = useRef<AvatarRenderer | undefined>(undefined);
-  const caption = poseLabel(pose, variant, locale);
+  const localeRef = useRef(locale);
+  localeRef.current = locale;
 
   useEffect(() => {
     const box = boxRef.current;
     if (!box) return;
-    const r = new BotRenderer();
-    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const r: AvatarRenderer = new BotRenderer();
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
     r.mount(box, {
       theme,
-      reducedMotion: reduced,
+      reducedMotion: mq.matches,
       characterName: character.name,
-      // Sementara: label dari poseLabel; fase C mengganti dengan i18n penuh.
-      getAriaLabel: (p, v) => `${character.name}: ${poseLabel(p, v, locale)}`,
+      getAriaLabel: (p, v) => `${character.name}: ${poseLabel(p, v, localeRef.current)}`,
     });
     rendererRef.current = r;
+    const onMotion = (): void => r.setReducedMotion(mq.matches);
+    mq.addEventListener("change", onMotion);
     return () => {
+      mq.removeEventListener("change", onMotion);
       r.destroy();
-      rendererRef.current = undefined;
+      if (rendererRef.current === r) rendererRef.current = null;
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    rendererRef.current?.setTheme(theme);
   }, [theme]);
 
   useEffect(() => {
@@ -61,18 +72,16 @@ export function AvatarStage({
     rendererRef.current?.setSpeechLevel(level);
   }, [level]);
 
+  const caption = poseLabel(pose, variant, locale);
   return (
-    <section className="avatar-stage" aria-label="Avatar">
+    <div className="avatar-anim" style={{ width: size, height: size }}>
       <div
-        className="avatar-box avatar-live"
+        className="avatar-live avatar-box"
         ref={boxRef}
         role="img"
         aria-label={`${character.name}: ${caption}`}
         data-testid="bibo-svg"
       />
-      <p className="caption" aria-live="polite" data-testid="avatar-caption">
-        {caption}
-      </p>
-    </section>
+    </div>
   );
 }
