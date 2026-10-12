@@ -35,6 +35,11 @@ describe("derivePose prioritas (PRD §8.2, pemetaan CHARACTER.md §11)", () => {
     // speaking OVERLAY: pose dasar tetap working, flag speaking terpisah.
     ["speaking bukan pose (tetap working+typing)", { agent: "working", busyKind: "editing", speaking: true }, { pose: "working", variant: "typing" }],
     ["speaking bukan pose (tetap idle)", { speaking: true }, { pose: "idle" }],
+    ["speaking + asking → tetap asking", { agent: "awaiting", speaking: true }, { pose: "asking" }],
+    ["speaking + offline → tetap offline", { link: "offline", speaking: true }, { pose: "offline" }],
+    ["speaking + confused → tetap confused", { agent: "error", speaking: true }, { pose: "confused" }],
+    ["speaking + listening → tetap listening", { mic: "listening", speaking: true }, { pose: "listening" }],
+    ["speaking + thinking → tetap thinking", { agent: "thinking", speaking: true }, { pose: "thinking" }],
   ];
   for (const [name, patch, want] of cases) {
     it(name, () => {

@@ -23,6 +23,15 @@ describe("ApprovalCard (FR-040..042)", () => {
     expect(screen.getByTestId("perm-once")).toBeTruthy();
     expect(screen.getByTestId("perm-always")).toBeTruthy();
   });
+  it("low: petunjuk suara ada (dock + popup), badge rendah", () => {
+    render(<ApprovalCard perm={{ ...perm, risk: "low", voiceAllowed: true }} onReply={() => {}} variant="dock" directory="/tmp/x" />);
+    expect(screen.getByTestId("risk-badge").textContent).toContain("rendah");
+    expect(screen.getByText(/ucapkan.*ya.*tolak/i)).toBeTruthy();
+    cleanup();
+    render(<ApprovalCard perm={{ ...perm, risk: "low", voiceAllowed: true }} onReply={() => {}} variant="popup" directory="/tmp/x" />);
+    expect(screen.getByTestId("perm-voice-hint")).toBeTruthy();
+    expect(screen.getByTestId("perm-always")).toBeTruthy(); // low boleh selalu-izinkan
+  });
   it("high: tanpa always, butuh ketik OK, petunjuk layar", () => {
     const onReply = vi.fn();
     render(<ApprovalCard perm={{ ...perm, risk: "high", voiceAllowed: false }} onReply={onReply} variant="dock" directory="/tmp/x" />);
