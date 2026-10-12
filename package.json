@@ -1,0 +1,16 @@
+{
+  "name": "codepet",
+  "private": true,
+  "version": "0.1.0-m1",
+  "type": "module",
+  "workspaces": ["packages/*", "apps/*", "tools/*"],
+  "scripts": {
+    "check": "bun run --filter spike check && bun run --filter mock-opencode check && bun run --filter ws-cli check && bun run --filter @codepet/protocol check && bun run --filter @codepet/avatar check && bun run --filter web check && bun run --filter bridge check",
+    "dev": "bun run --filter bridge dev & bun run --filter web dev",
+    "start": "bun run --filter web build && (bun run --filter bridge dev & bun run --filter web preview)",
+    "dev:bridge": "bun run --filter bridge dev",
+    "dev:mock": "bun run --filter mock-opencode dev",
+    "smoke:mock": "bun run --filter bridge smoke:mock",
+    "smoke:real": "bun run --filter ws-cli start -- --target real"
+  }
+}

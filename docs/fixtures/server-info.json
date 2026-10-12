@@ -1,0 +1,15 @@
+{
+  "info": {
+    "version": "2.0.16",
+    "pid": 10983,
+    "urls": [
+      "http://127.0.0.1:49374"
+    ],
+    "paths": {
+      "tmp": "/tmp/opencode"
+    }
+  },
+  "endpoint": {
+    "url": "http://127.0.0.1:49374"
+  }
+}

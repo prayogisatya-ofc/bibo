@@ -1,0 +1,16 @@
+{
+  "name": "mock-opencode",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "bun run ./src/server.ts",
+    "check": "bunx biome check ./src && bunx tsc --noEmit -p tsconfig.json"
+  },
+  "dependencies": {
+    "@opencode/client": "2.0.16"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.5"
+  }
+}

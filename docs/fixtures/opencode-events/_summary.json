@@ -1,0 +1,1015 @@
+{
+  "serverInfo": {
+    "version": "2.0.16",
+    "pid": 10983,
+    "urls": [
+      "http://127.0.0.1:49374"
+    ],
+    "paths": {
+      "tmp": "/tmp/opencode"
+    }
+  },
+  "clientPackage": "2.0.16",
+  "defaultModel": {
+    "location": {
+      "directory": "/home/trytoup"
+    },
+    "data": {
+      "id": "oc/muse-spark-1.3-contributor-free",
+      "modelID": "oc/muse-spark-1.3-contributor-free",
+      "providerID": "9router",
+      "name": "oc/muse-spark-1.3-contributor-free",
+      "package": "@opencode/ai/providers/openai-compatible",
+      "settings": {
+        "apiKey": "<redacted>",
+        "baseURL": "http://127.0.0.1:20128/v1",
+        "provider": "9router"
+      },
+      "capabilities": {
+        "tools": true,
+        "input": [
+          "text",
+          "image"
+        ],
+        "output": [
+          "text"
+        ]
+      },
+      "variants": [
+        {
+          "id": "low",
+          "settings": {
+            "reasoningEffort": "low"
+          }
+        },
+        {
+          "id": "medium",
+          "settings": {
+            "reasoningEffort": "medium"
+          }
+        },
+        {
+          "id": "high",
+          "settings": {
+            "reasoningEffort": "high"
+          }
+        }
+      ],
+      "time": {
+        "released": 0
+      },
+      "cost": [],
+      "status": "active",
+      "enabled": true,
+      "limit": {
+        "context": 200000,
+        "output": 32000
+      }
+    }
+  },
+  "agents": {
+    "location": {
+      "directory": "/home/trytoup"
+    },
+    "data": [
+      {
+        "id": "build",
+        "name": "Build",
+        "request": {
+          "settings": {},
+          "headers": {},
+          "body": {}
+        },
+        "description": "The default agent. Executes tools based on configured permissions.",
+        "mode": "primary",
+        "hidden": false,
+        "permissions": [
+          {
+            "action": "*",
+            "resource": "*",
+            "effect": "allow"
+          },
+          {
+            "action": "external_directory",
+            "resource": "*",
+            "effect": "ask"
+          },
+          {
+            "action": "read",
+            "resource": "*.env",
+            "effect": "ask"
+          },
+          {
+            "action": "read",
+            "resource": "*.env.*",
+            "effect": "ask"
+          },
+          {
+            "action": "read",
+            "resource": "*.env.example",
+            "effect": "allow"
+          },
+          {
+            "action": "external_directory",
+            "resource": "/home/trytoup/.local/share/opencode/shell/*/*",
+            "effect": "allow"
+          },
+          {
+            "action": "external_directory",
+            "resource": "/home/trytoup/.local/share/opencode/tool-output/*",
+            "effect": "allow"
+          },
+          {
+            "action": "external_directory",
+            "resource": "/tmp/opencode/*",
+            "effect": "allow"
+          },
+          {
+            "action": "external_directory",
+            "resource": "/home/trytoup/.config/opencode/*",
+            "effect": "allow"
+          },
+          {
+            "action": "question",
+            "resource": "*",
+            "effect": "allow"
+          }
+        ]
+      },
+      {
+        "id": "general",
+        "name": "General",
+        "request": {
+          "settings": {},
+          "headers": {},
+          "body": {}
+        },
+        "description": "General-purpose agent for researching complex questions and executing multi-step tasks. Use this agent to execute multiple units of work in parallel.",
+        "mode": "subagent",
+        "hidden": false,
+        "permissions": [
+          {
+            "action": "*",
+            "resource": "*",
+            "effect": "allow"
+          },
+          {
+            "action": "external_directory",
+            "resource": "*",
+            "effect": "ask"
+          },
+          {
+            "action": "read",
+            "resource": "*.env",
+            "effect": "ask"
+          },
+          {
+            "action": "read",
+            "resource": "*.env.*",
+            "effect": "ask"
+          },
+          {
+            "action": "read",
+            "resource": "*.env.example",
+            "effect": "allow"
+          },
+          {
+            "action": "external_directory",
+            "resource": "/home/trytoup/.local/share/opencode/shell/*/*",
+            "effect": "allow"
+          },
+          {
+            "action": "external_directory",
+            "resource": "/home/trytoup/.local/share/opencode/tool-output/*",
+            "effect": "allow"
+          },
+          {
+            "action": "external_directory",
+            "resource": "/tmp/opencode/*",
+            "effect": "allow"
+          },
+          {
+            "action": "external_directory",
+            "resource": "/home/trytoup/.config/opencode/*",
+            "effect": "allow"
+          },
+          {
+            "action": "question",
+            "resource": "*",
+            "effect": "deny"
+          },
+          {
+            "action": "subagent",
+            "resource": "*",
+            "effect": "deny"
+          }
+        ]
+      },
+      {
+        "id": "explore",
+        "name": "Explore",
+        "request": {
+          "settings": {},
+          "headers": {},
+          "body": {}
+        },
+        "system": "You are a file search specialist. You excel at thoroughly navigating and exploring codebases.\n\nYour strengths:\n- Rapidly finding files using glob patterns\n- Searching code and text with powerful regex patterns\n- Reading and analyzing file contents\n\nGuidelines:\n- Use Glob for broad file pattern matching\n- Use Grep for searching file contents with regex\n- Use Read when you know the specific file path you need to read\n- Adapt your search approach based on the thoroughness level specified by the caller\n- Return file paths as absolute paths in your final response\n- For clear communication, avoid using emojis\n- Do not create any files, or run bash commands that modify the user's system state in any way\n\nComplete the user's search request efficiently and report your findings clearly.",
+        "description": "Fast agent specialized for exploring codebases. Use this when you need to quickly find files by patterns (eg. \"src/components/**/*.tsx\"), search code for keywords (eg. \"API endpoints\"), or answer questions about the codebase (eg. \"how do API endpoints work?\"). When calling this agent, specify the desired thoroughness level: \"quick\" for basic searches, \"medium\" for moderate exploration, or \"very thorough\" for comprehensive analysis across multiple locations and naming conventions.",
+        "mode": "subagent",
+        "hidden": false,
+        "permissions": [
+          {
+            "action": "*",
+            "resource": "*",
+            "effect": "allow"
+          },
+          {
+            "action": "external_directory",
+            "resource": "*",
+            "effect": "ask"
+          },
+          {
+            "action": "read",
+            "resource": "*.env",
+            "effect": "ask"
+          },
+          {
+            "action": "read",
+            "resource": "*.env.*",
+            "effect": "ask"
+          },
+          {
+            "action": "read",
+            "resource": "*.env.example",
+            "effect": "allow"
+          },
+          {
+            "action": "external_directory",
+            "resource": "/home/trytoup/.local/share/opencode/shell/*/*",
+            "effect": "allow"
+          },
+          {
+            "action": "external_directory",
+            "resource": "/home/trytoup/.local/share/opencode/tool-output/*",
+            "effect": "allow"
+          },
+          {
+            "action": "external_directory",
+            "resource": "/tmp/opencode/*",
+            "effect": "allow"
+          },
+          {
+            "action": "external_directory",
+            "resource": "/home/trytoup/.config/opencode/*",
+            "effect": "allow"
+          },
+          {
+            "action": "*",
+            "resource": "*",
+            "effect": "deny"
+          },
+          {
+            "action": "grep",
+            "resource": "*",
+            "effect": "allow"
+          },
+          {
+            "action": "glob",
+            "resource": "*",
+            "effect": "allow"
+          },
+          {
+            "action": "webfetch",
+            "resource": "*",
+            "effect": "allow"
+          },
+          {
+            "action": "websearch",
+            "resource": "*",
+            "effect": "allow"
+          },
+          {
+            "action": "read",
+            "resource": "*",
+            "effect": "allow"
+          },
+          {
+            "action": "read",
+            "resource": "*.env",
+            "effect": "ask"
+          },
+          {
+            "action": "read",
+            "resource": "*.env.*",
+            "effect": "ask"
+          },
+          {
+            "action": "read",
+            "resource": "*.env.example",
+            "effect": "allow"
+          },
+          {
+            "action": "subagent",
+            "resource": "*",
+            "effect": "deny"
+          },
+          {
+            "action": "external_directory",
+            "resource": "*",
+            "effect": "ask"
+          },
+          {
+            "action": "external_directory",
+            "resource": "/home/trytoup/.local/share/opencode/shell/*/*",
+            "effect": "allow"
+          },
+          {
+            "action": "external_directory",
+            "resource": "/home/trytoup/.local/share/opencode/tool-output/*",
+            "effect": "allow"
+          },
+          {
+            "action": "external_directory",
+            "resource": "/tmp/opencode/*",
+            "effect": "allow"
+          },
+          {
+            "action": "external_directory",
+            "resource": "/home/trytoup/.config/opencode/*",
+            "effect": "allow"
+          }
+        ]
+      },
+      {
+        "id": "compaction",
+        "name": "Compaction",
+        "request": {
+          "settings": {},
+          "headers": {},
+          "body": {}
+        },
+        "mode": "primary",
+        "hidden": true,
+        "permissions": [
+          {
+            "action": "*",
+            "resource": "*",
+            "effect": "allow"
+          },
+          {
+            "action": "external_directory",
+            "resource": "*",
+            "effect": "ask"
+          },
+          {
+            "action": "read",
+            "resource": "*.env",
+            "effect": "ask"
+          },
+          {
+            "action": "read",
+            "resource": "*.env.*",
+            "effect": "ask"
+          },
+          {
+            "action": "read",
+            "resource": "*.env.example",
+            "effect": "allow"
+          },
+          {
+            "action": "external_directory",
+            "resource": "/home/trytoup/.local/share/opencode/shell/*/*",
+            "effect": "allow"
+          },
+          {
+            "action": "external_directory",
+            "resource": "/home/trytoup/.local/share/opencode/tool-output/*",
+            "effect": "allow"
+          },
+          {
+            "action": "external_directory",
+            "resource": "/tmp/opencode/*",
+            "effect": "allow"
+          },
+          {
+            "action": "external_directory",
+            "resource": "/home/trytoup/.config/opencode/*",
+            "effect": "allow"
+          }
+        ]
+      },
+      {
+        "id": "title",
+        "name": "Title",
+        "request": {
+          "settings": {},
+          "headers": {},
+          "body": {}
+        },
+        "system": "You are a title generator. You output ONLY a thread title. Nothing else.\n\n<task>\nGenerate a brief title that would help the user find this conversation later.\n\nFollow all rules in <rules>\nUse the <examples> so you know what a good title looks like.\nYour output must be:\n- A single line\n- <=50 characters\n- No explanations\n</task>\n\n<rules>\n- you MUST use the same language as the user message you are summarizing\n- Title must be grammatically correct and read naturally - no word salad\n- Never include tool names in the title (e.g. \"read tool\", \"bash tool\", \"edit tool\")\n- Focus on the main topic or question the user needs to retrieve\n- Vary your phrasing - avoid repetitive patterns like always starting with \"Analyzing\"\n- When a file is mentioned, focus on WHAT the user wants to do WITH the file, not just that they shared it\n- Keep exact: technical terms, numbers, filenames, HTTP codes\n- Remove: the, this, my, a, an\n- Never assume tech stack\n- Never use tools\n- NEVER respond to questions, just generate a title for the conversation\n- The title should NEVER include \"summarizing\" or \"generating\" when generating a title\n- DO NOT SAY YOU CANNOT GENERATE A TITLE OR COMPLAIN ABOUT THE INPUT\n- Always output something meaningful, even if the input is minimal.\n- If the user message is short or conversational (e.g. \"hello\", \"lol\", \"what's up\", \"hey\"):\n  -> create a title that reflects the user's tone or intent (such as Greeting, Quick check-in, Light chat, Intro message, etc.)\n</rules>\n\n<examples>\n\"debug 500 errors in production\" -> Debugging production 500 errors\n\"refactor user service\" -> Refactoring user service\n\"why is app.js failing\" -> app.js failure investigation\n\"implement rate limiting\" -> Rate limiting implementation\n\"how do I connect postgres to my API\" -> Postgres API connection\n\"best practices for React hooks\" -> React hooks best practices\n\"@src/credential.ts can you add refresh token support\" -> Credential refresh token support\n\"@utils/parser.ts this is broken\" -> Parser bug fix\n\"look at @config.json\" -> Config review\n\"@App.tsx add dark mode toggle\" -> Dark mode toggle in App\n</examples>",
+        "mode": "primary",
+        "hidden": true,
+        "permissions": [
+          {
+            "action": "*",
+            "resource": "*",
+            "effect": "allow"
+          },
+          {
+            "action": "external_directory",
+            "resource": "*",
+            "effect": "ask"
+          },
+          {
+            "action": "read",
+            "resource": "*.env",
+            "effect": "ask"
+          },
+          {
+            "action": "read",
+            "resource": "*.env.*",
+            "effect": "ask"
+          },
+          {
+            "action": "read",
+            "resource": "*.env.example",
+            "effect": "allow"
+          },
+          {
+            "action": "external_directory",
+            "resource": "/home/trytoup/.local/share/opencode/shell/*/*",
+            "effect": "allow"
+          },
+          {
+            "action": "external_directory",
+            "resource": "/home/trytoup/.local/share/opencode/tool-output/*",
+            "effect": "allow"
+          },
+          {
+            "action": "external_directory",
+            "resource": "/tmp/opencode/*",
+            "effect": "allow"
+          },
+          {
+            "action": "external_directory",
+            "resource": "/home/trytoup/.config/opencode/*",
+            "effect": "allow"
+          },
+          {
+            "action": "*",
+            "resource": "*",
+            "effect": "deny"
+          }
+        ]
+      },
+      {
+        "id": "summary",
+        "name": "Summary",
+        "request": {
+          "settings": {},
+          "headers": {},
+          "body": {}
+        },
+        "system": "Summarize what was done in this conversation. Write like a pull request description.\n\nRules:\n- 2-3 sentences max\n- Describe the changes made, not the process\n- Do not mention running tests, builds, or other validation steps\n- Do not explain what the user asked for\n- Write in first person (I added..., I fixed...)\n- Never ask questions or add new questions\n- If the conversation ends with an unanswered question to the user, preserve that exact question\n- If the conversation ends with an imperative statement or request to the user (e.g. \"Now please run the command and paste the console output\"), always include that exact request in the summary",
+        "mode": "primary",
+        "hidden": true,
+        "permissions": [
+          {
+            "action": "*",
+            "resource": "*",
+            "effect": "allow"
+          },
+          {
+            "action": "external_directory",
+            "resource": "*",
+            "effect": "ask"
+          },
+          {
+            "action": "read",
+            "resource": "*.env",
+            "effect": "ask"
+          },
+          {
+            "action": "read",
+            "resource": "*.env.*",
+            "effect": "ask"
+          },
+          {
+            "action": "read",
+            "resource": "*.env.example",
+            "effect": "allow"
+          },
+          {
+            "action": "external_directory",
+            "resource": "/home/trytoup/.local/share/opencode/shell/*/*",
+            "effect": "allow"
+          },
+          {
+            "action": "external_directory",
+            "resource": "/home/trytoup/.local/share/opencode/tool-output/*",
+            "effect": "allow"
+          },
+          {
+            "action": "external_directory",
+            "resource": "/tmp/opencode/*",
+            "effect": "allow"
+          },
+          {
+            "action": "external_directory",
+            "resource": "/home/trytoup/.config/opencode/*",
+            "effect": "allow"
+          },
+          {
+            "action": "*",
+            "resource": "*",
+            "effect": "deny"
+          }
+        ]
+      },
+      {
+        "id": "plan",
+        "name": "Plan",
+        "request": {
+          "settings": {},
+          "headers": {},
+          "body": {}
+        },
+        "description": "Read-only agent for exploring the codebase and planning work before implementation.",
+        "mode": "primary",
+        "hidden": false,
+        "permissions": [
+          {
+            "action": "*",
+            "resource": "*",
+            "effect": "allow"
+          },
+          {
+            "action": "external_directory",
+            "resource": "*",
+            "effect": "ask"
+          },
+          {
+            "action": "read",
+            "resource": "*.env",
+            "effect": "ask"
+          },
+          {
+            "action": "read",
+            "resource": "*.env.*",
+            "effect": "ask"
+          },
+          {
+            "action": "read",
+            "resource": "*.env.example",
+            "effect": "allow"
+          },
+          {
+            "action": "external_directory",
+            "resource": "/home/trytoup/.local/share/opencode/shell/*/*",
+            "effect": "allow"
+          },
+          {
+            "action": "external_directory",
+            "resource": "/home/trytoup/.local/share/opencode/tool-output/*",
+            "effect": "allow"
+          },
+          {
+            "action": "external_directory",
+            "resource": "/tmp/opencode/*",
+            "effect": "allow"
+          },
+          {
+            "action": "external_directory",
+            "resource": "/home/trytoup/.config/opencode/*",
+            "effect": "allow"
+          },
+          {
+            "action": "question",
+            "resource": "*",
+            "effect": "allow"
+          },
+          {
+            "action": "edit",
+            "resource": "*",
+            "effect": "deny"
+          },
+          {
+            "action": "edit",
+            "resource": "/home/trytoup/.opencode/plan/*",
+            "effect": "allow"
+          },
+          {
+            "action": "external_directory",
+            "resource": "/home/trytoup/.opencode/plan/*",
+            "effect": "allow"
+          }
+        ]
+      },
+      {
+        "id": "explorer",
+        "name": "explorer",
+        "model": {
+          "id": "oc/muse-spark-1.3-contributor-free",
+          "providerID": "9router"
+        },
+        "request": {
+          "settings": {},
+          "headers": {},
+          "body": {}
+        },
+        "description": "Fast explorer subagent for codebase exploration",
+        "mode": "subagent",
+        "hidden": false,
+        "permissions": [
+          {
+            "action": "*",
+            "resource": "*",
+            "effect": "allow"
+          },
+          {
+            "action": "external_directory",
+            "resource": "*",
+            "effect": "ask"
+          },
+          {
+            "action": "read",
+            "resource": "*.env",
+            "effect": "ask"
+          },
+          {
+            "action": "read",
+            "resource": "*.env.*",
+            "effect": "ask"
+          },
+          {
+            "action": "read",
+            "resource": "*.env.example",
+            "effect": "allow"
+          },
+          {
+            "action": "external_directory",
+            "resource": "/home/trytoup/.local/share/opencode/shell/*/*",
+            "effect": "allow"
+          },
+          {
+            "action": "external_directory",
+            "resource": "/home/trytoup/.local/share/opencode/tool-output/*",
+            "effect": "allow"
+          },
+          {
+            "action": "external_directory",
+            "resource": "/tmp/opencode/*",
+            "effect": "allow"
+          },
+          {
+            "action": "external_directory",
+            "resource": "/home/trytoup/.config/opencode/*",
+            "effect": "allow"
+          }
+        ]
+      }
+    ]
+  },
+  "scenarios": {
+    "01-simple-question": {
+      "sessionID": "ses_ed4bf95b1ffeZiIbGZvlMRmzrz",
+      "workdir": "/tmp/spike-work/01-simple-question",
+      "eventCounts": {
+        "server.connected": 1,
+        "session.created": 1,
+        "project.updated": 1,
+        "session.inbox.enqueued": 2,
+        "session.execution.started": 1,
+        "session.instructions.updated": 1,
+        "session.inbox.delivered": 1,
+        "session.step.streamed": 4,
+        "session.step.ended": 4,
+        "session.usage.updated": 4,
+        "session.step.started": 3,
+        "session.text.started": 2,
+        "session.text.delta": 2,
+        "session.text.ended": 2,
+        "session.execution.succeeded": 1,
+        "session.reasoning.started": 2,
+        "session.reasoning.ended": 2,
+        "session.tool.input.started": 2,
+        "session.tool.input.ended": 2,
+        "session.tool.called": 2,
+        "shell.created": 2,
+        "session.tool.progress": 2,
+        "shell.exited": 2,
+        "shell.deleted": 2,
+        "session.tool.success": 2
+      },
+      "notes": [
+        "2026-10-11T13:56:44.242Z session created: ses_ed4bf95b1ffeZiIbGZvlMRmzrz",
+        "2026-10-11T13:56:44.250Z prompt enqueued: {\"id\":\"msg_12b406a56001hfsAUyYD0y4uwR\",\"sessionID\":\"ses_ed4bf95b1ffeZiIbGZvlMRmzrz\",\"time\":{\"created\":1791727004247},\"type\":\"user\",\"payload\":{\"text\":\"Reply with exactly this text and nothing else, no tools: SPIKE-OK\"},\"delivery\":\"steer\"}",
+        "2026-10-11T13:56:47.800Z wait() returned after 3550ms",
+        "2026-10-11T13:56:55.336Z generate error: ServiceUnavailableError: [429]: {\"type\":\"error\",\"error\":{\"type\":\"FreeUsageLimitError\",\"message\":\"Rate limit exceeded. Please try again later.\"}}",
+        "2026-10-11T13:56:55.382Z instruction entry put+list ok (1 entries)",
+        "2026-10-11T13:56:55.413Z inbox list: []"
+      ],
+      "verification": {
+        "generateError": "ServiceUnavailableError: [429]: {\"type\":\"error\",\"error\":{\"type\":\"FreeUsageLimitError\",\"message\":\"Rate limit exceeded. Please try again later.\"}}",
+        "instructionEntries": [
+          {
+            "key": "<redacted>",
+            "value": "Akhiri jawaban dengan <speak>ringkasan 1 kalimat</speak>."
+          }
+        ],
+        "inboxList": []
+      }
+    },
+    "02-edit-file": {
+      "sessionID": "ses_ed4bf6a07ffeEhcWCbfryBGNaa",
+      "workdir": "/tmp/spike-work/02-edit-file",
+      "eventCounts": {
+        "session.created": 1,
+        "project.updated": 2,
+        "session.step.started": 18,
+        "session.retry.scheduled": 6,
+        "integration.updated": 2,
+        "provider.updated": 5,
+        "model.updated": 5,
+        "mcp.status.changed": 2,
+        "agent.updated": 1,
+        "command.updated": 2,
+        "skill.updated": 1,
+        "websearch.updated": 1,
+        "reference.updated": 1,
+        "plugin.updated": 1,
+        "session.inbox.enqueued": 1,
+        "session.execution.started": 1,
+        "session.instructions.updated": 2,
+        "session.inbox.delivered": 1,
+        "mcp.resources.changed": 1,
+        "session.reasoning.started": 4,
+        "session.reasoning.ended": 4,
+        "session.tool.input.started": 9,
+        "session.tool.input.ended": 9,
+        "session.tool.called": 9,
+        "shell.created": 4,
+        "session.tool.progress": 8,
+        "shell.exited": 4,
+        "shell.deleted": 4,
+        "session.tool.success": 9,
+        "session.step.streamed": 12,
+        "session.step.ended": 12,
+        "session.usage.updated": 12,
+        "session.text.started": 8,
+        "session.text.delta": 14,
+        "session.text.ended": 8,
+        "session.execution.succeeded": 3
+      },
+      "notes": [
+        "2026-10-11T13:56:55.421Z session created: ses_ed4bf6a07ffeEhcWCbfryBGNaa",
+        "2026-10-11T13:56:56.709Z prompt enqueued: {\"id\":\"msg_12b409621001SnVcjMPr3T3eXN\",\"sessionID\":\"ses_ed4bf6a07ffeEhcWCbfryBGNaa\",\"time\":{\"created\":1791727016707},\"type\":\"user\",\"payload\":{\"text\":\"In the current directory there is a file named spike-note.txt. Append exactly one new line with the text 'spike edit ok' to it using your edit tool, t",
+        "2026-10-11T13:57:55.692Z wait() returned after 58983ms",
+        "2026-10-11T13:58:05.654Z generate ok: {\"text\":\"File berhasil ditambah satu baris baru sesuai permintaan.\"}"
+      ],
+      "verification": {
+        "generate": {
+          "text": "File berhasil ditambah satu baris baru sesuai permintaan."
+        }
+      }
+    },
+    "03-bash-permission": {
+      "sessionID": "ses_ed4be57a7ffedykyopnF8nPW5x",
+      "workdir": "/tmp/spike-work/03-bash-permission",
+      "eventCounts": {
+        "session.created": 1,
+        "project.updated": 1,
+        "integration.updated": 2,
+        "provider.updated": 2,
+        "model.updated": 2,
+        "mcp.status.changed": 2,
+        "agent.updated": 1,
+        "command.updated": 2,
+        "skill.updated": 1,
+        "websearch.updated": 1,
+        "reference.updated": 1,
+        "plugin.updated": 1,
+        "session.inbox.enqueued": 1,
+        "session.execution.started": 1,
+        "session.instructions.updated": 1,
+        "session.inbox.delivered": 1,
+        "mcp.resources.changed": 1,
+        "session.step.started": 1,
+        "session.text.started": 1,
+        "session.tool.input.started": 1,
+        "session.text.delta": 1,
+        "session.tool.input.ended": 1,
+        "session.tool.called": 1,
+        "session.text.ended": 1,
+        "session.step.streamed": 1,
+        "permission.asked": 1,
+        "permission.replied": 1,
+        "session.tool.failed": 1,
+        "session.step.failed": 1,
+        "session.usage.updated": 1,
+        "session.execution.interrupted": 1
+      },
+      "notes": [
+        "2026-10-11T13:58:05.662Z session created: ses_ed4be57a7ffedykyopnF8nPW5x",
+        "2026-10-11T13:58:06.578Z prompt enqueued: {\"id\":\"msg_12b41a88e001pu4O2eLNG8yaCO\",\"sessionID\":\"ses_ed4be57a7ffedykyopnF8nPW5x\",\"time\":{\"created\":1791727086576},\"type\":\"user\",\"payload\":{\"text\":\"Run the shell command `echo spike-permission-test` using your bash tool, then reply DONE.\"},\"delivery\":\"steer\"}",
+        "2026-10-11T13:58:09.585Z found 1 pending permission(s), replying reject to unblock",
+        "2026-10-11T13:58:09.606Z wait() returned after 1ms"
+      ],
+      "verification": {
+        "permissionRequestSample": {
+          "id": "per_12b41b542001QMyEDzqPkpXKgF",
+          "sessionID": "ses_ed4be57a7ffedykyopnF8nPW5x",
+          "action": "shell",
+          "resources": [
+            "echo spike-permission-test"
+          ],
+          "save": [
+            "echo *"
+          ],
+          "source": {
+            "type": "tool",
+            "messageID": "msg_12b41ac03001Cb7hh0XyqLq5tj",
+            "id": "call_01a12b41b16c7031975ab51f53ae89fe"
+          }
+        }
+      }
+    },
+    "04-agent-question-form": {
+      "sessionID": "ses_ed4be33eeffev1f7JJF0P9hFTe",
+      "workdir": "/tmp/spike-work/04-agent-question-form",
+      "eventCounts": {
+        "session.created": 1,
+        "project.updated": 2,
+        "integration.updated": 2,
+        "provider.updated": 2,
+        "model.updated": 2,
+        "mcp.status.changed": 2,
+        "agent.updated": 1,
+        "command.updated": 2,
+        "skill.updated": 1,
+        "websearch.updated": 1,
+        "reference.updated": 1,
+        "plugin.updated": 1,
+        "session.inbox.enqueued": 2,
+        "session.execution.started": 2,
+        "session.instructions.updated": 1,
+        "session.inbox.delivered": 2,
+        "mcp.resources.changed": 1,
+        "session.step.started": 12,
+        "session.text.started": 4,
+        "session.tool.input.started": 12,
+        "session.tool.input.ended": 12,
+        "session.tool.called": 12,
+        "session.text.delta": 4,
+        "session.text.ended": 4,
+        "session.step.streamed": 12,
+        "form.created": 1,
+        "session.reasoning.started": 10,
+        "session.reasoning.ended": 10,
+        "shell.created": 10,
+        "session.tool.progress": 10,
+        "shell.exited": 9,
+        "shell.deleted": 9,
+        "session.tool.success": 10,
+        "session.step.ended": 10,
+        "session.usage.updated": 10,
+        "session.reasoning.delta": 1
+      },
+      "notes": [
+        "2026-10-11T13:58:14.809Z session created: ses_ed4be33eeffev1f7JJF0P9hFTe",
+        "2026-10-11T13:58:15.902Z prompt enqueued: {\"id\":\"msg_12b41cc37001agsGP18jduGKmy\",\"sessionID\":\"ses_ed4be33eeffev1f7JJF0P9hFTe\",\"time\":{\"created\":1791727095900},\"type\":\"user\",\"payload\":{\"text\":\"Use your question tool (if you have one) to ask me one question: which color do I prefer, red or blue? Wait for my answer before continuing.\"},\"delive",
+        "2026-10-11T13:58:21.918Z found 1 pending form(s)",
+        "2026-10-11T14:00:23.924Z TIMEOUT waiting idle after 120000ms"
+      ],
+      "verification": {
+        "formSample": {
+          "id": "frm_12b41de4a001B4jarCv0Uqsu1o",
+          "sessionID": "ses_ed4be33eeffev1f7JJF0P9hFTe",
+          "title": "Questions",
+          "metadata": {
+            "kind": "question",
+            "tool": {
+              "messageID": "msg_12b41d06f001qBFpW5NlvORZuM",
+              "id": "call_01a12b41db66701f82f17246bb010d3a"
+            }
+          },
+          "fields": [
+            {
+              "key": "<redacted>",
+              "title": "Color Preference",
+              "description": "Which color do you prefer, red or blue?",
+              "type": "string",
+              "options": [
+                {
+                  "value": "Red",
+                  "label": "Red",
+                  "description": "Prefer red color"
+                },
+                {
+                  "value": "Blue",
+                  "label": "Blue",
+                  "description": "Prefer blue color"
+                }
+              ],
+              "custom": true
+            }
+          ]
+        }
+      }
+    },
+    "05-tool-failure": {
+      "sessionID": "ses_ed4b94b2bffejrc58SRV36nUw6",
+      "workdir": "/tmp/spike-work/05-tool-failure",
+      "eventCounts": {
+        "server.connected": 1,
+        "session.created": 1,
+        "session.inbox.enqueued": 1,
+        "session.step.streamed": 8,
+        "session.step.ended": 7,
+        "session.usage.updated": 7,
+        "session.execution.started": 1,
+        "session.instructions.updated": 1,
+        "session.inbox.delivered": 1,
+        "session.step.started": 9,
+        "session.reasoning.started": 5,
+        "session.reasoning.ended": 5,
+        "session.tool.input.started": 6,
+        "session.tool.input.ended": 6,
+        "session.tool.called": 6,
+        "shell.created": 5,
+        "session.tool.progress": 5,
+        "shell.exited": 4,
+        "shell.deleted": 4,
+        "session.tool.success": 4,
+        "session.text.started": 2,
+        "session.text.delta": 3,
+        "session.text.ended": 2,
+        "session.tool.failed": 1,
+        "session.retry.scheduled": 2,
+        "project.updated": 1,
+        "session.execution.succeeded": 1
+      },
+      "notes": [
+        "2026-10-11T14:03:36.536Z session created: ses_ed4b94b2bffejrc58SRV36nUw6",
+        "2026-10-11T14:03:36.543Z prompt enqueued: {\"id\":\"msg_12b46b4da001c7lp7aRSgZEn31\",\"sessionID\":\"ses_ed4b94b2bffejrc58SRV36nUw6\",\"time\":{\"created\":1791727416539},\"type\":\"user\",\"payload\":{\"text\":\"Read the file named does-not-exist-xyz-123.txt in the current directory and tell me its contents. Do not create it, just report what happens.\"},\"deliv",
+        "2026-10-11T14:04:00.204Z wait() returned after 23661ms"
+      ],
+      "verification": {}
+    },
+    "06-interrupt": {
+      "sessionID": "ses_ed4ba2795ffefBOfPit05vxiDS",
+      "workdir": "/tmp/spike-work/06-interrupt",
+      "eventCounts": {
+        "session.created": 1,
+        "project.updated": 2,
+        "integration.updated": 2,
+        "provider.updated": 1,
+        "model.updated": 1,
+        "mcp.status.changed": 2,
+        "agent.updated": 1,
+        "command.updated": 2,
+        "skill.updated": 1,
+        "websearch.updated": 1,
+        "reference.updated": 1,
+        "plugin.updated": 1,
+        "session.inbox.enqueued": 2,
+        "session.execution.started": 2,
+        "session.instructions.updated": 1,
+        "session.inbox.delivered": 2,
+        "mcp.resources.changed": 1,
+        "session.step.started": 3,
+        "session.text.started": 1,
+        "session.reasoning.started": 2,
+        "session.reasoning.ended": 2,
+        "session.tool.input.started": 2,
+        "session.text.delta": 13,
+        "session.tool.input.ended": 2,
+        "session.tool.called": 2,
+        "shell.created": 2,
+        "session.tool.progress": 2,
+        "shell.exited": 2,
+        "shell.deleted": 2,
+        "session.tool.success": 2,
+        "session.step.streamed": 3,
+        "session.step.ended": 2,
+        "session.usage.updated": 2,
+        "session.text.ended": 1,
+        "session.step.failed": 1,
+        "session.execution.interrupted": 1
+      },
+      "notes": [
+        "2026-10-11T14:02:40.118Z session created: ses_ed4ba2795ffefBOfPit05vxiDS",
+        "2026-10-11T14:02:41.254Z prompt enqueued: {\"id\":\"msg_12b45d8ae001FNJo5twa5ZFr5R\",\"sessionID\":\"ses_ed4ba2795ffefBOfPit05vxiDS\",\"time\":{\"created\":1791727361252},\"type\":\"user\",\"payload\":{\"text\":\"Write a very long story, at least 2000 words, about a small white robot. Keep writing without stopping until I tell you to stop. Do not use tools, jus",
+        "2026-10-11T14:02:49.261Z interrupt result: {\"interrupted\":true}",
+        "2026-10-11T14:02:49.303Z wait() returned after 42ms"
+      ],
+      "verification": {
+        "interruptResult": {
+          "interrupted": true
+        }
+      }
+    }
+  },
+  "streamEndsDuringRun": 0,
+  "streamEndedWhileQuiet": false
+}

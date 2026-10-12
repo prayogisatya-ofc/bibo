@@ -1,0 +1,24 @@
+{
+  "name": "bridge",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "bun run ./src/server.ts",
+    "check": "bunx biome check ./src && bunx tsc --noEmit -p tsconfig.json && bunx vitest run",
+    "smoke:mock": "bun run --filter ws-cli start -- --target mock",
+    "smoke:real": "bun run --filter ws-cli start -- --target real"
+  },
+  "dependencies": {
+    "@codepet/protocol": "*",
+    "@opencode/client": "2.0.16",
+    "hono": "^4.7.0",
+    "ws": "^8.18.0",
+    "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.5",
+    "@types/ws": "^8.5.13",
+    "vitest": "^3.1.0"
+  }
+}

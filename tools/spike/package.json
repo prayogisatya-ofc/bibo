@@ -1,0 +1,17 @@
+{
+  "name": "spike",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "capture": "bun run ./capture-events.ts",
+    "trials": "bun run ./speak-trials.ts",
+    "check": "bunx biome check ."
+  },
+  "dependencies": {
+    "@opencode/client": "2.0.16"
+  },
+  "devDependencies": {
+    "@types/node": "^25.0.0"
+  }
+}
