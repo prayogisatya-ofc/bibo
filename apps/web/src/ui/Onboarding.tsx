@@ -56,20 +56,24 @@ export function Onboarding({
     : [];
   return (
     <div className="modal" role="dialog" aria-label={t.onboardTitle}>
-      <div className="modal-box">
+      <div className="modal-box onboard-box">
         <div className="row picker-head">
           <h2>{t.onboardTitle}</h2>
           <IconButton label={t.dialogClose} onClick={onClose} data-testid="onboard-close">
             <XIcon size={16} />
           </IconButton>
         </div>
-        <p>{t.onboardHint}</p>
-        <div className="row">
-          <Button variant="secondary" onClick={() => setPickerOpen(true)} data-testid="dir-browse" title={t.dirBrowse}>
-            <FolderIcon size={16} /> {t.dirBrowse}
-          </Button>
-          {dirN && <span className="muted" data-testid="dir-chosen">{dirN}</span>}
-        </div>
+        <p className="onboard-hint">{t.onboardHint}</p>
+
+        <section className="onboard-section" aria-label={t.onboardTitle}>
+          <div className="row onboard-folder-row">
+            <Button variant="secondary" onClick={() => setPickerOpen(true)} data-testid="dir-browse" title={t.dirBrowse}>
+              <FolderIcon size={16} /> {t.dirBrowse}
+            </Button>
+            {dirN && <span className="onboard-dir" data-testid="dir-chosen" title={dirN}>{dirN}</span>}
+          </div>
+        </section>
+
         {pickerOpen && (
           <DirPicker
             bridgeHttp={bridgeHttp}
@@ -81,52 +85,66 @@ export function Onboarding({
             onClose={() => setPickerOpen(false)}
           />
         )}
-        <h3>{t.sessionInFolder}</h3>
-        {!dirN ? (
-          <p className="muted" data-testid="sess-hint">{t.sessionPickFolderFirst}</p>
-        ) : (
-          <>
-            <Button
-              variant="primary"
-              disabled={!dirN}
-              onClick={() => onPick(dirN)}
-              data-testid="sess-new"
-            >
-              <PlusIcon size={14} /> {t.sessionNew}
-            </Button>
-            {folderSessions.length > 0 ? (
-              <ul className="recent">
-                {folderSessions.map((sn) => (
-                  <li key={sn.sessionID}>
-                    <button
-                      type="button"
-                      onClick={() => onPick(dirN, sn.sessionID)}
-                      data-testid={`sess-${sn.sessionID}`}
-                      title={t.sessionContinue}
-                    >
-                      {sn.title || sn.sessionID}
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p className="muted" data-testid="sess-empty">{t.sessionNoneInFolder}</p>
-            )}
-          </>
-        )}
+
+        <section className="onboard-section" aria-label={t.sessionInFolder}>
+          <h3 className="onboard-h3">{t.sessionInFolder}</h3>
+          {!dirN ? (
+            <p className="muted" data-testid="sess-hint">{t.sessionPickFolderFirst}</p>
+          ) : (
+            <>
+              <Button
+                variant="primary"
+                disabled={!dirN}
+                onClick={() => onPick(dirN)}
+                data-testid="sess-new"
+                className="onboard-new-btn"
+              >
+                <PlusIcon size={14} /> {t.sessionNew}
+              </Button>
+              {folderSessions.length > 0 ? (
+                <ul className="onboard-list">
+                  {folderSessions.map((sn) => (
+                    <li key={sn.sessionID}>
+                      <button
+                        type="button"
+                        className="onboard-item"
+                        onClick={() => onPick(dirN, sn.sessionID)}
+                        data-testid={`sess-${sn.sessionID}`}
+                        title={t.sessionContinue}
+                      >
+                        <span className="onboard-item-title">{sn.title || sn.sessionID}</span>
+                        <span className="onboard-item-sub">{t.sessionContinue}</span>
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="muted" data-testid="sess-empty">{t.sessionNoneInFolder}</p>
+              )}
+            </>
+          )}
+        </section>
+
         {merged.length > 0 && (
-          <>
-            <h3>{t.recentTitle}</h3>
-            <ul className="recent">
+          <section className="onboard-section" aria-label={t.recentTitle}>
+            <h3 className="onboard-h3">{t.recentTitle}</h3>
+            <ul className="onboard-list">
               {merged.map((d) => (
                 <li key={d}>
-                  <button type="button" onClick={() => setDir(d)} data-testid={`recent-${d}`}>
-                    {d}
+                  <button
+                    type="button"
+                    className="onboard-item"
+                    onClick={() => setDir(d)}
+                    data-testid={`recent-${d}`}
+                    title={d}
+                  >
+                    <FolderIcon size={16} />
+                    <span className="onboard-item-title onboard-path">{d}</span>
                   </button>
                 </li>
               ))}
             </ul>
-          </>
+          </section>
         )}
       </div>
     </div>

@@ -897,6 +897,23 @@ button:disabled { opacity: 0.5; cursor: default; }
 .modal-box label:has(> input[type="checkbox"]) { flex-direction: row; align-items: center; gap: 0.5rem; font-weight: 600; }
 .recent { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.3rem; }
 
+/* Dialog folder/sesi (Onboarding): rapi, lega, terstruktur. */
+.onboard-box { min-width: min(520px, 94vw); max-width: 560px; }
+.onboard-hint { color: var(--text-2); margin: 0 0 1rem; font-size: 0.95rem; line-height: 1.5; }
+.onboard-section { margin-top: 1.25rem; }
+.onboard-section:first-of-type { margin-top: 0; }
+.onboard-h3 { font-size: 0.85rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-2); margin: 0 0 0.6rem; }
+.onboard-folder-row { align-items: center; gap: 0.75rem; flex-wrap: wrap; }
+.onboard-dir { font-family: ui-monospace, monospace; font-size: 0.85rem; color: var(--text-2); background: var(--hover, rgba(127,127,127,0.12)); padding: 0.45rem 0.75rem; border-radius: 8px; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.onboard-new-btn { width: 100%; justify-content: center; margin-bottom: 0.6rem; }
+.onboard-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.5rem; max-height: 32vh; overflow-y: auto; }
+.onboard-item { display: flex; align-items: center; gap: 0.75rem; width: 100%; text-align: left; background: var(--hover, rgba(127,127,127,0.08)); border: 1px solid var(--line); border-radius: 12px; padding: 0.75rem 1rem; font: inherit; color: inherit; cursor: pointer; transition: background 0.15s ease, border-color 0.15s ease; }
+.onboard-item:hover { background: var(--hover, rgba(127,127,127,0.15)); border-color: var(--accent, #888); }
+.onboard-item-title { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 500; }
+.onboard-item-title.onboard-path { font-family: ui-monospace, monospace; font-size: 0.85rem; font-weight: 400; }
+.onboard-item-sub { font-size: 0.8rem; color: var(--text-2); flex-shrink: 0; }
+.onboard-item svg { flex-shrink: 0; color: var(--text-2); }
+
 /* Pemilih folder (FITUR B): breadcrumb + daftar isi, tanpa ikon emoji. */
 .dir-picker { min-width: min(480px, 92vw); }
 .dir-picker .picker-head { align-items: center; justify-content: space-between; }
