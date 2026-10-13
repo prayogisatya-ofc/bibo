@@ -75,6 +75,7 @@ interface SessionState {
   interrupted: boolean;
   pendingPermissions: Array<{ id: string; sessionID: string; action: string; resources: string[] }>;
   pendingForms: Array<{ id: string; sessionID: string; title: string; fields: unknown[]; answer?: unknown }>;
+  model?: { id: string; providerID: string };
   replaying: boolean;
   everReplayed: boolean;
   texts: string; // akumulasi delta untuk message.list
@@ -365,6 +366,17 @@ async function route(
     j(200, { version: "2.0.16-mock", pid: 1, urls: [], paths: { tmp: "/tmp" } });
     return;
   }
+  if (method === "GET" && path === "/api/model") {
+    // FITUR C: daftar model palsu agar E2E/tes bisa menguji pemilih model.
+    j(200, {
+      data: [
+        { id: "mock-a", modelID: "mock-a", name: "Mock A (cepat)", providerID: "mock" },
+        { id: "mock-b", modelID: "mock-b", name: "Mock B (pintar)", providerID: "mock" },
+        { id: "mock-c", modelID: "mock-c", name: "Mock C (hemat)", providerID: "mock" },
+      ],
+    });
+    return;
+  }
   if (path === "/api/session" && method === "POST") {
     const body = (await readBody(req)) as { title?: string; location?: { directory?: string }; metadata?: Record<string, unknown> };
     const id = `ses_mock${(++seq).toString().padStart(4, "0")}`;
@@ -437,6 +449,25 @@ async function route(
       },
     });
     kickReplay(st);
+    return;
+  }
+  const mModel = path.match(/^\/api\/session\/([^/]+)\/model$/);
+  if (mModel && method === "POST") {
+    const st = sessions.get(mModel[1]!);
+    if (!st) {
+      j(404, { error: "no session" });
+      return;
+    }
+    // FITUR C: catat model aktif sesi (observabilitas untuk tes).
+    const body = (await readBody(req)) as { model?: { id?: unknown; providerID?: unknown } };
+    const mid = body.model?.id;
+    const pid = body.model?.providerID;
+    if (typeof mid === "string" && typeof pid === "string") {
+      st.model = { id: mid, providerID: pid };
+      mlog(`model-switch ${st.id} → ${pid}/${mid}`);
+    }
+    res.writeHead(204);
+    res.end();
     return;
   }
   const mInterrupt = path.match(/^\/api\/session\/([^/]+)\/interrupt$/);
@@ -569,7 +600,8 @@ async function route(
       j(404, { error: "no session" });
       return;
     }
-    j(200, { data: { id: st.id, title: "", location: { directory: st.directory } } });
+    // FITUR C: sertakan model aktif sesi agar tes bisa memverifikasi switchModel.
+    j(200, { data: { id: st.id, title: "", location: { directory: st.directory }, model: st.model ?? null } });
     return;
   }
   if (method === "POST" && path === "/api/experimental/session/wait-reset") {

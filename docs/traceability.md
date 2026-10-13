@@ -118,3 +118,28 @@
 | NFR-PERF-04 | fps avatar | galeri ?dev=avatar (9 pose × 2 tema, freeze); skrip fps/CPU 10 dtk celebrate+working | e2e/avatar.spec.ts; scripts/perf-avatar.ts; docs/reports/avatar-ui/PERF.md |
 | Visual | 3 adegan vs referensi | pixelmatch informatif (bukan gate) | scripts/visual-compare.ts; docs/reports/avatar-ui/COMPARISON.md |
 | Gherkin §13.3 | semua skenario avatar | dipetakan ke tes otomatis | docs/reports/avatar-ui/GHERKIN.md |
+
+## FITUR A — panel Pengaturan berkelompok (2026-10-13, cabang feat/settings-folder-model)
+
+| Baru | Seksi Pengaturan | Kontrol dikelompokkan: Suara & Ucapan (mute, voice-select, rate, pitch, volume, test-voice, stt-lang, send-mode, headphone, dict), Tampilan (theme, locale), Avatar (avatar-size), Perilaku (verbosity), Koneksi (bridge URL); semua string hardcode → i18n id+en (33 kunci) | i18n.test (paritas) |
+| Baru | Shortcut Ctrl/Cmd+, | Buka/tutup panel Pengaturan; tidak bentrok Ctrl+M / Ctrl+.; didokumentasikan di README | — |
+| Baru | Aksesibilitas panel | useFocusTrap + Esc menutup; aria-modal="true"; tiap seksi aria-labelledby | e2e/a11y.spec.ts |
+| Baru | Responsif <768px | Bottom-sheet: max-height 88vh, radius 24px atas, safe-area, target sentuh 44px, font 16px (cegah zoom iOS) | — |
+| NFR-REG | testid dipertahankan | locale, theme, verbosity, mute, voice-select, rate, pitch, volume, test-voice, stt-lang, send-mode, headphone, avatar-size, dict tidak berubah | e2e suite |
+
+## FITUR B — pemilih folder sungguhan (2026-10-13, cabang feat/settings-folder-model)
+
+| Baru | Bridge GET /api/dirs | Query ?path= (kosong → home); validasi: absolut setelah resolve, tolak null byte & traversal; 400/403/404/500 tanpa bocor path/stack; 127.0.0.1 + CORS lokal tak berubah | dirs.test.ts (9) |
+| Baru | Modal DirPicker (web) | Breadcrumb per-segmen, klik folder navigasi, tombol Naik, "Pilih folder ini", file non-klik; loading spinner; error ramah + Coba lagi; Esc + useFocusTrap; ikon SVG FolderIcon/XIcon/SpinnerIcon | dirPicker.test.tsx (7) |
+| Baru | Fallback ketik manual | dir-input/dir-go tetap ada & berfungsi (e2e helper tak berubah); tombol "Jelajahi" (dir-browse) membuka picker; dipakai Onboarding + chip folder TopBar (satu komponen) | e2e suite |
+| NFR-I18N-01 | Kunci baru id+en | dirBrowse, dirPicker* (12 kunci) | i18n.test |
+
+## FITUR C — pilih model OpenCode (2026-10-13, cabang feat/settings-folder-model)
+
+| Baru | Protokol WS model | `models.list` / `model.set` (web→bridge), `models.listed` (bridge→web); `bridge.ready.model` diisi bila model aktif diketahui | contract.test.ts (lolos/tolak) |
+| Baru | Bridge: daftar + ganti model | `models.list` → `client.model.list()` dipetakan toleran (field hilang → fallback, tak crash); oc down → `models.listed` error `OC_DOWN`; `model.set` → `session.switchModel` sesi aktif + simpan `store.settings.preferredModel` | model.test.ts (11) + models.test.ts WS (3) |
+| Baru | Sesi baru memakai pilihan tersimpan | `ensureSession`: setelah sesi BARU dibuat, `applyPreferredModel` (sekali, diam-diam); sesi yang dipilih ulang tidak disentuh. Bukan pin: tanpa pilihan → default server (keputusan produk) | models.test.ts (sesi baru) |
+| Baru | Dropdown model di TopBar | `ModelPicker` (native select, di samping chip koneksi): nama model aktif / "Model: bawaan server"; state loading & error + tombol muat ulang; pilihan → `model.set`; tersimpan di localStorage `codepet.model`; daftar diminta ulang tiap (re)connect | modelPicker.test.tsx (5) + e2e/model.spec.ts |
+| Baru | Mock /api/model | `GET /api/model` → 3 model palsu; `POST /api/session/:id/model` → catat (204); `GET /api/session/:id` menyertakan model aktif (observabilitas tes) | e2e/model.spec.ts; models.test.ts |
+| NFR-SEC-04 | Allowlist operasi baru | `model.list` (GET /api/model) + `session.switchModel` (POST /api/session/{id}/model) terdaftar di OP_ROUTES; keduanya lolos `isAllowed` (bukan grup credential/integration/pty/config-update) | op-usage.test.ts |
+| NFR-I18N-01 | Kunci baru id+en | `modelPickerTitle`, `modelDefault`, `modelLoading`, `modelLoadError`, `modelDownError`, `modelSetError`, `modelRetry`, `modelLabel` | i18n.test |

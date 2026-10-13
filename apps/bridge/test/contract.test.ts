@@ -17,12 +17,20 @@ describe("kontrak pesan Web → Bridge", () => {
       { v: 1, type: "session.list" },
       { v: 1, type: "settings.update", settings: { a: 1 } },
       { v: 1, type: "speech.request_summary", messageID: "m" },
+      // FITUR C
+      { v: 1, type: "models.list" },
+      { v: 1, type: "model.set", id: "m", providerID: "p" },
+      { v: 1, type: "model.set", id: "m", providerID: "p", variant: "v" },
     ];
     for (const s of samples) {
       expect(webMessage.safeParse(s).success, JSON.stringify(s)).toBe(true);
     }
     expect(webMessage.safeParse({ v: 1, type: "user.message", text: "", source: "chat" }).success).toBe(false);
     expect(webMessage.safeParse({ v: 2, type: "hello" }).success).toBe(false);
+    // FITUR C: id/providerID wajib non-kosong.
+    expect(webMessage.safeParse({ v: 1, type: "model.set", id: "", providerID: "p" }).success).toBe(false);
+    expect(webMessage.safeParse({ v: 1, type: "model.set", id: "m", providerID: "" }).success).toBe(false);
+    expect(webMessage.safeParse({ v: 1, type: "model.set", id: "m" }).success).toBe(false);
   });
 });
 
@@ -42,10 +50,20 @@ describe("kontrak pesan Bridge → Web", () => {
       { v: 1, type: "form.requested", formID: "f", title: "t", fields: [] },
       { v: 1, type: "diff.ready", sessionID: "s", files: [] },
       { v: 1, type: "error", code: "c", message: "m", recoverable: true },
+      // FITUR C
+      { v: 1, type: "models.listed", models: [{ id: "a", name: "A", providerID: "p" }], current: null },
+      {
+        v: 1, type: "models.listed", models: [], current: { id: "a", providerID: "p" }, error: "OC_DOWN",
+      },
     ];
     for (const s of samples) {
       expect(bridgeMessage.safeParse(s).success, JSON.stringify(s)).toBe(true);
     }
+    // FITUR C: entri model tanpa providerID ditolak.
+    expect(
+      bridgeMessage.safeParse({ v: 1, type: "models.listed", models: [{ id: "a", name: "A" }], current: null })
+        .success,
+    ).toBe(false);
     expect(
       bridgeMessage.safeParse({
         v: 1, type: "bridge.ready", bridgeVersion: "b", opencode: { status: "up", version: "2.0.16" },

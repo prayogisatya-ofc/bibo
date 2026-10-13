@@ -176,6 +176,47 @@ button:disabled { opacity: 0.5; cursor: default; }
 .conn-chip.is-bad .conn-dot { background: var(--bad); }
 .topbar .spacer { flex: 1; }
 
+/* FITUR C: pemilih model (di samping chip koneksi). */
+.model-picker {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.model-select {
+  background: var(--chip);
+  border: 1px solid transparent;
+  border-radius: var(--radius-pill);
+  padding: 6px 10px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text);
+  max-width: 220px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: pointer;
+}
+.model-select:hover { border-color: var(--line); }
+.model-picker.is-loading, .model-picker.is-error {
+  color: var(--text-3);
+  background: var(--chip);
+  border-radius: var(--radius-pill);
+  padding: 6px 12px;
+}
+.model-picker.is-error { color: var(--bad); background: var(--bad-bg); }
+.model-retry {
+  border: 1px solid currentColor;
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: inherit;
+  font-size: 12px;
+  font-weight: 800;
+  padding: 3px 10px;
+  cursor: pointer;
+}
+
 .mode-switch {
   display: flex;
   gap: 4px;

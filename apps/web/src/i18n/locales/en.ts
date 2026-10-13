@@ -158,4 +158,13 @@ export const en = {
   avatarL: "Large",
   privacyNote: "Privacy: in Chrome, Web Speech API audio is processed by external services. CodePet stores no audio.",
   settingsHint: "Ctrl/Cmd+, opens/closes this panel.",
+  // --- FITUR C: model picker ---
+  modelPickerTitle: "Choose model",
+  modelDefault: "server default",
+  modelLoading: "Loading models…",
+  modelLoadError: "Couldn't load the model list.",
+  modelDownError: "OpenCode isn't connected yet.",
+  modelSetError: "Couldn't switch the model.",
+  modelRetry: "Reload",
+  modelLabel: "Model",
 } as const;

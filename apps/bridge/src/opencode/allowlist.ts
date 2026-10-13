@@ -101,6 +101,8 @@ export const OP_ROUTES: Record<string, { method: string; path: string }> = {
   "message.list": { method: "GET", path: "/api/session/{id}/message" },
   "session.diff": { method: "GET", path: "/api/session/{id}/diff" },
   "session.instructions.entry.put": { method: "PUT", path: "/api/experimental/session/{id}/instructions/entries/{key}" },
+  "model.list": { method: "GET", path: "/api/model" },
+  "session.switchModel": { method: "POST", path: "/api/session/{id}/model" },
   "permission.list": { method: "GET", path: "/api/session/{id}/permission" },
   "permission.reply": { method: "POST", path: "/api/session/{id}/permission/{requestID}/reply" },
   "event.subscribe": { method: "GET", path: "/api/event" },

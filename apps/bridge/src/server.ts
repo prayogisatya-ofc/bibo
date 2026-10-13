@@ -32,6 +32,13 @@ import { ALWAYS_NOT_ALLOWED, VOICE_NOT_ALLOWED, guardReply, logDecision } from "
 import { ReminderTracker } from "./safety/remind.js";
 import { loadStore, saveStore, rememberDir, type BridgeStoreData } from "./store.js";
 import { DirHttpError, listDir, resolveDirPath } from "./fs/dirs.js";
+import {
+  applyPreferredModel,
+  fetchModels,
+  savePreferredModel,
+  type ModelEntry,
+  type ModelRef,
+} from "./model.js";
 
 const VERSION = "0.1.0-m1";
 
@@ -54,6 +61,9 @@ async function main(): Promise<void> {
   const reducer = createReducer();
   let directory = "";
   let sessionID: string | undefined;
+  // FITUR C: model aktif yang diketahui bridge (dari model.set / penerapan
+  // pilihan tersimpan). null = pakai default server / belum diketahui.
+  let activeModel: ModelRef | null = null;
   const seenPermissions = new Set<string>();
   const seenForms = new Set<string>();
   let seenActive = false;
@@ -68,6 +78,11 @@ async function main(): Promise<void> {
 
   function speechLocale(): "id" | "en" {
     return store.settings["locale"] === "en" ? "en" : "id";
+  }
+
+  /** Ref model aktif untuk payload WS (hanya bila diketahui). */
+  function currentModelRef(): { id: string; providerID: string } | null {
+    return activeModel ? { id: activeModel.id, providerID: activeModel.providerID } : null;
   }
 
   function verbosity(): "silent" | "normal" | "cerewet" {
@@ -370,6 +385,8 @@ function isSettledError(e: unknown): boolean {
     if (sid) {
       sessionID = sid;
       directory = dir;
+      // Sesi dipilih manual: modelnya tidak disentuh (bukan pin).
+      activeModel = null;
       return sid;
     }
     const prev = store.lastSessionByDir[dir];
@@ -378,6 +395,7 @@ function isSettledError(e: unknown): boolean {
         await oc!.client.session.get({ sessionID: prev });
         sessionID = prev;
         directory = dir;
+        activeModel = null;
         return prev;
       } catch {
         // sesi lama hilang; buat baru di bawah.
@@ -401,6 +419,11 @@ function isSettledError(e: unknown): boolean {
     }
     sessionID = created.id;
     directory = dir;
+    // FITUR C: sesi BARU memakai pilihan model user yang tersimpan (bila ada),
+    // sekali, diam-diam. Ini bukan pin: tanpa pilihan tersimpan, default
+    // server OpenCode yang dipakai (keputusan produk). Sesi yang dipilih ulang
+    // (sid/prev di atas) tidak disentuh.
+    activeModel = await applyPreferredModel(oc!.client, store, created.id);
     store.lastSessionByDir[dir] = created.id;
     rememberDir(store, dir);
     await saveStore(config.dataDir, store);
@@ -419,6 +442,8 @@ function isSettledError(e: unknown): boolean {
           sessionID,
           recentDirs: store.recentDirs,
           ...meta,
+          // FITUR C: isi field `model` bila model aktif diketahui.
+          ...(activeModel ? { model: activeModel.id } : {}),
         });
         break;
       }
@@ -448,6 +473,7 @@ function isSettledError(e: unknown): boolean {
           sessionID: sid,
           recentDirs: store.recentDirs,
           ...(await sessionMeta(sid)),
+          ...(activeModel ? { model: activeModel.id } : {}),
         });
         pushState();
         break;
@@ -467,6 +493,58 @@ function isSettledError(e: unknown): boolean {
             }))
             .filter((x) => x.sessionID !== ""),
         });
+        break;
+      }
+      case "models.list": {
+        // Kode error dikirim apa adanya; web memetakannya ke pesan ramah (i18n).
+        if (!oc) {
+          send({ type: "models.listed", models: [], current: currentModelRef(), error: "OC_DOWN" });
+          break;
+        }
+        let models: ModelEntry[] | undefined;
+        try {
+          models = await fetchModels(oc.client);
+        } catch {
+          models = undefined;
+        }
+        if (!models) {
+          send({ type: "models.listed", models: [], current: currentModelRef(), error: "MODEL_LIST_FAILED" });
+          break;
+        }
+        send({ type: "models.listed", models, current: currentModelRef() });
+        break;
+      }
+      case "model.set": {
+        const c7 = needClient(send);
+        if (!c7) break;
+        // id + providerID sudah divalidasi non-kosong oleh zod (kontrak).
+        const ref: ModelRef = {
+          id: msg.id,
+          providerID: msg.providerID,
+          ...(msg.variant ? { variant: msg.variant } : {}),
+        };
+        // Daftar dicoba dimuat ulang agar balasan tetap lengkap; kegagalannya
+        // tak menggagalkan pergantian model.
+        let models: ModelEntry[] = [];
+        try {
+          models = await fetchModels(c7);
+        } catch {
+          // abaikan; balasan tetap membawa current terbaru.
+        }
+        // Ganti untuk sesi aktif bila ada. Tanpa sesi aktif, pilihan hanya
+        // disimpan dan dipakai sesi baru berikutnya (lihat ensureSession).
+        if (sessionID) {
+          try {
+            await c7.session.switchModel({ sessionID, model: ref });
+            activeModel = ref;
+          } catch {
+            send({ type: "models.listed", models, current: currentModelRef(), error: "MODEL_SET_FAILED" });
+            break;
+          }
+        }
+        savePreferredModel(store, ref);
+        await saveStore(config.dataDir, store);
+        send({ type: "models.listed", models, current: { id: ref.id, providerID: ref.providerID } });
         break;
       }
       case "user.message": {

@@ -29,6 +29,14 @@ export const webMessage = z.discriminatedUnion("type", [
   base.extend({ type: z.literal("session.list"), directory: z.string().optional() }),
   base.extend({ type: z.literal("settings.update"), settings: z.record(z.unknown()) }),
   base.extend({ type: z.literal("speech.request_summary"), messageID: z.string() }),
+  // FITUR C: pilih model dari server OpenCode (GET /api/model + session.switchModel).
+  base.extend({ type: z.literal("models.list") }),
+  base.extend({
+    type: z.literal("model.set"),
+    id: z.string().min(1),
+    providerID: z.string().min(1),
+    variant: z.string().optional(),
+  }),
 ]);
 export type WebMessage = z.infer<typeof webMessage>;
 /** Payload web→bridge tanpa envelope `v` (ditambahkan saat kirim). */
@@ -79,6 +87,14 @@ export const bridgeMessage = z.discriminatedUnion("type", [
     type: z.literal("diff.ready"),
     sessionID: z.string(),
     files: z.array(z.object({ path: z.string(), additions: z.number(), deletions: z.number() })),
+  }),
+  base.extend({
+    type: z.literal("models.listed"),
+    models: z.array(
+      z.object({ id: z.string(), name: z.string(), providerID: z.string() }),
+    ),
+    current: z.object({ id: z.string(), providerID: z.string() }).nullable(),
+    error: z.string().optional(),
   }),
   base.extend({ type: z.literal("error"), code: z.string(), message: z.string(), recoverable: z.boolean() }),
 ]);

@@ -2,6 +2,16 @@ import { useT } from "../i18n/index.js";
 import { FolderIcon, GearIcon, SpeakerIcon, SpeakerOffIcon } from "./icons.js";
 import type { ConnStatus } from "../ws/client.js";
 import type { UiMode } from "./useUiMode.js";
+import { ModelPicker, type ModelCurrent, type ModelOption } from "./ModelPicker.js";
+
+export interface TopBarModelState {
+  models: ModelOption[];
+  current: ModelCurrent | null;
+  loading: boolean;
+  error: string | null;
+  onSelect: (id: string, providerID: string) => void;
+  onRetry: () => void;
+}
 
 /**
  * Bilah atas 68px (fase C): logotype, chip folder proyek (klik = ganti
@@ -20,6 +30,7 @@ export function TopBar({
   onDir,
   onOpenSettings,
   showDirChip,
+  model,
 }: {
   conn: ConnStatus;
   ocStatus: "up" | "down";
@@ -33,6 +44,8 @@ export function TopBar({
   onOpenSettings: () => void;
   /** Referensi menyembunyikan chip folder di mode Ngobrol. */
   showDirChip: boolean;
+  /** FITUR C: pemilih model (di samping chip koneksi). */
+  model: TopBarModelState;
 }): JSX.Element {
   const t = useT();
   const connected = ocStatus === "up" && conn === "open";
@@ -67,6 +80,7 @@ export function TopBar({
         <span className="conn-dot" aria-hidden="true" />
         <span className="conn-text">{label}</span>
       </span>
+      <ModelPicker {...model} />
       <span className="spacer" aria-hidden="true" />
       <div className="mode-switch" role="group" aria-label="Mode">
         <button

@@ -158,4 +158,13 @@ export const id = {
   avatarL: "Besar",
   privacyNote: "Privasi: di Chrome, audio Web Speech API diproses layanan eksternal. CodePet tidak menyimpan audio.",
   settingsHint: "Pintasan Ctrl/Cmd+, membuka/menutup panel ini.",
+  // --- FITUR C: pemilih model ---
+  modelPickerTitle: "Pilih model",
+  modelDefault: "bawaan server",
+  modelLoading: "Memuat model…",
+  modelLoadError: "Gagal memuat daftar model.",
+  modelDownError: "OpenCode belum terhubung.",
+  modelSetError: "Gagal mengganti model.",
+  modelRetry: "Muat ulang",
+  modelLabel: "Model",
 } as const;

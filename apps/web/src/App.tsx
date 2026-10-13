@@ -5,6 +5,7 @@ import { AppProvider, useApp } from "./state/store.js";
 import { useBridge } from "./ws/client.js";
 import { useOrchestrator } from "./orchestrator/useOrchestrator.js";
 import { TopBar } from "./ui/TopBar.js";
+import type { ModelCurrent, ModelOption } from "./ui/ModelPicker.js";
 import { ChatMode } from "./ui/ChatMode.js";
 import { TalkMode } from "./ui/TalkMode.js";
 import { Onboarding, loadDirHistory, saveDirHistory } from "./ui/Onboarding.js";
@@ -23,12 +24,33 @@ import { humanError } from "./ui/errors.js";
 
 const BRIDGE_KEY = "codepet.bridge-url";
 const DEFAULT_BRIDGE = "http://127.0.0.1:4317";
+const MODEL_KEY = "codepet.model";
+
+/** Pilihan model terakhir dari localStorage (label optimistis selagi daftar dimuat). */
+function loadStoredModel(): ModelCurrent | null {
+  try {
+    const raw = localStorage.getItem(MODEL_KEY);
+    if (!raw) return null;
+    const p = JSON.parse(raw) as { id?: unknown; providerID?: unknown };
+    if (typeof p.id === "string" && p.id !== "" && typeof p.providerID === "string" && p.providerID !== "") {
+      return { id: p.id, providerID: p.providerID };
+    }
+  } catch {
+    // abaikan nilai rusak
+  }
+  return null;
+}
 
 function Shell({ locale, setLocale }: { locale: Locale; setLocale: (v: Locale) => void }): JSX.Element {
   const { agent, chat, feed, diffs, errors, apply, pushUser, pushSystem, clearDiffs } = useApp();
   const [bridgeHttp, setBridgeHttp] = useState(() => localStorage.getItem(BRIDGE_KEY) ?? DEFAULT_BRIDGE);
   const [info, setInfo] = useState({ ocStatus: "down" as "up" | "down", ocVersion: undefined as string | undefined, directory: "", sessionID: undefined as string | undefined, recentDirs: [] as string[], agent: undefined as string | undefined, model: undefined as string | undefined });
   const [sessions, setSessions] = useState<Extract<BridgeMessage, { type: "session.listed" }>["sessions"]>([]);
+  // FITUR C: pemilih model OpenCode.
+  const [models, setModels] = useState<ModelOption[]>([]);
+  const [modelCurrent, setModelCurrent] = useState<ModelCurrent | null>(() => loadStoredModel());
+  const [modelLoading, setModelLoading] = useState(true);
+  const [modelError, setModelError] = useState<string | null>(null);
   const [avatarSize, setAvatarSize] = useState<"s" | "m" | "l">(() => {
     const v = localStorage.getItem("codepet.avatar-size");
     return v === "s" || v === "l" ? v : "m";
@@ -87,6 +109,21 @@ function Shell({ locale, setLocale }: { locale: Locale; setLocale: (v: Locale) =
         setInfo((p) => ({ ...p, ocStatus: m.opencode === "up" ? "up" : "down" }));
       } else if (m.type === "session.listed") {
         setSessions(m.sessions);
+      } else if (m.type === "models.listed") {
+        // FITUR C: daftar model + model aktif; error = kode (OC_DOWN /
+        // MODEL_LIST_FAILED / MODEL_SET_FAILED) yang dipetakan ke pesan ramah
+        // di ModelPicker. Bila error, pertahankan label optimistis localStorage.
+        setModels(m.models);
+        setModelLoading(false);
+        const err = m.error ?? null;
+        setModelError(err);
+        if (m.current) {
+          setModelCurrent(m.current);
+          localStorage.setItem(MODEL_KEY, JSON.stringify(m.current));
+        } else if (!err) {
+          setModelCurrent(null);
+          localStorage.removeItem(MODEL_KEY);
+        }
       } else if (m.type === "error") {
         pushSystem(humanError(m.code, m.message, localeRef.current));
       } else if (m.type === "agent.speak") {
@@ -155,7 +192,13 @@ function Shell({ locale, setLocale }: { locale: Locale; setLocale: (v: Locale) =
   const micStopRef = useRef(micStop);
   micStopRef.current = micStop;
   useEffect(() => {
-    if (status === "open") sendRef.current({ type: "hello", clientVersion: "web-m2" });
+    if (status === "open") {
+      sendRef.current({ type: "hello", clientVersion: "web-m2" });
+      // FITUR C: daftar model diminta ulang setiap koneksi (re)open.
+      setModelLoading(true);
+      setModelError(null);
+      sendRef.current({ type: "models.list" });
+    }
   }, [status]);
 
   useEffect(() => {
@@ -374,6 +417,22 @@ function Shell({ locale, setLocale }: { locale: Locale; setLocale: (v: Locale) =
   const infoRef = useRef(info);
   infoRef.current = info;
 
+  function pickModel(id: string, providerID: string): void {
+    // Optimistis: label langsung berubah; bridge mengonfirmasi via models.listed
+    // (atau mengembalikan ke nilai lama bila gagal).
+    const cur = { id, providerID };
+    setModelCurrent(cur);
+    localStorage.setItem(MODEL_KEY, JSON.stringify(cur));
+    setModelError(null);
+    send({ type: "model.set", id, providerID });
+  }
+
+  function retryModels(): void {
+    setModelLoading(true);
+    setModelError(null);
+    send({ type: "models.list" });
+  }
+
   function pickDir(dir: string, sessionID?: string): void {
     saveDirHistory([dir, ...loadDirHistory().filter((d) => d !== dir)]);
     setShowOnboard(false);
@@ -426,6 +485,14 @@ function Shell({ locale, setLocale }: { locale: Locale; setLocale: (v: Locale) =
         onDir={openOnboard}
         onOpenSettings={() => setShowSettings(true)}
         showDirChip={mode === "chat"}
+        model={{
+          models,
+          current: modelCurrent,
+          loading: modelLoading,
+          error: modelError,
+          onSelect: pickModel,
+          onRetry: retryModels,
+        }}
       />
       {offline && (
         <div className="banner" role="alert" data-testid="offline-banner">
