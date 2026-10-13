@@ -1,4 +1,4 @@
-# LAPORAN AKHIR — Redesign Avatar + UI CodePet
+# LAPORAN AKHIR — Redesign Avatar + UI Bibo
 
 **Branch:** `redesign/avatar-ui` (30 commit, tidak di-push) · **Tanggal:** 2026-10-12
 **Status:** SELESAI — `bun run check` hijau penuh (7 workspace, termasuk 11 leg e2e + galeri)

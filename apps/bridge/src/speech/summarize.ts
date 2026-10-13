@@ -112,7 +112,7 @@ export function clamp2(s: string): string {
 }
 
 /** Instruksi suara untuk disuntik via instruction entry (Lampiran A). */
-export const VOICE_INSTRUCTION_KEY = "codepet.voice";
+export const VOICE_INSTRUCTION_KEY = "bibo.voice";
 export const VOICE_INSTRUCTION_VALUE =
   "Setelah menyelesaikan tugas, akhiri jawabanmu dengan SATU blok: " +
   "<speak>1-2 kalimat Bahasa Indonesia santai yang merangkum hasilnya untuk diucapkan.</speak> " +

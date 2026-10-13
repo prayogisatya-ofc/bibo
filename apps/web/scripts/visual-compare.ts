@@ -161,12 +161,12 @@ async function main(): Promise<void> {
       await rm(scene.dataDir, { recursive: true, force: true });
       await mkdir(scene.dataDir, { recursive: true });
       const bridge = runProc(BUN, ["run", "./src/server.ts"], `${ROOT}/apps/bridge`, {
-        CODEPET_BRIDGE_PORT: "4317",
-        CODEPET_DATA_DIR: scene.dataDir,
+        BIBO_BRIDGE_PORT: "4317",
+        BIBO_DATA_DIR: scene.dataDir,
         OPENCODE_URL: "http://127.0.0.1:4498",
-        CODEPET_MOCK_SCENARIO: scene.scenario,
-        CODEPET_POLL_MS: "500",
-        CODEPET_APPROVAL_POLL_MS: "500",
+        BIBO_MOCK_SCENARIO: scene.scenario,
+        BIBO_POLL_MS: "500",
+        BIBO_APPROVAL_POLL_MS: "500",
       });
       await waitOk("http://127.0.0.1:4317/health", 15000);
 

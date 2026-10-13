@@ -75,12 +75,12 @@ async function startBridge(openCodeUrl: string): Promise<Ctx> {
     cwd: ROOT,
     env: {
       ...process.env,
-      CODEPET_BRIDGE_PORT: String(port),
-      CODEPET_DATA_DIR: dataDir,
-      CODEPET_POLL_MS: "500",
-      CODEPET_APPROVAL_POLL_MS: "500",
+      BIBO_BRIDGE_PORT: String(port),
+      BIBO_DATA_DIR: dataDir,
+      BIBO_POLL_MS: "500",
+      BIBO_APPROVAL_POLL_MS: "500",
       OPENCODE_URL: openCodeUrl,
-      CODEPET_MOCK_SCENARIO: "simple-answer",
+      BIBO_MOCK_SCENARIO: "simple-answer",
     },
     stdio: "pipe",
   });

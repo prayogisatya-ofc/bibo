@@ -83,7 +83,7 @@ Hasil `grep -rn "Bibo" apps/web/src packages/avatar/src`:
 
 | # | Lokasi | String |
 |---|---|---|
-| 1 | `i18n/locales/id.ts:2`, `en.ts:2` | `appTitle: "CodePet — Bibo"` |
+| 1 | `i18n/locales/id.ts:2`, `en.ts:2` | `appTitle: "Bibo — Bibo"` |
 | 2 | `i18n/locales/id.ts:31` | `emptyChat: "Belum ada pesan. Sapa Bibo dulu!"` |
 | 3 | `i18n/locales/en.ts:31` | `emptyChat: "No messages yet. Say hi to Bibo!"` |
 | 4 | `orchestrator/pose.ts:74` | `idle: "Bibo siap."` |

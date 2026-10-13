@@ -12,8 +12,8 @@
     "verify:no-secrets": "bun run ./scripts/verify-no-secrets.ts"
   },
   "dependencies": {
-    "@codepet/avatar": "*",
-    "@codepet/protocol": "*",
+    "@bibo/avatar": "*",
+    "@bibo/protocol": "*",
     "@fontsource/nunito": "^5.3.0",
     "@tabler/icons-react": "^3.49.0",
     "react": "^18.3.1",

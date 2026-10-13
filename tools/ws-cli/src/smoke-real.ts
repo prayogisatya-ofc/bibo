@@ -31,7 +31,7 @@ async function main(): Promise<void> {
     await mkdir("/tmp/breal-chat", { recursive: true });
     bridge = spawn(BUN, ["run", "./src/server.ts"], {
       cwd: `${ROOT}/apps/bridge`,
-      env: { ...process.env, CODEPET_BRIDGE_PORT: "4318", CODEPET_DATA_DIR: "/tmp/breal" },
+      env: { ...process.env, BIBO_BRIDGE_PORT: "4318", BIBO_DATA_DIR: "/tmp/breal" },
       stdio: "pipe",
     });
     await waitOk("http://127.0.0.1:4318/health", 30000);

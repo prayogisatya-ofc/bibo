@@ -20,13 +20,13 @@ function num(v: string | undefined, dflt: number): number {
 }
 
 export function loadConfig(env: NodeJS.ProcessEnv = process.env): BridgeConfig {
-  const level = env["CODEPET_LOG_LEVEL"];
+  const level = env["BIBO_LOG_LEVEL"];
   return {
     opencodeUrl: env["OPENCODE_URL"] || undefined,
-    port: num(env["CODEPET_BRIDGE_PORT"], 4317),
-    pollMs: num(env["CODEPET_POLL_MS"], 1000),
-    approvalPollMs: num(env["CODEPET_APPROVAL_POLL_MS"], 1500),
+    port: num(env["BIBO_BRIDGE_PORT"], 4317),
+    pollMs: num(env["BIBO_POLL_MS"], 1000),
+    approvalPollMs: num(env["BIBO_APPROVAL_POLL_MS"], 1500),
     logLevel: level === "debug" || level === "info" || level === "warn" || level === "error" ? level : "info",
-    dataDir: env["CODEPET_DATA_DIR"] || ".codepet",
+    dataDir: env["BIBO_DATA_DIR"] || ".bibo",
   };
 }

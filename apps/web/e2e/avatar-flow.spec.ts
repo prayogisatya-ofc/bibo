@@ -2,7 +2,7 @@ import { expect, test } from "@playwright/test";
 
 /**
  * Alur pose ujung-ke-ujung (M3 DoD): skenario mock → urutan pose §8.3.
- * Dijalankan per skenario via e2e-run (CODEPET_MOCK_SCENARIO).
+ * Dijalankan per skenario via e2e-run (BIBO_MOCK_SCENARIO).
  * Menegaskan karakter TIDAK pernah idle saat agent masih aktif.
  */
 

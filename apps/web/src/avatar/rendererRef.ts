@@ -1,4 +1,4 @@
-import type { AvatarRenderer } from "@codepet/avatar";
+import type { AvatarRenderer } from "@bibo/avatar";
 
 /**
  * Instance renderer avatar yang sedang aktif (satu-satunya).

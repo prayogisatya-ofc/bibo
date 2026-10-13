@@ -72,12 +72,12 @@ async function main(): Promise<void> {
     await waitOk("http://127.0.0.1:4498/api/info", 15000);
     await import("node:fs/promises").then((fs) => fs.rm("/tmp/mock-debug.log", { force: true }));
     run(BUN, ["run", "./src/server.ts"], `${ROOT}/apps/bridge`, {
-      CODEPET_BRIDGE_PORT: "4317",
-      CODEPET_DATA_DIR: "/tmp/perf-btest",
+      BIBO_BRIDGE_PORT: "4317",
+      BIBO_DATA_DIR: "/tmp/perf-btest",
       OPENCODE_URL: "http://127.0.0.1:4498",
-      CODEPET_MOCK_SCENARIO: "simple-answer",
-      CODEPET_POLL_MS: "500",
-      CODEPET_APPROVAL_POLL_MS: "500",
+      BIBO_MOCK_SCENARIO: "simple-answer",
+      BIBO_POLL_MS: "500",
+      BIBO_APPROVAL_POLL_MS: "500",
     });
     await waitOk("http://127.0.0.1:4317/health", 15000);
     run(BUN, ["run", "preview", "--port", "5173"], `${ROOT}/apps/web`, {});

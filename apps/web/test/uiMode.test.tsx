@@ -19,10 +19,10 @@ describe("useUiMode (§C.2)", () => {
     expect(seen?.mode).toBe("chat");
     act(() => seen?.toggleMode());
     expect(seen?.mode).toBe("talk");
-    expect(localStorage.getItem("codepet.ui-mode")).toBe("talk");
+    expect(localStorage.getItem("bibo.ui-mode")).toBe("talk");
   });
   it("memulihkan dari localStorage", () => {
-    localStorage.setItem("codepet.ui-mode", "talk");
+    localStorage.setItem("bibo.ui-mode", "talk");
     render(<Probe />);
     expect(seen?.mode).toBe("talk");
   });
@@ -32,7 +32,7 @@ describe("useUiMode (§C.2)", () => {
       window.dispatchEvent(new KeyboardEvent("keydown", { key: ".", ctrlKey: true, bubbles: true }));
     });
     expect(seen?.mode).toBe("talk");
-    expect(localStorage.getItem("codepet.ui-mode")).toBe("talk");
+    expect(localStorage.getItem("bibo.ui-mode")).toBe("talk");
   });
   it("Ctrl+. diabaikan saat fokus di input teks", () => {
     render(<Probe />);

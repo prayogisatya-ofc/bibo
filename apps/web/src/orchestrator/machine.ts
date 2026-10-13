@@ -1,7 +1,7 @@
 import { assign, setup } from "xstate";
-import type { AgentState, BridgeMessage } from "@codepet/protocol";
+import type { AgentState, BridgeMessage } from "@bibo/protocol";
 import { derivePose, type PoseContext } from "./pose.js";
-import type { AvatarMood, AvatarPose, WorkingVariant } from "@codepet/avatar";
+import type { AvatarMood, AvatarPose, WorkingVariant } from "@bibo/avatar";
 
 /**
  * Orkestrator XState v5 (PRD §8.1): tiga region paralel link/agent/voice.

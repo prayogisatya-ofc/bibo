@@ -3,7 +3,7 @@ import { useCallback, useEffect, useState } from "react";
 /** Mode tampilan aplikasi (AGENT-PROMPT-AVATAR-UI §C.2). */
 export type UiMode = "chat" | "talk";
 
-const KEY = "codepet.ui-mode";
+const KEY = "bibo.ui-mode";
 
 function load(): UiMode {
   try {

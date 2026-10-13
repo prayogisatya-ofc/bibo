@@ -1,5 +1,5 @@
 import { createContext, useCallback, useContext, useMemo, useRef, useState, type ReactNode } from "react";
-import type { AgentState, BridgeMessage, FeedItem } from "@codepet/protocol";
+import type { AgentState, BridgeMessage, FeedItem } from "@bibo/protocol";
 import { stripSpeak } from "../ui/text-utils.js";
 
 export interface ChatMsg {

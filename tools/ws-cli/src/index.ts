@@ -5,7 +5,7 @@ import { WebSocket } from "ws";
 /**
  * Klien WS uji untuk DoD M1: hello → session.select → user.message,
  * lalu menunggu agent.text.final + agent.state idle.
- * Token dibaca dari <dataDir>/token (default .codepet).
+ * Token dibaca dari <dataDir>/token (default .bibo).
  *
  *   bun run ./src/cli-test.ts --bridge ws://127.0.0.1:4317 --prompt "..." --dir /tmp/x
  */
@@ -19,10 +19,10 @@ function arg(name: string, dflt = ""): string {
 async function main(): Promise<void> {
   const target = arg("target", "");
   const bridge = arg("bridge", target === "real" ? "ws://127.0.0.1:4318" : "ws://127.0.0.1:4317");
-  const dataDir = arg("dataDir", target === "real" ? "/tmp/breal" : join(process.cwd(), ".codepet"));
+  const dataDir = arg("dataDir", target === "real" ? "/tmp/breal" : join(process.cwd(), ".bibo"));
   const token = arg("token", (await readFile(join(dataDir, "token"), "utf-8")).trim());
   const prompt = arg("prompt", "Reply with exactly: SMOKE-OK. No tools.");
-  const dir = arg("dir", "/tmp/codepet-smoke");
+  const dir = arg("dir", "/tmp/bibo-smoke");
   const timeoutMs = Number(arg("timeout", "90000"));
 
   const ws = new WebSocket(`${bridge}/ws?token=${token}`);

@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { createActor } from "xstate";
-import type { BridgeMessage } from "@codepet/protocol";
-import type { AvatarMood, AvatarPose, WorkingVariant } from "@codepet/avatar";
+import type { BridgeMessage } from "@bibo/protocol";
+import type { AvatarMood, AvatarPose, WorkingVariant } from "@bibo/avatar";
 import { eventsFromBridge, machine, snapshotPose } from "./machine.js";
 
 /**

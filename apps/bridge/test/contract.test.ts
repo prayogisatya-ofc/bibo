@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { AVATAR_POSES, agentSignal, agentState, bridgeMessage, webMessage } from "@codepet/protocol";
+import { AVATAR_POSES, agentSignal, agentState, bridgeMessage, webMessage } from "@bibo/protocol";
 
 /** Tes kontrak (PRD §13.1): semua pesan WS valid dua arah + pose avatar. */
 

@@ -6,7 +6,7 @@ import { Markdown } from "./markdown.js";
 import { MicButton } from "./MicButton.js";
 import { SendIcon, StopIcon } from "./icons.js";
 
-const HISTORY_KEY = "codepet.input-history";
+const HISTORY_KEY = "bibo.input-history";
 
 function loadHistory(): string[] {
   try {

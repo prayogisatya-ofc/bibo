@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { createActor } from "xstate";
 import { eventsFromBridge, machine, snapshotPose } from "../src/orchestrator/machine.js";
-import type { BridgeMessage, BridgePayload } from "@codepet/protocol";
+import type { BridgeMessage, BridgePayload } from "@bibo/protocol";
 
 function feed(title: string, status: "running" | "ok" | "fail"): BridgePayload {
   return { type: "feed.item", item: { id: "c", kind: "tool", title, status, ts: 1 } };

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import type { BridgeMessage } from "@codepet/protocol";
+import type { BridgeMessage } from "@bibo/protocol";
 import { LocaleProvider, useT, type Locale } from "./i18n/index.js";
 import { AppProvider, useApp } from "./state/store.js";
 import { useBridge } from "./ws/client.js";
@@ -22,9 +22,9 @@ import { CHAT_AVATAR_PX, TALK_AVATAR_ASKING_PX, TALK_AVATAR_PX } from "./ui/stag
 import { rendererRef } from "./avatar/rendererRef.js";
 import { humanError } from "./ui/errors.js";
 
-const BRIDGE_KEY = "codepet.bridge-url";
+const BRIDGE_KEY = "bibo.bridge-url";
 const DEFAULT_BRIDGE = "http://127.0.0.1:4317";
-const MODEL_KEY = "codepet.model";
+const MODEL_KEY = "bibo.model";
 
 /** Pilihan model terakhir dari localStorage (label optimistis selagi daftar dimuat). */
 function loadStoredModel(): ModelCurrent | null {
@@ -52,16 +52,16 @@ function Shell({ locale, setLocale }: { locale: Locale; setLocale: (v: Locale) =
   const [modelLoading, setModelLoading] = useState(true);
   const [modelError, setModelError] = useState<string | null>(null);
   const [avatarSize, setAvatarSize] = useState<"s" | "m" | "l">(() => {
-    const v = localStorage.getItem("codepet.avatar-size");
+    const v = localStorage.getItem("bibo.avatar-size");
     return v === "s" || v === "l" ? v : "m";
   });
   const [showOnboard, setShowOnboard] = useState(false);
   const [showSettings, setShowSettings] = useState(false);  const [level, setLevel] = useState(0);
   const [verbosity, setVerbosity] = useState<Verbosity>(() => {
-    const v = localStorage.getItem("codepet.verbosity");
+    const v = localStorage.getItem("bibo.verbosity");
     return v === "silent" || v === "cerewet" ? v : "normal";
   });
-  const [muted, setMutedState] = useState(() => localStorage.getItem("codepet.muted") === "1");
+  const [muted, setMutedState] = useState(() => localStorage.getItem("bibo.muted") === "1");
   // ADR keputusan (c): default aplikasi TERANG (referensi yang disetujui).
   const [theme, setTheme] = useState<"dark" | "light" | "auto">("light");
   const effectiveTheme: "dark" | "light" = theme === "auto" ? (window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark") : theme;
@@ -71,11 +71,11 @@ function Shell({ locale, setLocale }: { locale: Locale; setLocale: (v: Locale) =
   const [voiceDraft, setVoiceDraft] = useState<{ text: string; key: string } | undefined>(undefined);
   const [toast, setToast] = useState<{ msg: string; key: number } | undefined>(undefined);
   const [sendMode, setSendMode] = useState<"auto" | "confirm">(
-    () => (localStorage.getItem("codepet.send-mode") === "confirm" ? "confirm" : "auto"),
+    () => (localStorage.getItem("bibo.send-mode") === "confirm" ? "confirm" : "auto"),
   );
-  const [sttLang, setSttLang] = useState(() => localStorage.getItem("codepet.stt-lang") ?? "id-ID");
+  const [sttLang, setSttLang] = useState(() => localStorage.getItem("bibo.stt-lang") ?? "id-ID");
   const [dictText, setDictText] = useState(() => Object.entries(loadDict()).map(([k, v]) => `${k} -> ${v}`).join("\n"));
-  const [headphone, setHeadphone] = useState(() => localStorage.getItem("codepet.headphone") === "1");
+  const [headphone, setHeadphone] = useState(() => localStorage.getItem("bibo.headphone") === "1");
   const [micDenied, setMicDenied] = useState(false);
   // Izin/form yang diminimalkan (talk mode) — kartu tak pernah hilang selama pending.
   const [minimizedPerm, setMinimizedPerm] = useState<Record<string, boolean>>({});
@@ -247,7 +247,7 @@ function Shell({ locale, setLocale }: { locale: Locale; setLocale: (v: Locale) =
         e.preventDefault();
         setMutedState((m) => {
           const next = !m;
-          localStorage.setItem("codepet.muted", next ? "1" : "0");
+          localStorage.setItem("bibo.muted", next ? "1" : "0");
           engine?.setSettings({ muted: next });
           if (next) engine?.cancel();
           return next;
@@ -387,7 +387,7 @@ function Shell({ locale, setLocale }: { locale: Locale; setLocale: (v: Locale) =
 
   function setMuted(m: boolean): void {
     setMutedState(m);
-    localStorage.setItem("codepet.muted", m ? "1" : "0");
+    localStorage.setItem("bibo.muted", m ? "1" : "0");
     engine?.setSettings({ muted: m });
     if (m) engine?.cancel();
   }
@@ -399,7 +399,7 @@ function Shell({ locale, setLocale }: { locale: Locale; setLocale: (v: Locale) =
 
   function changeVerbosity(v: Verbosity): void {
     setVerbosity(v);
-    localStorage.setItem("codepet.verbosity", v);
+    localStorage.setItem("bibo.verbosity", v);
     send({ type: "settings.update", settings: { verbosity: v } });
   }
 
@@ -520,12 +520,12 @@ function Shell({ locale, setLocale }: { locale: Locale; setLocale: (v: Locale) =
       <SettingsPanel
         bridgeHttp={bridgeHttp} onBridgeHttp={setBridgeHttp} open={showSettings} onClose={() => setShowSettings(false)}
         engine={engine} verbosity={verbosity} onVerbosity={changeVerbosity} muted={muted} onMuted={setMuted}
-        theme={theme} onTheme={setTheme} locale={locale} onLocale={(v) => { setLocale(v); localStorage.setItem("codepet.locale", v); send({ type: "settings.update", settings: { locale: v } }); }}
-        sttLang={sttLang} onSttLang={(v) => { setSttLang(v); localStorage.setItem("codepet.stt-lang", v); }}
-        sendMode={sendMode} onSendMode={(v) => { setSendMode(v); localStorage.setItem("codepet.send-mode", v); }}
-        headphone={headphone} onHeadphone={(v) => { setHeadphone(v); localStorage.setItem("codepet.headphone", v ? "1" : "0"); }}
+        theme={theme} onTheme={setTheme} locale={locale} onLocale={(v) => { setLocale(v); localStorage.setItem("bibo.locale", v); send({ type: "settings.update", settings: { locale: v } }); }}
+        sttLang={sttLang} onSttLang={(v) => { setSttLang(v); localStorage.setItem("bibo.stt-lang", v); }}
+        sendMode={sendMode} onSendMode={(v) => { setSendMode(v); localStorage.setItem("bibo.send-mode", v); }}
+        headphone={headphone} onHeadphone={(v) => { setHeadphone(v); localStorage.setItem("bibo.headphone", v ? "1" : "0"); }}
         avatarSize={avatarSize}
-        onAvatarSize={(v) => { setAvatarSize(v); localStorage.setItem("codepet.avatar-size", v); }}
+        onAvatarSize={(v) => { setAvatarSize(v); localStorage.setItem("bibo.avatar-size", v); }}
         dictText={dictText} onDictText={(v) => {
           setDictText(v);
           const d: Record<string, string> = {};
@@ -652,7 +652,7 @@ function Shell({ locale, setLocale }: { locale: Locale; setLocale: (v: Locale) =
 }
 
 export function App(): JSX.Element {
-  const [locale, setLocale] = useState<Locale>(() => (localStorage.getItem("codepet.locale") === "en" ? "en" : "id"));
+  const [locale, setLocale] = useState<Locale>(() => (localStorage.getItem("bibo.locale") === "en" ? "en" : "id"));
   return (
     <LocaleProvider value={locale}>
       <AppProvider key={locale}>

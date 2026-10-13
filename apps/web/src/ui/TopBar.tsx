@@ -58,7 +58,7 @@ export function TopBar({
         : `${t.statusOnline}${ocVersion ? ` · OpenCode ${ocVersion}` : ""}`;
   return (
     <header className="topbar">
-      <div className="logotype">CodePet</div>
+      <div className="logotype">Bibo</div>
       {showDirChip && (
         <button
           type="button"

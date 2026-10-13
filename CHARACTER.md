@@ -1,4 +1,4 @@
-# CHARACTER.md — Karakter Robot & Spesifikasi Animasi (CodePet)
+# CHARACTER.md — Karakter Robot & Spesifikasi Animasi (Bibo)
 
 | Item | Isi |
 |---|---|

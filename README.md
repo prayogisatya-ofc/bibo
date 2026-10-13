@@ -1,4 +1,4 @@
-# CodePet — avatar robot untuk OpenCode v2 (MVP v0.1.0)
+# Bibo — avatar robot untuk OpenCode v2 (MVP v0.1.0)
 
 Ngobrol (suara/teks) dengan agent coding OpenCode lewat karakter robot "Bibo":
 perintah diteruskan ke OpenCode v2, karakter bereaksi (berpikir, mengetik,

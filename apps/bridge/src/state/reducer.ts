@@ -1,4 +1,4 @@
-import { type AgentSignal, type AgentState, type FeedItem, type PermissionView, initialAgentState } from "@codepet/protocol";
+import { type AgentSignal, type AgentState, type FeedItem, type PermissionView, initialAgentState } from "@bibo/protocol";
 import { toolKind } from "../opencode/normalize.js";
 import { permissionTitle, toolFeedItem } from "./feed.js";
 

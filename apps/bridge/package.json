@@ -10,7 +10,7 @@
     "smoke:real": "bun run --filter ws-cli start -- --target real"
   },
   "dependencies": {
-    "@codepet/protocol": "*",
+    "@bibo/protocol": "*",
     "@opencode/client": "2.0.16",
     "hono": "^4.7.0",
     "ws": "^8.18.0",

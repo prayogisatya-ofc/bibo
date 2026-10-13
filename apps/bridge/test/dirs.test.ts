@@ -41,7 +41,7 @@ describe("resolveDirPath", () => {
 describe("listDir", () => {
   let root = "";
   beforeAll(async () => {
-    root = await mkdtemp(join(tmpdir(), "codepet-dirs-"));
+    root = await mkdtemp(join(tmpdir(), "bibo-dirs-"));
     await mkdir(join(root, "Zeta"));
     await mkdir(join(root, "alpha"));
     await writeFile(join(root, "b.txt"), "b");

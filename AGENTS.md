@@ -1,4 +1,4 @@
-# AGENTS.md — CodePet
+# AGENTS.md — Bibo
 
 ## Aturan utama
 1. Target OpenCode **v2**. Baca https://opencode.ai/v2/docs/ dan https://opencode.ai/v2/docs/api

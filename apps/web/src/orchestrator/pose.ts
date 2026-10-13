@@ -1,4 +1,4 @@
-import type { AvatarPose, WorkingVariant } from "@codepet/avatar";
+import type { AvatarPose, WorkingVariant } from "@bibo/avatar";
 
 /**
  * Konteks murni untuk derivePose (PRD §8.1–8.2, pemetaan tampilan CHARACTER.md §11).
@@ -36,7 +36,7 @@ export function busyKindOf(tool: string): Exclude<PoseContext["busyKind"], undef
   return TOOL_BUSY_KIND[tool] ?? "thinking";
 }
 
-/** busyKind bridge → varian pose Bekerja (kontrak @codepet/avatar). editing → mengetik. */
+/** busyKind bridge → varian pose Bekerja (kontrak @bibo/avatar). editing → mengetik. */
 const WORKING_VARIANT: Record<"reading" | "editing" | "running" | "searching" | "delegating", WorkingVariant> = {
   reading: "reading",
   editing: "typing",

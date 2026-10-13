@@ -1,5 +1,5 @@
 export const id = {
-  appTitle: "CodePet — {name}",
+  appTitle: "Bibo — {name}",
   onboardTitle: "Pilih folder proyek",
   onboardHint: "Bridge akan membuat atau melanjutkan sesi OpenCode di folder ini.",
   onboardPlaceholder: "/home/kamu/proyek",
@@ -20,7 +20,7 @@ export const id = {
   statusReconnecting: "Menghubungkan…",
   statusDown: "Terputus",
   offlineBanner: "Aku kehilangan kontak dengan OpenCode. Cek server-nya ya.",
-  badVersion: "CodePet membutuhkan OpenCode v2.",
+  badVersion: "Bibo membutuhkan OpenCode v2.",
   inputPlaceholder: "Ketik pesan untuk {name}…",
   send: "Kirim",
   stop: "Stop",
@@ -160,7 +160,7 @@ export const id = {
   avatarS: "Kecil",
   avatarM: "Sedang",
   avatarL: "Besar",
-  privacyNote: "Privasi: di Chrome, audio Web Speech API diproses layanan eksternal. CodePet tidak menyimpan audio.",
+  privacyNote: "Privasi: di Chrome, audio Web Speech API diproses layanan eksternal. Bibo tidak menyimpan audio.",
   settingsHint: "Pintasan Ctrl/Cmd+, membuka/menutup panel ini.",
   // --- FITUR C: pemilih model ---
   modelPickerTitle: "Pilih model",

@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { cleanup, render, screen } from "@testing-library/react";
 import { ActivityFeed } from "../src/ui/ActivityFeed.js";
-import type { FeedItem } from "@codepet/protocol";
+import type { FeedItem } from "@bibo/protocol";
 
 afterEach(cleanup);
 

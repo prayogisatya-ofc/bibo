@@ -3,7 +3,7 @@ import { useT } from "../i18n/index.js";
 import { DirPicker } from "./DirPicker.js";
 import { FolderIcon, PlusIcon } from "./icons.js";
 
-const DIRS_KEY = "codepet.dir-history";
+const DIRS_KEY = "bibo.dir-history";
 
 export function loadDirHistory(): string[] {
   try {
@@ -21,7 +21,7 @@ export function saveDirHistory(dirs: string[]): void {
   }
 }
 
-import type { BridgeMessage } from "@codepet/protocol";
+import type { BridgeMessage } from "@bibo/protocol";
 
 type ListedSession = Extract<BridgeMessage, { type: "session.listed" }>["sessions"][number];
 

@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import type { FeedItem } from "@codepet/protocol";
+import type { FeedItem } from "@bibo/protocol";
 import { useLocale } from "../i18n/index.js";
 import { CheckIcon, XIcon } from "./icons.js";
 import { truncate2k } from "./text-utils.js";

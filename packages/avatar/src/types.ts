@@ -1,7 +1,7 @@
 /**
  * Kontrak AvatarRenderer — CHARACTER.md §12.
  *
- * Decoupled dari @codepet/protocol: tipe avatar didefinisikan di sini dan
+ * Decoupled dari @bibo/protocol: tipe avatar didefinisikan di sini dan
  * package ini TIDAK mengimpor tipe avatar dari package protocol.
  * Logika bisnis hanya memanggil interface ini; tidak boleh menyentuh DOM SVG.
  */

@@ -1,4 +1,4 @@
-import type { AvatarPose, WorkingVariant } from "@codepet/avatar";
+import type { AvatarPose, WorkingVariant } from "@bibo/avatar";
 import { fill, type Strings } from "../i18n/index.js";
 import { character } from "../character.js";
 

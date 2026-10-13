@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { bridgeMessage, type BridgeMessage, type WebPayload } from "@codepet/protocol";
+import { bridgeMessage, type BridgeMessage, type WebPayload } from "@bibo/protocol";
 
 export type ConnStatus = "connecting" | "open" | "reconnecting" | "down";
 

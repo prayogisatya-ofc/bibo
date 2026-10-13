@@ -3,7 +3,7 @@ import { expect, test } from "@playwright/test";
 /**
  * E2E M2 vs mock-opencode + bridge sungguhan.
  * Prasyarat (lihat package.json e2e:*): mock :4498, bridge :4317 (OPENCODE_URL=mock),
- * web dev/preview :5173. Skenario mock dipilih via CODEPET_MOCK_SCENARIO bridge.
+ * web dev/preview :5173. Skenario mock dipilih via BIBO_MOCK_SCENARIO bridge.
  */
 
 async function onboard(page: import("@playwright/test").Page, dir: string): Promise<void> {
@@ -52,7 +52,7 @@ test("edit-files: feed tool + kartu perubahan", async ({ page }) => {
 test("offline: banner + input mati saat bridge down", async ({ page }) => {
   // Arahkan web ke bridge yang mati via localStorage sebelum load.
   await page.addInitScript(() => {
-    localStorage.setItem("codepet.bridge-url", "http://127.0.0.1:4399");
+    localStorage.setItem("bibo.bridge-url", "http://127.0.0.1:4399");
   });
   await page.goto("/");
   await expect(page.getByTestId("offline-banner")).toBeVisible({ timeout: 25000 });

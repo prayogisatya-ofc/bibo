@@ -1,5 +1,5 @@
 export const en = {
-  appTitle: "CodePet — {name}",
+  appTitle: "Bibo — {name}",
   onboardTitle: "Pick a project folder",
   onboardHint: "The bridge will create or resume an OpenCode session in this folder.",
   onboardPlaceholder: "/home/you/project",
@@ -20,7 +20,7 @@ export const en = {
   statusReconnecting: "Connecting…",
   statusDown: "Disconnected",
   offlineBanner: "I lost contact with OpenCode. Please check the server.",
-  badVersion: "CodePet needs OpenCode v2.",
+  badVersion: "Bibo needs OpenCode v2.",
   inputPlaceholder: "Type a message for {name}…",
   send: "Send",
   stop: "Stop",
@@ -160,7 +160,7 @@ export const en = {
   avatarS: "Small",
   avatarM: "Medium",
   avatarL: "Large",
-  privacyNote: "Privacy: in Chrome, Web Speech API audio is processed by external services. CodePet stores no audio.",
+  privacyNote: "Privacy: in Chrome, Web Speech API audio is processed by external services. Bibo stores no audio.",
   settingsHint: "Ctrl/Cmd+, opens/closes this panel.",
   // --- FITUR C: model picker ---
   modelPickerTitle: "Choose model",

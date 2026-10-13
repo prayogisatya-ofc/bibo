@@ -32,14 +32,14 @@ test("mode-switch: chat ↔ ngobrol, uiMode tersimpan di localStorage", async ({
   await expect(page.getByTestId("chat-log")).toHaveCount(0);
   await expect(page.getByTestId("feed")).toHaveCount(0);
   await expect(page.getByTestId("mic-btn")).toBeVisible();
-  expect(await page.evaluate(() => localStorage.getItem("codepet.ui-mode"))).toBe("talk");
+  expect(await page.evaluate(() => localStorage.getItem("bibo.ui-mode"))).toBe("talk");
   // Persist: reload tetap di Ngobrol.
   await page.reload();
   await expect(page.locator(".talk-screen")).toBeVisible({ timeout: 15000 });
   // Kembali ke Chat: riwayat (input) tetap ada.
   await page.getByTestId("mode-chat").click();
   await expect(page.getByTestId("chat-log")).toBeVisible();
-  expect(await page.evaluate(() => localStorage.getItem("codepet.ui-mode"))).toBe("chat");
+  expect(await page.evaluate(() => localStorage.getItem("bibo.ui-mode"))).toBe("chat");
 });
 
 test("talk-permission: popup izin medium di bawah Bibo + petunjuk suara", async ({ page }) => {

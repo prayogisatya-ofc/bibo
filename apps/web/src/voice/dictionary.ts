@@ -4,7 +4,7 @@
  * "titik/koma/baris baru".
  */
 
-const KEY = "codepet.stt-dict";
+const KEY = "bibo.stt-dict";
 
 export const DEFAULT_DICT: Record<string, string> = {
   reakt: "React",

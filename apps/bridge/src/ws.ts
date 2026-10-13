@@ -1,7 +1,7 @@
 import type { Server } from "node:http";
 import type { IncomingMessage } from "node:http";
 import { WebSocketServer, WebSocket } from "ws";
-import { type BridgePayload, type WebMessage, webMessage } from "@codepet/protocol";
+import { type BridgePayload, type WebMessage, webMessage } from "@bibo/protocol";
 
 /**
  * Gateway WebSocket Web ↔ Bridge (PRD §6.6, NFR-SEC-01).

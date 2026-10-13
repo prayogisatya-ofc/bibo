@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import type { AvatarMood, AvatarPose, WorkingVariant } from "@codepet/avatar";
+import type { AvatarMood, AvatarPose, WorkingVariant } from "@bibo/avatar";
 import { fill, useT } from "../i18n/index.js";
 import { character } from "../character.js";
 import { AvatarStage } from "./AvatarStage.js";
@@ -10,7 +10,7 @@ import { ChangesCard } from "./ChangesCard.js";
 import { ActivityFeed } from "./ActivityFeed.js";
 import { activityChip, CHAT_AVATAR_PX, stageSub, stageTitle } from "./stageText.js";
 import type { DiffFile } from "../state/store.js";
-import type { FeedItem } from "@codepet/protocol";
+import type { FeedItem } from "@bibo/protocol";
 
 /**
  * Mode Chat (§C.3): kartu kiri 360px (panggung Bibo, chip aktivitas, judul

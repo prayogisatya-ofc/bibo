@@ -395,7 +395,7 @@ async function main() {
       try {
         await client.session.instructions.entry.put({
           sessionID: session.id,
-          key: "codepet.voice",
+          key: "bibo.voice",
           value: "Akhiri jawaban dengan <speak>ringkasan 1 kalimat</speak>.",
         });
         const entries = await client.session.instructions.entry.list({ sessionID: session.id });

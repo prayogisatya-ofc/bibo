@@ -1,4 +1,4 @@
-import type { AgentSignal } from "@codepet/protocol";
+import type { AgentSignal } from "@bibo/protocol";
 import type { OpenCodeClient } from "./client.js";
 
 /**

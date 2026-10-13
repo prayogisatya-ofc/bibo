@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it } from "vitest";
 import { cleanup, render, screen } from "@testing-library/react";
 import { AppProvider, useApp } from "../src/state/store.js";
-import type { BridgeMessage, BridgePayload } from "@codepet/protocol";
+import type { BridgeMessage, BridgePayload } from "@bibo/protocol";
 
 afterEach(cleanup);
 

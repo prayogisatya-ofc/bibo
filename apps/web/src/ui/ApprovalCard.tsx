@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import type { PermissionView } from "@codepet/protocol";
+import type { PermissionView } from "@bibo/protocol";
 import { fill, useT } from "../i18n/index.js";
 import { character } from "../character.js";
 import { ChevronDownIcon, MicIcon, QuestionIcon } from "./icons.js";

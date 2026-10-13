@@ -1,5 +1,5 @@
 import { useState } from "react";
-import type { FormView } from "@codepet/protocol";
+import type { FormView } from "@bibo/protocol";
 import { useT } from "../i18n/index.js";
 import { ChevronDownIcon } from "./icons.js";
 import { useFocusTrap } from "./useFocusTrap.js";

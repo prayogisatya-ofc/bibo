@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import type { AvatarMood, AvatarPose, WorkingVariant } from "@codepet/avatar";
+import type { AvatarMood, AvatarPose, WorkingVariant } from "@bibo/avatar";
 import { fill, useT } from "../i18n/index.js";
 import { character } from "../character.js";
 import { AvatarStage } from "./AvatarStage.js";

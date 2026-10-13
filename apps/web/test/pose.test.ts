@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { AvatarPose, WorkingVariant } from "@codepet/avatar";
+import type { AvatarPose, WorkingVariant } from "@bibo/avatar";
 import { busyKindOf, derivePose, poseLabel, type PoseContext } from "../src/orchestrator/pose.js";
 
 const base: PoseContext = {

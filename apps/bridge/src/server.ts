@@ -10,7 +10,7 @@ import {
   type WebMessage,
   agentState,
   webMessage,
-} from "@codepet/protocol";
+} from "@bibo/protocol";
 import { loadConfig } from "./config.js";
 import { connect, type OpenCodeClient } from "./opencode/client.js";
 import { EventNormalizer, type RawEvent } from "./opencode/normalize.js";
@@ -74,7 +74,7 @@ async function main(): Promise<void> {
   let lastAssistantText = "";
   let lastDiffFiles: Array<{ path: string }> = [];
   let lastProgressAt = 0;
-  const summaryMode = summaryModeFromEnv(process.env["CODEPET_SUMMARY_MODE"]);
+  const summaryMode = summaryModeFromEnv(process.env["BIBO_SUMMARY_MODE"]);
 
   function speechLocale(): "id" | "en" {
     return store.settings["locale"] === "en" ? "en" : "id";
@@ -402,10 +402,10 @@ function isSettledError(e: unknown): boolean {
       }
     }
     const created = await oc!.client.session.create({
-      title: "CodePet",
+      title: "Bibo",
       location: { directory: dir },
       // Test hook: pilih skenario mock. Tidak dipakai di produksi.
-      ...(process.env["CODEPET_MOCK_SCENARIO"] ? { metadata: { mockScenario: process.env["CODEPET_MOCK_SCENARIO"] } } : {}),
+      ...(process.env["BIBO_MOCK_SCENARIO"] ? { metadata: { mockScenario: process.env["BIBO_MOCK_SCENARIO"] } } : {}),
     });
     // Injeksi instruksi suara via instruction entry (cara terverifikasi M0).
     try {

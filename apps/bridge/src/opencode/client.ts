@@ -23,7 +23,7 @@ export async function connect(urlOverride?: string): Promise<Connection> {
   }
   const info = await client.server.info();
   if (!info.version.startsWith(SUPPORTED_MAJOR)) {
-    throw new Error(`CodePet membutuhkan OpenCode v2, server melaporkan ${info.version}`);
+    throw new Error(`Bibo membutuhkan OpenCode v2, server melaporkan ${info.version}`);
   }
   return { client, version: info.version };
 }

@@ -8,7 +8,7 @@ import {
   type AvatarPose,
   type ReactionKind,
   type WorkingVariant,
-} from "@codepet/avatar";
+} from "@bibo/avatar";
 
 /**
  * Galeri uji visual manual (?dev=avatar) — CHARACTER.md §14.

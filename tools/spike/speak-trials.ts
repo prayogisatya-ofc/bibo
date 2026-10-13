@@ -1,6 +1,6 @@
 /**
  * M4 DoD: 10 giliran terhadap OpenCode v2 NYATA — jalur ringkasan + teks ucapan.
- * Memakai model default server KECUALI bila CODEPET_TRIAL_MODEL/Provider diset
+ * Memakai model default server KECUALI bila BIBO_TRIAL_MODEL/Provider diset
  * (lingkungan ini: default 9router mati → fallback ke model gratis yang bekerja).
  * Putaran ganjil: instruction entry dipasang (jalur tag). Genap: tanpa entry
  * (jalur generate/heuristic). Biaya: 10 prompt kecil.
@@ -14,8 +14,8 @@ import { splitSpeak } from "../../apps/bridge/src/speech/parse-speak.js";
 import { VOICE_INSTRUCTION_KEY, VOICE_INSTRUCTION_VALUE, clamp2 } from "../../apps/bridge/src/speech/summarize.js";
 
 const MODEL = {
-  id: process.env["CODEPET_TRIAL_MODEL"] ?? "muse-spark-1.3-free",
-  providerID: process.env["CODEPET_TRIAL_PROVIDER"] ?? "openagentic",
+  id: process.env["BIBO_TRIAL_MODEL"] ?? "muse-spark-1.3-free",
+  providerID: process.env["BIBO_TRIAL_PROVIDER"] ?? "openagentic",
 };
 
 const TASKS = [

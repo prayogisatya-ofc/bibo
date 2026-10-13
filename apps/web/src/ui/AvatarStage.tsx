@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
-import { BotRenderer, type AvatarRenderer } from "@codepet/avatar";
-import type { AvatarMood, AvatarPose, WorkingVariant } from "@codepet/avatar";
+import { BotRenderer, type AvatarRenderer } from "@bibo/avatar";
+import type { AvatarMood, AvatarPose, WorkingVariant } from "@bibo/avatar";
 import { poseLabel } from "../orchestrator/pose.js";
 import { character } from "../character.js";
 import { rendererRef } from "../avatar/rendererRef.js";

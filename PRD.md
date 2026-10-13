@@ -1,8 +1,8 @@
-# PRD — CodePet: Avatar Robot Digital untuk OpenCode v2
+# PRD — Bibo: Avatar Robot Digital untuk OpenCode v2
 
 | Item | Isi |
 |---|---|
-| **Nama kerja** | CodePet (placeholder, boleh diganti) |
+| **Nama kerja** | Bibo (placeholder, boleh diganti) |
 | **Karakter MVP** | "Bibo" — robot mungil putih berbentuk squircle, dua mata oval, dua tangan melayang (SVG 2D, mengikuti gambar referensi) |
 | **Versi dokumen** | 1.1 (karakter diganti dari kucing "Mochi" menjadi robot "Bibo") |
 | **Tanggal** | 10 Oktober 2026 |
@@ -18,7 +18,7 @@
 
 ## 0. Ringkasan Eksekutif
 
-CodePet adalah aplikasi web lokal berisi **karakter kartun animasi** yang menjadi "wajah" dari OpenCode. Pengguna berbicara (suara) atau mengetik (chat) ke karakter. Perintah diteruskan ke OpenCode v2 yang menjalankan pekerjaan coding sungguhan (baca/edit file, jalankan perintah, dll). Karakter:
+Bibo adalah aplikasi web lokal berisi **karakter kartun animasi** yang menjadi "wajah" dari OpenCode. Pengguna berbicara (suara) atau mengetik (chat) ke karakter. Perintah diteruskan ke OpenCode v2 yang menjalankan pekerjaan coding sungguhan (baca/edit file, jalankan perintah, dll). Karakter:
 
 1. **Mendengar** (mic → teks),
 2. **Bereaksi** secara visual terhadap apa yang OpenCode kerjakan (berpikir, mengetik, menjalankan, bertanya, senang, bingung),
@@ -156,7 +156,7 @@ Aturan keras untuk agent:
 
 **HTTP API** — `https://opencode.ai/v2/docs/api` (142 operasi, 260 skema)
 
-Endpoint yang dipakai CodePet (nama operasi → rute):
+Endpoint yang dipakai Bibo (nama operasi → rute):
 
 | Kebutuhan | Operation ID | Rute | Catatan |
 |---|---|---|---|
@@ -219,7 +219,7 @@ dipastikan lewat observasi. Hasil spike (`docs/fixtures/opencode-events/`, 7 fix
 ### 5.4 Kompatibilitas versi
 
 - Bridge membaca `server.info` saat start dan mencatat versi di log. Simpan versi + hasil spike di findings.
-- Jika versi mayor bukan `2.x`, tampilkan error jelas di UI ("CodePet membutuhkan OpenCode v2").
+- Jika versi mayor bukan `2.x`, tampilkan error jelas di UI ("Bibo membutuhkan OpenCode v2").
 - Pin versi `@opencode/client` secara eksak di `package.json` setelah spike (v2 masih berkembang; ada laporan perubahan antar rilis).
 
 ---
@@ -908,7 +908,7 @@ v0.2: Whisper STT → TTS natural + animasi bicara audio-reaktif → switcher se
 ## 15. Aturan Kerja untuk AI Agent (taruh juga di `AGENTS.md`)
 
 ```markdown
-# AGENTS.md — CodePet
+# AGENTS.md — Bibo
 
 ## Aturan utama
 1. Target OpenCode **v2**. Baca https://opencode.ai/v2/docs/ dan https://opencode.ai/v2/docs/api
@@ -961,7 +961,7 @@ Tes hijau, tipe ketat tanpa `any` baru, tanpa TODO tak tercatat, README/ADR dipe
 ### Lampiran A — Instruksi suara untuk OpenCode (disuntik ke sesi / `AGENTS.md`)
 
 ```markdown
-## Gaya jawaban untuk antarmuka suara (CodePet)
+## Gaya jawaban untuk antarmuka suara (Bibo)
 Setelah menyelesaikan tugas, akhiri jawabanmu dengan SATU blok:
 <speak>1–2 kalimat Bahasa Indonesia santai yang merangkum hasilnya untuk diucapkan.</speak>
 Aturan blok <speak>:

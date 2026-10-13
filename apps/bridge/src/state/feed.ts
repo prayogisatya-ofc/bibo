@@ -1,4 +1,4 @@
-import type { FeedItem } from "@codepet/protocol";
+import type { FeedItem } from "@bibo/protocol";
 
 /** Pembangun item activity feed (PRD §7.3, dipakai state/reducer.ts). */
 

@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { AVATAR_POSES } from "@codepet/avatar";
+import { AVATAR_POSES } from "@bibo/avatar";
 
 /**
  * Galeri visual (fase E, CHARACTER.md §14): tiap pose × tema, dibekukan

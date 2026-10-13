@@ -1,4 +1,4 @@
-import type { AgentSignal, ExecOutcome } from "@codepet/protocol";
+import type { AgentSignal, ExecOutcome } from "@bibo/protocol";
 
 /**
  * Normalisasi event OpenCode v2 → AgentSignal (PRD §6.4, ADR-007).
