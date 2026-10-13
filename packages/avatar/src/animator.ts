@@ -88,7 +88,40 @@ function parseTransform(tf: string): GsapProps {
   return out;
 }
 
-/** Konversi satu keyframe WAAPI ke props GSAP. */
+/** Origin SVG (koordinat viewBox) untuk elemen dengan transform-box: view-box.
+ * GSAP menimpa transform-origin CSS saat inisialisasi, jadi nilai diambil
+ * dari sini (sesuai svg.ts) bukan dari getComputedStyle. */
+const SVG_VIEWBOX_ORIGINS: Record<string, string> = {
+  antenna: "100 62",
+  "body-float": "100 166",
+};
+
+/** Ambil svgOrigin dari CSS transform-origin bila transform-box: view-box (untuk SVG). */
+function getSvgOrigin(el: Element): string | undefined {
+  // Cek peta hardcoded dulu (paling andal — GSAP menimpa computed style).
+  const id = el.getAttribute("id");
+  if (id && SVG_VIEWBOX_ORIGINS[id] !== undefined) {
+    return SVG_VIEWBOX_ORIGINS[id];
+  }
+  try {
+    const cs = getComputedStyle(el as unknown as globalThis.Element);
+    // getComputedStyle tersedia di browser; di jsdom transformBox mungkin kosong.
+    const box = (cs as unknown as { transformBox?: string }).transformBox ?? "";
+    if (box !== "view-box") return undefined;
+    const origin = cs.transformOrigin ?? "";
+    const m = /(-?[\d.]+)px\s+(-?[\d.]+)px/.exec(origin);
+    if (!m || m[1] === undefined || m[2] === undefined) return undefined;
+    // Abaikan "0px 0px" — itu tanda GSAP sudah menimpa (bukan nilai asli).
+    if (m[1] === "0" && m[2] === "0") return undefined;
+    return `${m[1]} ${m[2]}`;
+  } catch {
+    return undefined;
+  }
+}
+
+/** Konversi satu keyframe WAAPI ke props GSAP.
+ * Hanya untuk keyframes 'transform' string & opacity (jalur GSAP).
+ * Properti individual (rotate/translate/scale) ditangani via WAAPI. */
 function keyframeToProps(kf: Keyframe): GsapProps {
   const out: GsapProps = {};
   if (typeof kf.transform === "string") {
@@ -98,9 +131,10 @@ function keyframeToProps(kf: Keyframe): GsapProps {
     const v = kf.opacity;
     out.opacity = typeof v === "string" ? parseFloat(v) : (v as number);
   }
-  // Properti CSS lain (mis. "d" untuk path) diteruskan apa adanya bila string/number.
+  // Properti CSS lain diteruskan apa adanya bila string/number.
   for (const key of Object.keys(kf)) {
-    if (key === "transform" || key === "opacity" || key === "offset" || key === "easing" || key === "composite") continue;
+    if (key === "transform" || key === "opacity" || key === "offset" || key === "easing" || key === "composite" ||
+        key === "rotate" || key === "translate" || key === "scale") continue;
     const v = (kf as Record<string, unknown>)[key];
     if (typeof v === "string" || typeof v === "number") out[key] = v;
   }
@@ -114,6 +148,25 @@ interface Tracked {
   infinite: boolean;
   /** Durasi satu iterasi (detik) — untuk seekAll. */
   duration: number;
+}
+
+/** Animasi no-op untuk lingkungan tanpa WAAPI (tidak terjadi di browser target). */
+function noopAnimation(): Animation {
+  return {
+    cancel() {},
+    finish() {},
+    pause() {},
+    play() {},
+    reverse() {},
+    persist() {},
+    commitStyles() {},
+    currentTime: 0,
+    playbackRate: 1,
+    playState: "finished",
+    onfinish: null,
+    oncancel: null,
+    onremove: null,
+  } as unknown as Animation;
 }
 
 /** Facade mirip WAAPI Animation di atas GSAP (untuk kompatibilitas). */
@@ -166,12 +219,35 @@ export class Animator {
   ): Animation {
     this.stop(el, id);
 
+    // HYBRID: properti individual (rotate/translate/scale) pakai WAAPI —
+    // browser menangani transform-box/transform-origin SVG dengan benar.
+    // GSAP hanya untuk keyframes 'transform' string & opacity (lebih halus).
+    const usesIndividual = keyframes.some((kf) => {
+      const r = kf as Record<string, unknown>;
+      return typeof r["rotate"] === "string" || typeof r["translate"] === "string" || typeof r["scale"] === "string";
+    });
+    if (usesIndividual) {
+      return this.startWaapi(el, id, layer, keyframes, options);
+    }
+
     const durationMs = typeof options.duration === "number" ? options.duration : 1000;
     const durationS = Math.max(durationMs / 1000, 0.001);
     const ease = mapEase(typeof options.easing === "string" ? options.easing : undefined);
     const iterations = options.iterations ?? 1;
     const infinite = iterations === Infinity;
     const delayS = typeof options.delay === "number" ? options.delay / 1000 : 0;
+    // Hormati transform-box: view-box pada SVG (mis. antena) agar origin benar.
+    // Set via gsap.set EKSPLISIT sebelum timeline (bukan via vars) agar GSAP
+    // tidak mengabaikannya.
+    const svgOrigin = getSvgOrigin(el);
+    if (svgOrigin !== undefined) {
+      try {
+        gsap.set(el as unknown as object, { svgOrigin });
+      } catch {
+        /* abaikan */
+      }
+    }
+    const originVars = svgOrigin !== undefined ? { svgOrigin } : {};
 
     // Hitung offset tiap keyframe (WAAPI: tanpa offset = terbagi rata).
     const n = keyframes.length;
@@ -190,6 +266,7 @@ export class Animator {
         } else {
           const props = keyframeToProps(kf0);
           tween = gsap.to(el as unknown as object, {
+            ...originVars,
             ...props,
             duration: durationS,
             ease,
@@ -201,12 +278,22 @@ export class Animator {
         }
       } else {
         // Multi-keyframe: timeline dengan tween per segmen.
+        // PENTING: set nilai keyframe pertama di t=0 (seperti WAAPI),
+        // lalu tween ke keyframe berikutnya.
         const tl = gsap.timeline({
           delay: delayS,
           repeat: infinite ? -1 : (iterations as number) - 1,
           yoyo: options.direction === "alternate",
           paused: this.paused,
         });
+        // Set state awal ke keyframe[0] (mendukung fill:"backwards").
+        const kf0 = keyframes[0];
+        if (kf0) {
+          const props0 = keyframeToProps(kf0);
+          if (Object.keys(props0).length > 0) {
+            tl.set(el as unknown as object, { ...originVars, ...props0 }, 0);
+          }
+        }
         for (let i = 1; i < n; i++) {
           const from = offsets[i - 1] ?? 0;
           const to = offsets[i] ?? 1;
@@ -217,7 +304,7 @@ export class Animator {
           // Easing per-keyframe bila ada, else easing global.
           const kfEaseRaw = (kf as { easing?: unknown }).easing;
           const kfEase = typeof kfEaseRaw === "string" ? mapEase(kfEaseRaw) : ease;
-          tl.to(el as unknown as object, { ...props, duration: segDur, ease: kfEase }, from * durationS);
+          tl.to(el as unknown as object, { ...originVars, ...props, duration: segDur, ease: kfEase }, from * durationS);
         }
         tween = tl;
       }
@@ -261,6 +348,60 @@ export class Animator {
     }
 
     return facade as unknown as Animation;
+  }
+
+  /** Jalur WAAPI untuk properti individual (rotate/translate/scale).
+   * Browser menangani transform-box/transform-origin SVG dengan benar,
+   * tidak seperti GSAP yang menimpa origin. */
+  private startWaapi(
+    el: Element,
+    id: string,
+    layer: AnimLayer,
+    keyframes: Keyframe[],
+    options: KeyframeAnimationOptions,
+  ): Animation {
+    const anyEl = el as Element & { animate?: Element["animate"] };
+    let anim: Animation;
+    try {
+      anim =
+        typeof anyEl.animate === "function" ? anyEl.animate(keyframes, options) : noopAnimation();
+    } catch {
+      anim = noopAnimation();
+    }
+    anim.playbackRate = this.rate;
+    (anim as unknown as { __animId?: string }).__animId = id;
+    if (this.paused) anim.pause();
+    // Simpan sebagai Tracked dengan tween facade agar stop/pause konsisten.
+    // Untuk WAAPI, bungkus dalam objek yang meniru antarmuka GSAP minimal.
+    const wrapper = {
+      kill: () => { try { anim.cancel(); } catch { /* abaikan */ } },
+      pause: () => { try { anim.pause(); } catch { /* abaikan */ } },
+      play: () => { try { anim.play(); } catch { /* abaikan */ } },
+      timeScale: (r: number) => { try { anim.playbackRate = r; } catch { /* abaikan */ } },
+      progress: (p: number) => {
+        try {
+          const dur = typeof options.duration === "number" ? options.duration : 1000;
+          anim.currentTime = p * dur;
+        } catch { /* abaikan */ }
+      },
+      time: (_t: number) => { /* tidak dipakai untuk WAAPI */ },
+      eventCallback: (_e: string, _cb: () => void) => { /* tidak dipakai */ },
+    };
+    const durationMs = typeof options.duration === "number" ? options.duration : 1000;
+    let per = this.tracked.get(el);
+    if (!per) {
+      per = new Map();
+      this.tracked.set(el, per);
+    }
+    per.set(id, {
+      id,
+      layer,
+      tween: wrapper as unknown as gsap.core.Timeline,
+      infinite: options.iterations === Infinity,
+      duration: Math.max(durationMs / 1000, 0.001),
+    });
+    this.syncDataAnim(el);
+    return anim;
   }
 
   stop(el: Element, id: string): void {
