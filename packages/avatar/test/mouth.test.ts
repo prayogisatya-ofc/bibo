@@ -8,7 +8,8 @@ describe("mouthParams (§6.7)", () => {
     expect(m.closed).toBe(true);
     expect(m.rx).toBeCloseTo(3, 5);
     expect(m.ry).toBeCloseTo(1.5, 5);
-    expect(m.cy).toBeCloseTo(120 + 1.5 * 0.6, 5);
+    // Koordinat LOKAL (di dalam #mouth translate(100,120)): cy = ry·0.6.
+    expect(m.cy).toBeCloseTo(1.5 * 0.6, 5);
     expect(m.tongue).toBeNull();
   });
 
@@ -21,18 +22,19 @@ describe("mouthParams (§6.7)", () => {
     const m = mouthParams(1);
     expect(m.rx).toBeCloseTo(6.5, 5); // 3 + 3.5·1
     expect(m.ry).toBeCloseTo(8, 5); // 1.5 + 6.5·1
-    expect(m.cy).toBeCloseTo(120 + 8 * 0.6, 5);
+    expect(m.cy).toBeCloseTo(8 * 0.6, 5);
     expect(m.tongue).not.toBeNull();
+    expect(m.tongue?.cx).toBeCloseTo(0, 5);
     expect(m.tongue?.rx).toBeCloseTo(6.5 * 0.6, 5);
     expect(m.tongue?.ry).toBeCloseTo(8 * 0.4, 5);
-    expect(m.tongue?.cy).toBeCloseTo(120 + 8 * 1.3, 5);
+    expect(m.tongue?.cy).toBeCloseTo(8 * 1.3, 5);
   });
 
   it("a=0.5: lidah tampil (a>0.4)", () => {
     const m = mouthParams(0.5);
     expect(m.rx).toBeCloseTo(3 + 3.5 * 0.5, 5);
     expect(m.ry).toBeCloseTo(1.5 + 6.5 * 0.5, 5);
-    expect(m.cy).toBeCloseTo(120 + m.ry * 0.6, 5);
+    expect(m.cy).toBeCloseTo(m.ry * 0.6, 5);
     expect(m.tongue).not.toBeNull();
   });
 

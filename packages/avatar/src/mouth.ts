@@ -26,10 +26,12 @@ export function mouthParams(a: number): MouthParams {
   const closed = a < 0.08;
   const rx = 3 + 3.5 * a;
   const ry = 1.5 + 6.5 * a;
-  const cy = 120 + ry * 0.6;
+  // Koordinat LOKAL (elips di dalam #mouth yang di-translate(100,120)).
+  // CHARACTER.md §6.7 memakai absolut: cy = 120 + ry·0.6 → lokal: ry·0.6.
+  const cy = ry * 0.6;
   const tongue =
     a > 0.4
-      ? { cx: 100, cy: 120 + ry * 1.3, rx: rx * 0.6, ry: ry * 0.4 }
+      ? { cx: 0, cy: ry * 1.3, rx: rx * 0.6, ry: ry * 0.4 }
       : null;
   return { rx, ry, cy, tongue, closed };
 }
