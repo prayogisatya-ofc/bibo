@@ -4,6 +4,7 @@ import { createRoot } from "react-dom/client";
 import "@fontsource/nunito/500.css";
 import "@fontsource/nunito/700.css";
 import "@fontsource/nunito/800.css";
+import "./tailwind.css";
 import "./app.css";
 
 // Lazy agar galeri /dev/avatar bisa dimuat tanpa memuat modul App

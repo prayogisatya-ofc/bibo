@@ -1,0 +1,12 @@
+/* Tailwind CSS v4 — utilitas. Custom theme Bibo memakai CSS variables
+ * dari app.css agar konsisten dengan design tokens yang ada. */
+@import "tailwindcss";
+
+@theme {
+  --color-bibo-accent: var(--accent);
+  --color-bibo-card: var(--card);
+  --color-bibo-line: var(--line);
+  --color-bibo-text: var(--text);
+  --color-bibo-text2: var(--text-2);
+  --font-sans: "Nunito", ui-sans-serif, system-ui, sans-serif;
+}

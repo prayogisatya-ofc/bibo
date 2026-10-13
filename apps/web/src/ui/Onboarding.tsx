@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useT } from "../i18n/index.js";
 import { DirPicker } from "./DirPicker.js";
 import { FolderIcon, PlusIcon } from "./icons.js";
+import { Button } from "./components/index.js";
 
 const DIRS_KEY = "bibo.dir-history";
 
@@ -51,9 +52,9 @@ export function Onboarding({
         <h2>{t.onboardTitle}</h2>
         <p>{t.onboardHint}</p>
         <div className="row">
-          <button type="button" onClick={() => setPickerOpen(true)} data-testid="dir-browse" title={t.dirBrowse}>
+          <Button variant="secondary" onClick={() => setPickerOpen(true)} data-testid="dir-browse" title={t.dirBrowse}>
             <FolderIcon size={16} /> {t.dirBrowse}
-          </button>
+          </Button>
           {dirN && <span className="muted" data-testid="dir-chosen">{dirN}</span>}
         </div>
         {pickerOpen && (
@@ -72,14 +73,14 @@ export function Onboarding({
           <p className="muted" data-testid="sess-hint">{t.sessionPickFolderFirst}</p>
         ) : (
           <>
-            <button
-              type="button"
+            <Button
+              variant="primary"
               disabled={!dirN}
               onClick={() => onPick(dirN)}
               data-testid="sess-new"
             >
               <PlusIcon size={14} /> {t.sessionNew}
-            </button>
+            </Button>
             {folderSessions.length > 0 ? (
               <ul className="recent">
                 {folderSessions.map((sn) => (
