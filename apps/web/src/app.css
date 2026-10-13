@@ -491,7 +491,7 @@ button:disabled { opacity: 0.5; cursor: default; }
   border: 1px solid var(--line);
   border-radius: 16px;
   padding: 14px 16px;
-  margin: 0 24px;
+  margin: 0 24px 12px;
   background: var(--card);
 }
 .changes-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
@@ -552,6 +552,8 @@ button:disabled { opacity: 0.5; cursor: default; }
 
 /* Kartu izin/form yang menempel di atas komposer (mode chat) */
 .docked-cards { padding: 0 24px; display: flex; flex-direction: column; gap: 12px; }
+/* Beri jarak ke komposer hanya bila ada kartu (fragment kosong tak makan tempat). */
+.docked-cards:not(:empty) { margin-bottom: 12px; }
 
 /* ==========================================================================
  * Mode Ngobrol
@@ -929,8 +931,10 @@ button:disabled { opacity: 0.5; cursor: default; }
 
 /* Pemilih folder (FITUR B): breadcrumb + daftar isi, tanpa ikon emoji. */
 .dir-picker { min-width: min(480px, 92vw); }
-.dir-picker .picker-head { align-items: center; justify-content: space-between; }
-.dir-picker .picker-head h2 { margin: 0; }
+/* Header dialog (judul + tombol ×): berlaku untuk SEMUA popup yang memakai
+ * .row.picker-head (Onboarding, DirPicker, dst.) — × selalu di ujung kanan. */
+.modal-box .picker-head { align-items: center; justify-content: space-between; }
+.modal-box .picker-head h2 { margin: 0; }
 .crumbs { display: flex; flex-wrap: wrap; align-items: center; gap: 0.25rem; font-size: 0.95rem; }
 .crumb-wrap { display: inline-flex; align-items: center; }
 .crumb-sep { color: var(--text-2); margin: 0 0.15rem; }
