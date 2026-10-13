@@ -54,36 +54,54 @@ interface GsapProps {
   [k: string]: unknown;
 }
 
-/** Urai string transform CSS ("translate(100px,120px) scaleY(0.1)") ke props GSAP. */
+/** Urai string transform CSS ke props GSAP.
+ * PENTING: beberapa translate() diakumulasi (bukan ditimpa) — pola
+ * "translate(42px,152px) translate(0px,-12px)" = base + delta. */
 function parseTransform(tf: string): GsapProps {
   const out: GsapProps = {};
   let m: RegExpExecArray | null;
 
-  // translate(x, y) | translate(x)
-  m = /translate\(\s*(-?[\d.]+)(?:px)?\s*,?\s*(-?[\d.]+)?(?:px)?\s*\)/.exec(tf);
-  if (m && m[1] !== undefined) {
-    out.x = parseFloat(m[1]);
-    if (m[2] !== undefined) out.y = parseFloat(m[2]);
+  // Kumpulkan SEMUA translate() lalu jumlahkan.
+  let tx = 0, ty = 0, hasT = false;
+  const reT = /translate\(\s*(-?[\d.]+)(?:px)?\s*,?\s*(-?[\d.]+)?(?:px)?\s*\)/g;
+  while ((m = reT.exec(tf)) !== null) {
+    if (m[1] !== undefined) { tx += parseFloat(m[1]); hasT = true; }
+    if (m[2] !== undefined) ty += parseFloat(m[2]);
   }
-  m = /translateX\(\s*(-?[\d.]+)(?:px)?\s*\)/.exec(tf);
-  if (m && m[1] !== undefined) out.x = parseFloat(m[1]);
-  m = /translateY\(\s*(-?[\d.]+)(?:px)?\s*\)/.exec(tf);
-  if (m && m[1] !== undefined) out.y = parseFloat(m[1]);
-
-  // scale(s) | scale(sx, sy)
-  m = /scale\(\s*(-?[\d.]+)\s*,?\s*(-?[\d.]+)?\s*\)/.exec(tf);
-  if (m && m[1] !== undefined) {
-    out.scaleX = parseFloat(m[1]);
-    out.scaleY = m[2] !== undefined ? parseFloat(m[2]) : parseFloat(m[1]);
+  const reTX = /translateX\(\s*(-?[\d.]+)(?:px)?\s*\)/g;
+  while ((m = reTX.exec(tf)) !== null) {
+    if (m[1] !== undefined) { tx += parseFloat(m[1]); hasT = true; }
   }
-  m = /scaleX\(\s*(-?[\d.]+)\s*\)/.exec(tf);
-  if (m && m[1] !== undefined) out.scaleX = parseFloat(m[1]);
-  m = /scaleY\(\s*(-?[\d.]+)\s*\)/.exec(tf);
-  if (m && m[1] !== undefined) out.scaleY = parseFloat(m[1]);
+  const reTY = /translateY\(\s*(-?[\d.]+)(?:px)?\s*\)/g;
+  while ((m = reTY.exec(tf)) !== null) {
+    if (m[1] !== undefined) { ty += parseFloat(m[1]); hasT = true; }
+  }
+  if (hasT) { out.x = tx; out.y = ty; }
 
-  // rotate(deg)
-  m = /rotate\(\s*(-?[\d.]+)(?:deg)?\s*\)/.exec(tf);
-  if (m && m[1] !== undefined) out.rotation = parseFloat(m[1]);
+  // scale(s) | scale(sx, sy) — ambil yang terakhir (tidak diakumulasi).
+  const reS = /scale\(\s*(-?[\d.]+)\s*,?\s*(-?[\d.]+)?\s*\)/g;
+  let lastS: RegExpExecArray | null = null;
+  while ((m = reS.exec(tf)) !== null) lastS = m;
+  if (lastS && lastS[1] !== undefined) {
+    out.scaleX = parseFloat(lastS[1]);
+    out.scaleY = lastS[2] !== undefined ? parseFloat(lastS[2]) : parseFloat(lastS[1]);
+  }
+  const reSX = /scaleX\(\s*(-?[\d.]+)\s*\)/g;
+  let lastSX: RegExpExecArray | null = null;
+  while ((m = reSX.exec(tf)) !== null) lastSX = m;
+  if (lastSX && lastSX[1] !== undefined) out.scaleX = parseFloat(lastSX[1]);
+  const reSY = /scaleY\(\s*(-?[\d.]+)\s*\)/g;
+  let lastSY: RegExpExecArray | null = null;
+  while ((m = reSY.exec(tf)) !== null) lastSY = m;
+  if (lastSY && lastSY[1] !== undefined) out.scaleY = parseFloat(lastSY[1]);
+
+  // rotate(deg) — ambil yang terakhir, akumulasi bila beberapa.
+  let rot = 0, hasR = false;
+  const reR = /rotate\(\s*(-?[\d.]+)(?:deg)?\s*\)/g;
+  while ((m = reR.exec(tf)) !== null) {
+    if (m[1] !== undefined) { rot += parseFloat(m[1]); hasR = true; }
+  }
+  if (hasR) out.rotation = rot;
 
   return out;
 }

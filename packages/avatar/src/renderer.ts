@@ -725,8 +725,10 @@ export class BotRenderer implements AvatarRenderer, PoseOps {
       );
     }
     applyPoseLayers(this, pose, variant);
-    // Overlay speaking bertahan di atas pose baru (mulut/busur/lampu).
-    if (this.speaking && pose !== "offline") {
+    // Overlay speaking bertahan di atas pose baru (mulut/busur/lampu) —
+    // KECUALI working: animasi bicara bentrok dengan animasi kerja,
+    // jadi saat bekerja avatar langsung bekerja tanpa overlay bicara.
+    if (this.speaking && pose !== "offline" && pose !== "working") {
       this.setMouth("m-open");
       startSpeakingVisuals(this, { lamp: pose !== "asking" && pose !== "sleeping" });
     }
@@ -874,6 +876,8 @@ export class BotRenderer implements AvatarRenderer, PoseOps {
   /* ------------------------------ speaking ------------------------------ */
 
   private startSpeaking(): void {
+    // Saat working: jangan tampilkan overlay bicara (bentrok dengan animasi kerja).
+    if (this.pose === "working") return;
     this.speaking = true;
     this.speakA = 0;
     this.svg.dataset.speaking = "true";
