@@ -150,6 +150,11 @@ export function applyIdle(r: PoseOps): void {
   r.setMouth("m-smile");
   r.setLamp("stem");
   lampPattern(r, "standby");
+  // Tangan yang tak dipakai pose sebelumnya kembali ke sisi (mis. sehabis
+  // celebrate/minta-izin/tidur): meluncur, bukan meloncat.
+  const settle = r.T.transition.poseMs;
+  r.moveHand("l", 0, 0, settle, T.ease.out);
+  r.moveHand("r", 0, 0, settle, T.ease.out);
   const period = jittered(r.rand, T.idle.float.periodMs, T.idle.float.jitter);
   r.floatBody({
     ampY: T.idle.float.ampY,
@@ -348,6 +353,8 @@ export function applyThinking(r: PoseOps): void {
   // Tangan R ke dagu (114,148): offset (-44, 0) dari (158,148).
   r.placeHand("r", "front");
   r.moveHand("r", T.thinking.chin.dx, T.thinking.chin.dy, T.thinking.handToChinMs, T.ease.pop);
+  // Tangan L tak dipakai pose ini: kembalikan ke sisi.
+  r.moveHand("l", 0, 0, r.T.transition.poseMs, T.ease.out);
   r.later(T.thinking.handToChinMs, () => chinRubLoop(r));
   // Tangan L ambient (composite:add agar tidak menimpa posisi dasar).
   const handL = r.el("hand-l");
@@ -735,6 +742,8 @@ export function applyAsking(r: PoseOps): void {
   // Raise hand R: antisipasi turun 2 unit, lalu naik ke (160,84).
   r.placeHand("r", "front");
   r.moveHand("r", 0, T.asking.anticipateY, 80, T.ease.soft);
+  // Tangan L tak dipakai pose ini: kembalikan ke sisi.
+  r.moveHand("l", 0, 0, r.T.transition.poseMs, T.ease.out);
   r.later(80, () => {
     r.moveHand("r", 2, -64, T.asking.raiseMs, T.ease.pop);
   });
@@ -1014,6 +1023,8 @@ export function applyConfused(r: PoseOps): void {
   // Tangan R menggaruk kepala (136,76): offset (-22,-72).
   r.placeHand("r", "front");
   r.moveHand("r", -22, -72, c.scratch.enterMs, T.ease.pop);
+  // Tangan L tak dipakai pose ini: kembalikan ke sisi.
+  r.moveHand("l", 0, 0, r.T.transition.poseMs, T.ease.out);
   r.later(c.scratch.enterMs, () => scratchLoop(r));
   // Tangan L bergetar halus.
   if (!r.reduced) {

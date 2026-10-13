@@ -244,9 +244,13 @@ export class BotRenderer implements AvatarRenderer, PoseOps {
   }
 
   moveHand(which: HandWhich, x: number, y: number, ms: number, ease: string = T.ease.out): void {
-    const cur = this.handPos[which];
     const hand = this.el(which === "l" ? "hand-l" : "hand-r");
     this.anim.stop(hand, "hand-move");
+    // Mulai dari posisi RENDER saat ini (bukan tebakan handPos yang bisa basi
+    // bila tween sebelumnya terbunuh mid-flight) — tangan meluncur, tak meloncat.
+    const from = this.renderedTranslate(hand) ?? this.handPos[which];
+    const cur = from;
+    this.handPos[which] = { x, y };
     (hand as HTMLElement).style.setProperty("translate", `${x}px ${y}px`);
     if (!this.reducedMotion && ms > 0) {
       this.anim.start(
@@ -263,6 +267,25 @@ export class BotRenderer implements AvatarRenderer, PoseOps {
       });
     }
     this.handPos[which] = { x, y };
+  }
+
+  /**
+   * Posisi translate tangan/kaki sesuai RENDER (getComputedStyle), atau null
+   * bila tak terbaca. Dipakai agar moveHand selalu mulai dari posisi visual
+   * yang benar walau tween sebelumnya terbunuh di tengah jalan.
+   */
+  private renderedTranslate(hand: Element): { x: number; y: number } | null {
+    try {
+      const t = getComputedStyle(hand as unknown as globalThis.Element).translate;
+      if (!t || t === "none") return null;
+      const parts = t.split(/\s+/).map((v) => parseFloat(v));
+      const x = parts[0] ?? NaN;
+      const y = parts[1] ?? 0;
+      if (!Number.isFinite(x) || !Number.isFinite(y)) return null;
+      return { x, y };
+    } catch {
+      return null;
+    }
   }
 
   handBase(which: HandWhich): { x: number; y: number } {

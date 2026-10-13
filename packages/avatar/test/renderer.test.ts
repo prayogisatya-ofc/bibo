@@ -557,6 +557,23 @@ describe("transisi (§10)", () => {
     expect(rec?.cancelled).toBe(false);
   });
 
+  it("tangan kembali ke sisi saat pose idle (habis celebrate/asking)", () => {
+    mount();
+    r.setPose("celebrate");
+    expect(r.handBase("l")).not.toEqual({ x: 0, y: 0 });
+    expect(r.handBase("r")).not.toEqual({ x: 0, y: 0 });
+    r.setPose("idle");
+    expect(r.handBase("l")).toEqual({ x: 0, y: 0 });
+    expect(r.handBase("r")).toEqual({ x: 0, y: 0 });
+    // thinking/asking/confused hanya memakai tangan kanan: kiri ke sisi.
+    r.setPose("thinking");
+    expect(r.handBase("l")).toEqual({ x: 0, y: 0 });
+    r.setPose("asking");
+    expect(r.handBase("l")).toEqual({ x: 0, y: 0 });
+    r.setPose("confused");
+    expect(r.handBase("l")).toEqual({ x: 0, y: 0 });
+  });
+
   it("sapu varian: desync dua mulut/mata terlihat diperbaiki", () => {
     mount();
     // Simulasi desync: dua varian mulut + dua varian mata dipaksa terlihat.
