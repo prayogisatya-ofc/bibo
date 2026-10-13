@@ -167,3 +167,29 @@ describe("gear & props di tempat", () => {
     expect((q("mouth") as HTMLElement).style.getPropertyValue("scale")).toBe("");
   });
 });
+
+describe("tangan tidak mengorbit (rotate di-bake)", () => {
+  it("cheer: rotate di-bake dengan translate atribut tangan", () => {
+    mount();
+    setPose("celebrate");
+    vi.advanceTimersByTime(500);
+    const rec = recordsFor(q("hand-l"), "cheer")[0];
+    expect(rec).toBeDefined();
+    const kf = JSON.stringify(rec?.keyframes);
+    expect(kf).toContain("translate(42px,152px)");
+    expect(kf).toContain("rotate(");
+    expect(kf).not.toContain('"rotate"');
+  });
+
+  it("chin rub: rotate di-bake dengan translate atribut tangan", () => {
+    mount();
+    setPose("thinking");
+    vi.advanceTimersByTime(3000);
+    const rec = recordsFor(q("hand-r"), "rub")[0];
+    expect(rec).toBeDefined();
+    const kf = JSON.stringify(rec?.keyframes);
+    expect(kf).toContain("translate(158px,148px)");
+    expect(kf).toContain("rotate(");
+    expect(kf).not.toContain('"rotate"');
+  });
+});

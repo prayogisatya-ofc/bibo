@@ -305,21 +305,27 @@ function chinRubLoop(r: PoseOps): void {
   const c = T.thinking.chin;
   if (r.reduced) return;
   const hand = r.el("hand-r");
-  const base = (): { x: number; y: number } => r.handBase("r");
   const rub = (n: number): void => {
     if (n >= c.rubs) {
       r.later(jittered(r.rand, (c.pauseMinMs + c.pauseMaxMs) / 2, 0.25), () => chinRubLoop(r));
       return;
     }
-    const b = base();
+    // Hanya bake translate ATRIBUT; offset posisi tetap dari style.translate,
+    // dan gerakan gosok sebagai delta. Rotate kini tepat di tangan.
+    const attrBase = baseTranslate(hand);
     r.anim.start(
       hand,
       "rub",
       "B",
       [
-        { translate: `${b.x}px ${b.y}px`, rotate: "0deg" },
-        { translate: `${b.x + c.rubX}px ${b.y - c.rubY}px`, rotate: `${c.rubDeg}deg`, offset: 0.5 },
-        { translate: `${b.x - c.rubX}px ${b.y + c.rubY}px`, rotate: `${-c.rubDeg}deg` },
+        { transform: `${attrBase} translate(0px, 0px) rotate(0deg)` },
+        {
+          transform: `${attrBase} translate(${c.rubX}px, ${-c.rubY}px) rotate(${c.rubDeg}deg)`,
+          offset: 0.5,
+        },
+        {
+          transform: `${attrBase} translate(${-c.rubX}px, ${c.rubY}px) rotate(${-c.rubDeg}deg)`,
+        },
       ],
       { duration: c.rubMs, easing: T.ease.soft },
     );
@@ -845,14 +851,20 @@ export function applyCelebrate(r: PoseOps): void {
   const h = T.celebrate.hands;
   for (const [which, delay] of [["l", 0], ["r", h.periodMs / 2]] as const) {
     const hand = r.el(which === "l" ? "hand-l" : "hand-r");
-    const base = r.handBase(which);
+    // Hanya bake translate ATRIBUT; offset posisi tetap dari style.translate
+    // (moveHand), dan bob (±ampY) sebagai delta. Rotate kini tepat di tangan.
+    const attrBase = baseTranslate(hand);
     r.anim.start(
       hand,
       "cheer",
       "B",
       [
-        { translate: `${base.x}px ${base.y - h.ampY}px`, rotate: `${-h.rotDeg}deg` },
-        { translate: `${base.x}px ${base.y + h.ampY}px`, rotate: `${h.rotDeg}deg` },
+        {
+          transform: `${attrBase} translate(0px, ${-h.ampY}px) rotate(${-h.rotDeg}deg)`,
+        },
+        {
+          transform: `${attrBase} translate(0px, ${h.ampY}px) rotate(${h.rotDeg}deg)`,
+        },
       ],
       {
         duration: h.periodMs,
