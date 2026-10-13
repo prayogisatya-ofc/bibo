@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { onboardDir } from "./helpers.js";
 
 /**
  * E2E suara M4 dengan TTS dipalsukan (e2e/stub-speech.js).
@@ -8,26 +9,20 @@ import { expect, test } from "@playwright/test";
 async function onboard(page: import("@playwright/test").Page, dir: string): Promise<void> {
   await page.addInitScript({ path: "e2e/stub-speech.js" });
   await page.goto("/");
-  const input = page.getByTestId("dir-input");
-  try {
-    await input.waitFor({ timeout: 15000 });
-  } catch {
-    await page.getByTestId("dir-btn").click();
-    await input.waitFor({ timeout: 10000 });
-  }
-  await input.fill(dir);
-  await page.getByTestId("dir-go").click();
+  await onboardDir(page, dir);
 }
 
-test("speak: ack dulu lalu ringkasan, tanpa kode/speak-tag", async ({ page }) => {
+test("speak: tanpa ack, ringkasan tepat sekali, tanpa kode/speak-tag", async ({ page }) => {
   await onboard(page, "/tmp/e2e-speak");
   await page.getByTestId("chat-input").fill("halo bibo");
   await page.getByTestId("send-btn").click();
   // Tunggu final + ringkasan terucap.
   await expect(page.getByTestId("chat-count")).not.toHaveText("1", { timeout: 20000 });
-  await page.waitForFunction(() => (window.__spoken ?? []).length >= 2, null, { timeout: 20000 });
+  await page.waitForFunction(() => (window.__spoken ?? []).length >= 1, null, { timeout: 20000 });
+  // Beri waktu bagi exec.ended susulan (polling/pemulihan): tak boleh ada ucapan kedua.
+  await page.waitForTimeout(4000);
   const spoken = (await page.evaluate(() => window.__spoken ?? [])) as Array<{ text: string }>;
-  expect(spoken.length).toBeGreaterThanOrEqual(2);
+  expect(spoken.length).toBe(1);
   const all = spoken.map((s) => s.text).join("\n");
   expect(all).not.toContain("<speak>");
   expect(all).not.toContain("```");
@@ -41,7 +36,9 @@ test("speak: cancel menghentikan ucapan + animasi bicara", async ({ page }) => {
   await page.getByTestId("send-btn").click();
   await page.waitForFunction(() => (window.__spoken ?? []).length >= 1, null, { timeout: 20000 });
   const before = (await page.evaluate(() => (window.__spoken ?? []).length)) as number;
-  await page.getByTestId("stop-btn").click();
+  // Tanpa ack, ucapan baru muncul setelah giliran selesai (tombol Stop sudah
+  // hilang); Esc di input tetap memanggil onStop → engine.cancel().
+  await page.getByTestId("chat-input").press("Escape");
   await page.waitForTimeout(1200);
   const after = (await page.evaluate(() => (window.__spoken ?? []).length)) as number;
   // Maksimal 1 utterance susulan yang sudah terlanjur jalan; antrean dibuang.

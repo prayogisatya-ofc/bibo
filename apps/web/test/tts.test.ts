@@ -75,6 +75,15 @@ describe("antrean & prioritas", () => {
     // Setelah 'lama' selesai (1 chunk), 'baru' jalan; 'lama' tak diulang.
     expect(t.eng.spoken).toEqual(["lama", "baru"]);
   });
+  it("ucapan identik beruntun tidak diulang; repeat-* tetap boleh", () => {
+    const t = stub();
+    t.eng.speak("s1", "Sudah selesai.", "normal");
+    t.finish();
+    t.eng.speak("s2", "Sudah selesai.", "normal");
+    expect(t.spoken).toHaveLength(1);
+    t.eng.speak("repeat-1", "Sudah selesai.", "normal");
+    expect(t.spoken).toHaveLength(2);
+  });
   it("cancel menghentikan + level 0 seketika", () => {
     const t = stub();
     const levels: number[] = [];

@@ -69,6 +69,9 @@ async function main(): Promise<void> {
   let seenActive = false;
   let activeMisses = 0;
   let turnStartedAt = 0;
+  // Ringkasan lisan maksimal sekali per giliran: exec.ended bisa datang
+  // berulang (SSE + heuristik polling + pemulihan burst).
+  let summarySpoken = false;
   const tracker = new SpeakTracker();
   const speakByMessage = new Map<string, string[]>();
   let lastAssistantText = "";
@@ -154,7 +157,8 @@ function isSettledError(e: unknown): boolean {
         kind: "summary",
       });
     }
-    if (signal.t === "exec.ended" && signal.outcome === "success" && sessionID) {
+    if (signal.t === "exec.ended" && signal.outcome === "success" && sessionID && !summarySpoken) {
+      summarySpoken = true;
       const sid = sessionID;
       void (async () => {
         try {
@@ -565,9 +569,8 @@ function isSettledError(e: unknown): boolean {
         lastDiffFiles = [];
         seenActive = false;
         turnStartedAt = Date.now();
-        if (verbosity() !== "silent") {
-          broadcast({ type: "agent.speak", id: `spk-${Date.now()}`, text: phrase("ack", speechLocale()), priority: "normal", kind: "ack" });
-        }
+        // Tanpa ucapan ack: pengguna tak perlu dijawab suara saat memberi perintah.
+        summarySpoken = false;
         ingest({ t: "exec.started", sessionID });
         break;
       }

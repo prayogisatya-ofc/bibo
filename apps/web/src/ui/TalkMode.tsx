@@ -81,10 +81,12 @@ export function TalkMode({
 
   return (
     <main className="talk-screen">
+      <div className="talk-bubble-zone" data-testid="talk-bubble-zone">
+        <SpeechBubble bubble={bubble} />
+      </div>
       <div className={`talk-stage${asking ? " asking" : ""}`}>
         <div className="talk-bibo-wrap">
           <AvatarStage pose={pose} variant={variant} mood={mood} level={level} theme={theme} locale={locale} size={biboSize} animateFrom={animateFrom} />
-          <SpeechBubble bubble={bubble} />
         </div>
       </div>
 
@@ -117,7 +119,7 @@ export function TalkMode({
               Mic tidak tersedia — chat teks tetap jalan.
             </p>
           )}
-          <MicButton size="huge" listening={listening} disabled={!sttSupported} onDown={micDown} onUp={micUp} />
+          <MicButton size="small" listening={listening} disabled={!sttSupported} onDown={micDown} onUp={micUp} />
           <div className="talk-hint">
             <b>{t.talkHint1}</b> · {fill(t.talkHint2, { mode: t.modeChat })}
           </div>

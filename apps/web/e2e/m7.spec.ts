@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { onboardDir } from "./helpers.js";
 
 /**
  * E2E pemilih mode Chat | Ngobrol (pengganti mini mode, keputusan ADR d).
@@ -7,15 +8,7 @@ import { expect, test } from "@playwright/test";
 
 async function onboard(page: import("@playwright/test").Page, dir: string, query = ""): Promise<void> {
   await page.goto(`/${query}`);
-  const input = page.getByTestId("dir-input");
-  try {
-    await input.waitFor({ timeout: 15000 });
-  } catch {
-    await page.getByTestId("dir-btn").click();
-    await input.waitFor({ timeout: 10000 });
-  }
-  await input.fill(dir);
-  await page.getByTestId("dir-go").click();
+  await onboardDir(page, dir);
   await expect(page.getByTestId("offline-banner")).toHaveCount(0);
 }
 
@@ -118,21 +111,40 @@ test("ganti sesi: daftar sesi + pilih", async ({ page }) => {
   await page.getByTestId("send-btn").click();
   await expect(page.locator(".bubble-user", { hasText: "satu" })).toBeVisible({ timeout: 10000 });
   // Direktori kedua = sesi kedua.
-  await page.getByTestId("dir-btn").click();
-  const input = page.getByTestId("dir-input");
-  await input.waitFor({ timeout: 10000 });
-  await input.fill("/tmp/e2e-sess-b");
-  await page.getByTestId("dir-go").click();
+  await onboardDir(page, "/tmp/e2e-sess-b");
   await page.getByTestId("chat-input").fill("dua");
   await page.getByTestId("send-btn").click();
   await expect(page.locator(".bubble-user", { hasText: "dua" })).toBeVisible({ timeout: 10000 });
-  // Buka menu: daftar sesi tampil ≥2, pilih satu, tidak error.
+  // Buka dialog lagi, pilih folder sesi pertama → daftar sesinya muncul,
+  // pilih satu → lanjut tanpa error.
   await page.getByTestId("dir-btn").click();
-  await page.waitForTimeout(1500);
-  const sessBtns = page.locator("[data-testid^='sess-']");
-  await expect(sessBtns.first()).toBeVisible({ timeout: 10000 });
-  expect(await sessBtns.count()).toBeGreaterThanOrEqual(1);
+  await page.getByTestId("dir-browse").click();
+  const input = page.getByTestId("dir-picker-input");
+  await input.waitFor({ timeout: 10000 });
+  await input.fill("/tmp/e2e-sess-a");
+  await input.press("Enter");
+  await page.getByTestId("dir-picker-select").click();
+  const sessBtns = page.locator(
+    "[data-testid^='sess-']:not([data-testid='sess-new']):not([data-testid='sess-hint']):not([data-testid='sess-empty'])",
+  );
+  await expect(sessBtns.first()).toBeVisible({ timeout: 15000 });
   await sessBtns.first().click();
   await expect(page.getByTestId("offline-banner")).toHaveCount(0);
   await expect(page.getByTestId("chat-input")).toBeEnabled();
+});
+
+test("talk layout: bubble lebar di atas, mic kecil di bawah", async ({ page }) => {
+  await onboard(page, "/tmp/e2e-talk-layout");
+  await page.getByTestId("mode-talk").click();
+  await expect(page.locator(".talk-screen")).toBeVisible();
+  // Zona bubble ada (kosong saat belum ada ucapan) di atas panggung karakter.
+  const zone = page.getByTestId("talk-bubble-zone");
+  await expect(zone).toBeVisible();
+  const zy = (await zone.boundingBox())?.y ?? 9999;
+  const sy = (await page.locator(".talk-stage").boundingBox())?.y ?? 0;
+  expect(zy).toBeLessThan(sy);
+  // Mic kecil (48px), bukan huge 88px.
+  const mic = page.getByTestId("mic-btn");
+  await expect(mic).toBeVisible();
+  expect((await mic.boundingBox())?.width).toBeLessThanOrEqual(52);
 });

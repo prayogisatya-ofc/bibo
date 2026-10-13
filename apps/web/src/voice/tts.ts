@@ -128,6 +128,7 @@ export class TtsEngine {
   private rafId = 0;
   private lastFrame = 0;
   private accentUntil = 0;
+  private lastSpoken: { text: string; at: number } | undefined;
   private settings: TtsSettings;
   private useDefaultVoice = false;
 
@@ -176,6 +177,12 @@ export class TtsEngine {
     if (this.settings.muted) return;
     const clean = sanitizeForSpeech(text);
     if (!clean) return;
+    // Jangan ulangi ucapan identik yang baru saja diantre/diucapkan (≤15 dtk).
+    const now = this.opts.now?.() ?? Date.now();
+    // Pengecualian: "ulangi" (repeat-*) dan uji suara memang sengaja mengulang.
+    const intentional = id.startsWith("repeat-") || id === "test";
+    if (!intentional && this.lastSpoken && this.lastSpoken.text === clean && now - this.lastSpoken.at < 15_000) return;
+    this.lastSpoken = { text: clean, at: now };
     if (priority === "urgent") {
       // Sela: buang antrean normal + hentikan yang sedang jalan.
       this.queue = this.queue.filter((j) => j.priority === "urgent");

@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { onboardDir } from "./helpers.js";
 
 /**
  * M5 Gherkin §13.3: STT dipalsukan (?stt=fake + __stt inject), TTS dipalsukan.
@@ -8,15 +9,7 @@ import { expect, test } from "@playwright/test";
 async function onboardStt(page: import("@playwright/test").Page, dir: string, stt = "fake"): Promise<void> {
   await page.addInitScript({ path: "e2e/stub-speech.js" });
   await page.goto(`/?stt=${stt}`);
-  const input = page.getByTestId("dir-input");
-  try {
-    await input.waitFor({ timeout: 15000 });
-  } catch {
-    await page.getByTestId("dir-btn").click();
-    await input.waitFor({ timeout: 10000 });
-  }
-  await input.fill(dir);
-  await page.getByTestId("dir-go").click();
+  await onboardDir(page, dir);
   await expect(page.getByTestId("offline-banner")).toHaveCount(0);
 }
 
@@ -46,18 +39,15 @@ test("voice-bargein: mic aktif menghentikan TTS seketika", async ({ page }) => {
   await onboardStt(page, "/tmp/e2e-voice-barge");
   await page.getByTestId("chat-input").fill("halo");
   await page.getByTestId("send-btn").click();
-  // Tunggu ucapan ack mulai.
-  await page.waitForFunction(() => (window.__spoken ?? []).length >= 1, null, { timeout: 15000 });
+  // Tanpa ack: ucapan pertama = ringkasan akhir giliran.
+  await page.waitForFunction(() => (window.__spoken ?? []).length >= 1, null, { timeout: 20000 });
   const cancelledBefore = (await page.evaluate(() => window.__ttsCancelled ?? 0)) as number;
   await micHold(page, 400);
   await page.waitForTimeout(300);
   const cancelledAfter = (await page.evaluate(() => window.__ttsCancelled ?? 0)) as number;
   expect(cancelledAfter).toBeGreaterThan(cancelledBefore);
   await micRelease(page);
-  // Antrean dibuang saat cancel; ucapan ringkasan giliran boleh mulai setelahnya
-  // (sah). Pastikan SETELAH semua selesai, animasi benar-benar berhenti.
   await expect(page.getByTestId("avatar-caption")).toHaveText("Bibo siap", { timeout: 25000 });
-  await page.waitForFunction(() => (window.__spoken ?? []).length >= 2, null, { timeout: 20000 });
   await page.waitForTimeout(1500);
   // Overlay bicara berhenti: data-speaking kembali false (bukan voice-pulse lama).
   const speaking = await page.evaluate(() => document.querySelector('[data-testid="bibo-svg"] svg')?.getAttribute("data-speaking"));
@@ -67,15 +57,7 @@ test("voice-bargein: mic aktif menghentikan TTS seketika", async ({ page }) => {
 test("voice-nomic: STT tidak tersedia", async ({ page }) => {
   await page.addInitScript({ path: "e2e/stub-speech.js" });
   await page.goto("/?stt=none");
-  const input = page.getByTestId("dir-input");
-  try {
-    await input.waitFor({ timeout: 15000 });
-  } catch {
-    await page.getByTestId("dir-btn").click();
-    await input.waitFor({ timeout: 10000 });
-  }
-  await input.fill("/tmp/e2e-voice-nomic");
-  await page.getByTestId("dir-go").click();
+  await onboardDir(page, "/tmp/e2e-voice-nomic");
   await expect(page.getByTestId("mic-unavailable")).toBeVisible({ timeout: 10000 });
   await expect(page.getByTestId("mic-unavailable")).toContainText("Mic tidak tersedia");
   // Chat teks tetap jalan.

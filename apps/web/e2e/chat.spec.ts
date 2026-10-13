@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { onboardDir } from "./helpers.js";
 
 /**
  * E2E M2 vs mock-opencode + bridge sungguhan.
@@ -9,16 +10,7 @@ import { expect, test } from "@playwright/test";
 async function onboard(page: import("@playwright/test").Page, dir: string): Promise<void> {
   await page.goto("/");
   // Modal bisa muncul belakangan (menunggu bridge.ready) atau sudah ada.
-  const input = page.getByTestId("dir-input");
-  try {
-    await input.waitFor({ timeout: 15000 });
-  } catch {
-    // Bridge sudah punya direktori → buka onboarding manual.
-    await page.getByTestId("dir-btn").click();
-    await input.waitFor({ timeout: 10000 });
-  }
-  await input.fill(dir);
-  await page.getByTestId("dir-go").click();
+  await onboardDir(page, dir);
 }
 
 test("simple-answer: kirim pesan, streaming, selesai", async ({ page }) => {

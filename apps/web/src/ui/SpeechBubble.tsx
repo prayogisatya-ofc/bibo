@@ -1,9 +1,10 @@
 import type { Bubble } from "./bubbleState.js";
 
 /**
- * Bubble ucapan mode Ngobrol: di kanan atas kepala Bibo (di atas kepala pada
- * layar sempit), pop 180ms (key unik per ucapan), maks 3 baris, fade 1,5 dtk
- * setelah ucapan selesai, tone error = tint merah lembut.
+ * Bubble ucapan mode Ngobrol: blok lebar DI ATAS karakter, tinggi mengikuti
+ * teks (tanpa potong baris), pop 180ms (key unik per ucapan), fade 1,5 dtk
+ * setelah ucapan selesai, tone error = tint merah lembut. Ekor di bawah
+ * menunjuk ke kepala Bibo.
  */
 export function SpeechBubble({ bubble }: { bubble: Bubble | null }): JSX.Element | null {
   if (!bubble || !bubble.text) return null;

@@ -449,9 +449,11 @@ export class Animator {
     this.syncDataAnim(el);
   }
 
-  /** Batalkan semua animasi pada lapisan tertentu (atau semua bila tanpa argumen). */
-  stopLayer(layer?: AnimLayer): void {
+  /** Batalkan animasi pada lapisan tertentu (atau semua bila tanpa argumen);
+   * bila `only` diisi, batasi ke satu elemen. */
+  stopLayer(layer?: AnimLayer, only?: Element): void {
     for (const [el, per] of [...this.tracked]) {
+      if (only !== undefined && el !== only) continue;
       for (const [id, t] of [...per]) {
         if (layer === undefined || t.layer === layer) {
           try {
@@ -463,7 +465,7 @@ export class Animator {
         }
       }
       if (per.size === 0) this.tracked.delete(el);
-      else this.syncDataAnim(el);
+      this.syncDataAnim(el);
     }
   }
 

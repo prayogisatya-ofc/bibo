@@ -571,7 +571,8 @@ button:disabled { opacity: 0.5; cursor: default; }
   position: relative;
   display: flex;
   justify-content: center;
-  margin-top: 24px;
+  /* Karakter turun jadi fokus utama; bubble sudah punya zona sendiri di atas. */
+  margin-top: 56px;
   transition: transform var(--mode-anim) ease;
 }
 .talk-stage .avatar-anim {
@@ -579,11 +580,21 @@ button:disabled { opacity: 0.5; cursor: default; }
 }
 .talk-stage.asking { transform: translateY(-34px); }
 
+/* Zona bubble ucapan: blok lebar di atas karakter, tinggi mengikuti teks.
+ * min-height menjaga karakter tidak meloncat saat bubble muncul/hilang. */
+.talk-bubble-zone {
+  width: min(680px, calc(100vw - 48px));
+  min-height: 88px;
+  margin-top: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+}
 /* Bubble ucapan */
 .talk-bibo-wrap { position: relative; display: inline-block; }
-.speech-bubble-pos { position: absolute; left: 70%; top: 2%; z-index: 3; }
+.speech-bubble-pos { position: static; z-index: 3; width: 100%; display: flex; justify-content: center; }
 .speech-bubble {
-  position: absolute;
+  position: relative;
   background: var(--card);
   border-radius: var(--radius-card);
   padding: 20px 24px;
@@ -591,11 +602,7 @@ button:disabled { opacity: 0.5; cursor: default; }
   font-weight: 700;
   line-height: 1.4;
   box-shadow: var(--shadow-pop);
-  max-width: 340px;
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
+  width: 100%;
   animation: bubble-pop var(--bubble-pop) cubic-bezier(0.34, 1.56, 0.64, 1);
   transition: opacity 1.5s ease;
   z-index: 3;
@@ -611,18 +618,13 @@ button:disabled { opacity: 0.5; cursor: default; }
 }
 .speech-bubble .bubble-tail {
   position: absolute;
-  left: -9px;
-  bottom: 28px;
+  left: 50%;
+  top: auto;
+  bottom: -9px;
   width: 20px; height: 20px;
   background: inherit;
-  transform: rotate(45deg);
+  transform: translateX(-50%) rotate(45deg);
   border-radius: 4px;
-}
-/* ekor kiri menunjuk ke kepala Bibo; di layar sempit bubble di atas kepala */
-@media (max-width: 900px) {
-  .speech-bubble-pos { left: 50%; top: -12px; transform: translateX(-50%); }
-  .speech-bubble { max-width: min(340px, 80vw); }
-  .speech-bubble .bubble-tail { left: 50%; bottom: auto; top: -9px; transform: translateX(-50%) rotate(45deg); }
 }
 
 /* Indikator "sedang berbicara" */
@@ -641,9 +643,20 @@ button:disabled { opacity: 0.5; cursor: default; }
 .eq { display: flex; align-items: flex-end; gap: 3px; height: 16px; }
 .eq i { width: 4px; background: var(--accent-2); border-radius: 2px; transition: height 90ms linear; }
 
-/* Kontrol mic mode ngobrol */
+/* Kontrol mic mode ngobrol: tombol kecil di bawah, fokus tetap ke karakter. */
+.talk-controls .mic-small {
+  width: 48px; height: 48px;
+  border: 0; border-radius: 50%;
+  background: var(--mic-grad);
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: var(--mic-ring);
+  color: #fff;
+  flex: 0 0 auto;
+}
+.talk-controls .mic-small.listening { animation: mic-pulse 1.6s ease-in-out infinite; }
 .talk-controls {
-  margin-top: 34px;
+  margin-top: 28px;
+  margin-bottom: 40px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -1047,7 +1060,9 @@ button.picker-entry:hover { background: var(--hover, rgba(127, 127, 127, 0.15));
   :root { --side-pad: 16px; --topbar-h: 60px; }
   .chat-screen { padding-bottom: 16px; }
   .stage-card { max-height: 35vh; padding: 14px; gap: 10px; }
-  .stage-box { height: 100%; min-height: 120px; }
+  .stage-box { height: clamp(140px, 24vh, 220px); min-height: 0; }
+  /* Avatar selalu muat utuh di panggung pendek (kepala tak terpotong). */
+  .stage-box .avatar-fixed-box { max-width: 100%; max-height: 100%; }
   .stage-status .stage-sub, .mic-hint, .stop-bibo .stop-label { display: none; }
   .mic-big { width: 56px; height: 56px; }
   .dir-chip .dir-text { display: none; }

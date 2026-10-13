@@ -20,7 +20,7 @@ export function MicButton({
   disabled: boolean;
   onDown: () => void;
   onUp: () => void;
-  /** big = 72px (chat), huge = 88px (ngobrol), small = 44px (komposer). */
+  /** big = 72px (chat), huge = 88px (tak dipakai lagi di Ngobrol), small = 44px (komposer) / 48px (kontrol Ngobrol). */
   size?: "big" | "huge" | "small";
   /** Testid; komposer memakai "mic-input-btn" agar tak ganda dengan mic panggung. */
   testId?: string;

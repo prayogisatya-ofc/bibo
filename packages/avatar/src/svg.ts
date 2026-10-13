@@ -36,7 +36,7 @@ display:block;width:100%;height:auto;overflow:visible}
 --bot-ask:#F59E0B;--bot-bad:#E5453D;--bot-shadow:rgba(40,48,96,.14)}
 #bot .e-var,#bot .m-var{opacity:0}
 #bot text{font-family:Nunito,system-ui,sans-serif;user-select:none}
-#body-float{transform-box:view-box;transform-origin:100px 166px;will-change:transform}
+#body-float,#pose-blend{transform-box:view-box;transform-origin:100px 166px;will-change:transform}
 #antenna{transform-box:view-box;transform-origin:100px 62px;will-change:transform}
 #hand-l,#hand-r{transform-box:fill-box;transform-origin:50% 50%;will-change:transform}
 #hand-l .hand-wave,#hand-r .hand-wave{transform-box:fill-box;transform-origin:50% 130%}
@@ -51,7 +51,7 @@ display:block;width:100%;height:auto;overflow:visible}
 <g id="shadow"><ellipse cx="100" cy="178" rx="50" ry="7" fill="var(--bot-shadow)"/></g>
 <g id="hands-back">
 </g>
-<g id="body-float"><g id="body-nod">
+<g id="pose-blend"><g id="body-float"><g id="body-nod">
 <g id="antenna"><path id="stem" d="M100 62 V46" stroke="var(--bot-stem)" stroke-width="4" stroke-linecap="round" fill="none"/><g id="bulb"><circle id="bulb-ring" cx="100" cy="39" r="8.5" fill="none" stroke="var(--bot-info)" stroke-width="2" opacity="0"/><circle id="bulb-core" cx="100" cy="39" r="8.5" fill="var(--bot-stem)"/><circle id="bulb-glint" cx="97" cy="36" r="2.4" fill="#fff" opacity=".7"/></g></g>
 <g id="body"><rect id="body-shape" x="40" y="60" width="120" height="106" rx="46" fill="var(--bot-body)" stroke="var(--bot-body-stroke)" stroke-width="1.5"/><ellipse id="body-glint" cx="68" cy="75" rx="16" ry="6" fill="var(--bot-body-glint)" opacity=".9"/></g>
 <g id="visor"><rect id="visor-shape" x="57" y="86" width="86" height="50" rx="23" fill="var(--bot-visor)"/>
@@ -77,7 +77,7 @@ display:block;width:100%;height:auto;overflow:visible}
 <g id="prop-note" opacity="0" transform="translate(152,58)"><ellipse cx="0" cy="0" rx="4.5" ry="3.5" transform="rotate(-20)" fill="var(--bot-ask)"/><path d="M4 -2 V-18 q7 1 5 9" fill="none" stroke="var(--bot-ask)" stroke-width="2.4" stroke-linecap="round"/></g>
 <circle id="snot" cx="112" cy="122" r="0" fill="var(--bot-eye)" opacity="0"/>
 <g id="prop-disc" opacity="0"><circle cx="92" cy="30" r="3" fill="var(--bot-bad)"/><circle cx="108" cy="30" r="3" fill="var(--bot-bad)"/><path d="M96 30 h8" stroke="var(--bot-bad)" stroke-width="2" stroke-dasharray="3 3" stroke-linecap="round"/></g>
-</g></g>
+</g></g></g>
 <g id="props-world">
 <g id="keyboard" opacity="0"><rect x="54" y="166" width="92" height="14" rx="6" fill="var(--bot-key)"/><rect id="key-row" x="62" y="170" width="76" height="3" rx="1.5" fill="#C9D2F7"/></g>
 <g id="sound-arcs">

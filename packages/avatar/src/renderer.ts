@@ -103,6 +103,7 @@ export class BotRenderer implements AvatarRenderer, PoseOps {
   private director: IdleDirector | null = null;
   private autoSleep = false;
   private hoverAt = 0;
+  private hoverLifted: Record<HandWhich, boolean> = { l: false, r: false };
   private lastHoverWave = 0;
   private io: IntersectionObserver | null = null;
 
@@ -696,9 +697,52 @@ export class BotRenderer implements AvatarRenderer, PoseOps {
 
   /* ------------------------------ internal ------------------------------ */
 
+  /**
+   * Transisi antar pose tanpa "loncat": loop ambient (float/sway) pose baru
+   * selalu mulai dari 0, jadi offset badan saat ini ditangkap dulu lalu
+   * diluruhkan pada wrapper #pose-blend (ease-out) — badan meluncur halus
+   * dari posisi lama ke koreografi baru.
+   */
+  private captureBodyOffset(): { tx: number; ty: number; rot: number } | null {
+    if (this.reducedMotion || !this.svg?.isConnected) return null;
+    const body = this.el("body-float");
+    let tx = 0;
+    let ty = 0;
+    let rot = 0;
+    try {
+      const cs = getComputedStyle(body as unknown as globalThis.Element);
+      const t = (cs.translate || "").split(/\s+/).map((v) => parseFloat(v));
+      tx = Number.isFinite(t[0]) ? (t[0] as number) : 0;
+      ty = Number.isFinite(t[1]) ? (t[1] as number) : 0;
+      const r = parseFloat(cs.rotate || "0");
+      rot = Number.isFinite(r) ? r : 0;
+    } catch {
+      return null;
+    }
+    if (Math.abs(tx) < 0.2 && Math.abs(ty) < 0.2 && Math.abs(rot) < 0.2) return null;
+    return { tx, ty, rot };
+  }
+
+  private startBlend(o: { tx: number; ty: number; rot: number }): void {
+    const { tx, ty, rot } = o;
+    const blend = this.el("pose-blend");
+    this.anim.start(
+      blend,
+      "pose-blend",
+      "C",
+      [
+        { translate: `${tx}px ${ty}px`, rotate: `${rot}deg` },
+        { translate: "0px 0px", rotate: "0deg" },
+      ],
+      { duration: T.transition.poseMs, easing: T.ease.out },
+    );
+  }
+
   private applyPose(pose: AvatarPose, variant: WorkingVariant, cancelReactions: boolean): void {
+    const offset = pose !== this.pose || variant !== this.variant ? this.captureBodyOffset() : null;
     this.pose = pose;
     this.variant = variant;
+    this.hoverLifted = { l: false, r: false };
     // Bersihkan timer & lapisan pose lama; reaksi hanya bila diminta (§5.1).
     for (const t of this.poseTimers) window.clearTimeout(t);
     this.poseTimers.clear();
@@ -725,6 +769,12 @@ export class BotRenderer implements AvatarRenderer, PoseOps {
       );
     }
     applyPoseLayers(this, pose, variant);
+    // Pose baru memulai loop dari keyframe pertamanya (mis. tilt berpikir);
+    // wrapper menutup selisih lama→baru agar tak ada lompatan.
+    if (offset) {
+      const now = this.captureBodyOffset() ?? { tx: 0, ty: 0, rot: 0 };
+      this.startBlend({ tx: offset.tx - now.tx, ty: offset.ty - now.ty, rot: offset.rot - now.rot });
+    }
     // Overlay speaking bertahan di atas pose baru (mulut/busur/lampu) —
     // KECUALI working: animasi bicara bentrok dengan animasi kerja,
     // jadi saat bekerja avatar langsung bekerja tanpa overlay bicara.
@@ -769,17 +819,33 @@ export class BotRenderer implements AvatarRenderer, PoseOps {
     tongue.setAttribute("opacity", "0");
   }
 
-  /** Sembunyikan semua props; pose menghidupkan yang dibutuhkannya. */
+  /** Sembunyikan semua props; pose menghidupkan yang dibutuhkannya.
+   * Animasi pose (lapisan A/B) pada elemen props dihentikan di sini sebagai
+   * jaring pengaman — kalau tidak, loop (mis. dot pulse) terus menulis opacity
+   * dan elemennya "bangkit lagi" di pose berikutnya (animasi bertumpuk).
+   * Lapisan C (reaksi) TIDAK disentuh: reaksi bertahan saat pose → idle (§5.1). */
   private resetProps(): void {
     this.propShown.clear();
-    const hide = (id: string): void => {
-      (this.el(id) as HTMLElement).style.opacity = "0";
+    const stopAndHide = (id: string): void => {
+      const el = this.el(id);
+      this.anim.stopLayer("A", el);
+      this.anim.stopLayer("B", el);
+      (el as HTMLElement).style.opacity = "0";
     };
-    for (const id of PROP_IDS) hide(id);
-    for (const id of DOT_IDS) hide(id);
-    for (const id of ZZZ_IDS) hide(id);
-    for (const id of SWEAT_IDS) hide(id);
-    for (const id of ARC_IDS) hide(id);
+    for (const id of PROP_IDS) stopAndHide(id);
+    for (const id of DOT_IDS) stopAndHide(id);
+    for (const id of ZZZ_IDS) stopAndHide(id);
+    for (const id of SWEAT_IDS) stopAndHide(id);
+    for (const id of ARC_IDS) stopAndHide(id);
+    // Anak (path/rect) kadang membawa animasi sendiri (sweat rise/fall, arc-in).
+    for (const parent of ["dots", "zzz", "sweat", "sound-arcs", "q-bubble", "q-bubble-2"]) {
+      const g = this.svg?.querySelector(`#${parent}`);
+      if (!g) continue;
+      for (const child of Array.from(g.querySelectorAll("*"))) {
+        this.anim.stopLayer("A", child);
+        this.anim.stopLayer("B", child);
+      }
+    }
     const snot = this.el("snot") as unknown as SVGCircleElement;
     snot.setAttribute("r", "0");
     snot.setAttribute("opacity", "0");
@@ -1367,6 +1433,7 @@ export class BotRenderer implements AvatarRenderer, PoseOps {
         // Tangan terdekat naik -4.
         const which: HandWhich = e.clientX < cx ? "l" : "r";
         const b = this.handBase(which);
+        this.hoverLifted[which] = true;
         const hand = this.el(which === "l" ? "hand-l" : "hand-r");
         this.anim.start(
           hand,
@@ -1392,6 +1459,20 @@ export class BotRenderer implements AvatarRenderer, PoseOps {
       if (this.lookUser) {
         this.lookTarget = { x: 0, y: 0 };
         this.ensureClock();
+      }
+      // Kembalikan tangan yang sempat terangkat hover (jangan nyangkut).
+      for (const which of ["l", "r"] as const) {
+        if (!this.hoverLifted[which]) continue;
+        this.hoverLifted[which] = false;
+        const hand = this.el(which === "l" ? "hand-l" : "hand-r");
+        const b = this.handBase(which);
+        this.anim.start(
+          hand,
+          "hover-lift",
+          "C",
+          [{ translate: `${b.x}px ${b.y - 4}px` }, { translate: `${b.x}px ${b.y}px` }],
+          { duration: 200, easing: T.ease.out },
+        );
       }
     }
   }

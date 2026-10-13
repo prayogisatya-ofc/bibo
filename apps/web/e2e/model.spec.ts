@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { onboardDir } from "./helpers.js";
 
 /**
  * FITUR C: pemilih model ujung-ke-ujung vs mock-opencode + bridge sungguhan.
@@ -10,15 +11,7 @@ import { expect, test } from "@playwright/test";
 
 async function onboard(page: import("@playwright/test").Page, dir: string): Promise<void> {
   await page.goto("/");
-  const input = page.getByTestId("dir-input");
-  try {
-    await input.waitFor({ timeout: 15000 });
-  } catch {
-    await page.getByTestId("dir-btn").click();
-    await input.waitFor({ timeout: 10000 });
-  }
-  await input.fill(dir);
-  await page.getByTestId("dir-go").click();
+  await onboardDir(page, dir);
 }
 
 async function selectedText(sel: import("@playwright/test").Locator): Promise<string | undefined> {
