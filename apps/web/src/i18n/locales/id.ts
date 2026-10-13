@@ -15,6 +15,7 @@ export const id = {
   dirPickerError: "Tidak bisa membaca folder.",
   dirPickerFile: "file",
   dirPickerClose: "Tutup pemilih folder",
+  dialogClose: "Tutup dialog",
   recentTitle: "Terakhir dibuka",
   statusOnline: "Terhubung",
   statusReconnecting: "Menghubungkan…",

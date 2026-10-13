@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { useT } from "../i18n/index.js";
 import { DirPicker } from "./DirPicker.js";
-import { FolderIcon, PlusIcon } from "./icons.js";
-import { Button } from "./components/index.js";
+import { FolderIcon, PlusIcon, XIcon } from "./icons.js";
+import { Button, IconButton } from "./components/index.js";
 
 const DIRS_KEY = "bibo.dir-history";
 
@@ -32,12 +32,13 @@ export function normDir(d: string | undefined): string {
 }
 
 export function Onboarding({
-  recent, sessions, bridgeHttp, onPick,
+  recent, sessions, bridgeHttp, onPick, onClose,
 }: {
   recent: string[];
   sessions: ListedSession[];
   bridgeHttp: string;
   onPick: (dir: string, sessionID?: string) => void;
+  onClose: () => void;
 }): JSX.Element {
   const t = useT();
   const [dir, setDir] = useState("");
@@ -45,11 +46,23 @@ export function Onboarding({
   const local = loadDirHistory();
   const merged = [...recent, ...local.filter((d) => !recent.includes(d))].slice(0, 10);
   const dirN = normDir(dir);
-  const folderSessions = dirN ? sessions.filter((sn) => normDir(sn.directory) === dirN) : [];
+  // Filter sesi: cocokkan direktori; jika sesi tidak punya info direktori,
+  // tampilkan juga (jangan disembunyikan).
+  const folderSessions = dirN
+    ? sessions.filter((sn) => {
+        const snDir = normDir(sn.directory);
+        return !snDir || snDir === dirN;
+      })
+    : [];
   return (
     <div className="modal" role="dialog" aria-label={t.onboardTitle}>
       <div className="modal-box">
-        <h2>{t.onboardTitle}</h2>
+        <div className="row picker-head">
+          <h2>{t.onboardTitle}</h2>
+          <IconButton label={t.dialogClose} onClick={onClose} data-testid="onboard-close">
+            <XIcon size={16} />
+          </IconButton>
+        </div>
         <p>{t.onboardHint}</p>
         <div className="row">
           <Button variant="secondary" onClick={() => setPickerOpen(true)} data-testid="dir-browse" title={t.dirBrowse}>

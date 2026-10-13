@@ -15,6 +15,7 @@ export const en = {
   dirPickerError: "Couldn't read the folder.",
   dirPickerFile: "file",
   dirPickerClose: "Close folder picker",
+  dialogClose: "Close dialog",
   recentTitle: "Recently opened",
   statusOnline: "Connected",
   statusReconnecting: "Connecting…",

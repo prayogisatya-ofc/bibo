@@ -36,6 +36,7 @@ interface AppCtx {
   pushSystem: (text: string) => void;
   clearDiffs: () => void;
   clearFeed: () => void;
+  clearChat: () => void;
 }
 
 const Ctx = createContext<AppCtx | undefined>(undefined);
@@ -130,10 +131,11 @@ export function AppProvider({ children }: { children: ReactNode }): JSX.Element 
 
   const clearDiffs = useCallback(() => setDiffs([]), []);
   const clearFeed = useCallback(() => setFeed([]), []);
+  const clearChat = useCallback(() => setChat([]), []);
 
   const value = useMemo(
-    () => ({ agent, chat, feed, perms, diffs, errors, apply, pushUser, pushSystem, clearDiffs, clearFeed }),
-    [agent, chat, feed, perms, diffs, errors, apply, pushUser, pushSystem, clearDiffs, clearFeed],
+    () => ({ agent, chat, feed, perms, diffs, errors, apply, pushUser, pushSystem, clearDiffs, clearFeed, clearChat }),
+    [agent, chat, feed, perms, diffs, errors, apply, pushUser, pushSystem, clearDiffs, clearFeed, clearChat],
   );
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }

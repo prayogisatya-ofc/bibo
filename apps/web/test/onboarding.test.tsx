@@ -10,13 +10,14 @@ const sessions = [
   { sessionID: "s3", title: "Sesi B1", directory: "/proj/b" },
 ];
 
-function setup(onPick = vi.fn()) {
+function setup(onPick = vi.fn(), onClose = vi.fn()) {
   render(
     <Onboarding
       recent={["/proj/a", "/proj/b", "/proj/c"]}
       sessions={sessions}
       bridgeHttp="http://127.0.0.1:8787"
       onPick={onPick}
+      onClose={onClose}
     />,
   );
   return onPick;

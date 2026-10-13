@@ -42,7 +42,7 @@ function loadStoredModel(): ModelCurrent | null {
 }
 
 function Shell({ locale, setLocale }: { locale: Locale; setLocale: (v: Locale) => void }): JSX.Element {
-  const { agent, chat, feed, diffs, errors, apply, pushUser, pushSystem, clearDiffs, clearFeed } = useApp();
+  const { agent, chat, feed, diffs, errors, apply, pushUser, pushSystem, clearDiffs, clearFeed, clearChat } = useApp();
   const [bridgeHttp, setBridgeHttp] = useState(() => localStorage.getItem(BRIDGE_KEY) ?? DEFAULT_BRIDGE);
   const [info, setInfo] = useState({ ocStatus: "down" as "up" | "down", ocVersion: undefined as string | undefined, directory: "", sessionID: undefined as string | undefined, recentDirs: [] as string[], agent: undefined as string | undefined, model: undefined as string | undefined });
   const [sessions, setSessions] = useState<Extract<BridgeMessage, { type: "session.listed" }>["sessions"]>([]);
@@ -447,6 +447,9 @@ function Shell({ locale, setLocale }: { locale: Locale; setLocale: (v: Locale) =
   function pickDir(dir: string, sessionID?: string): void {
     saveDirHistory([dir, ...loadDirHistory().filter((d) => d !== dir)]);
     setShowOnboard(false);
+    // Ganti sesi: bersihkan chat lama agar sesi yang dimuat tampil fresh.
+    // (Riwayat sesi dikirim bridge via pesan chat setelah session.select.)
+    if (sessionID) clearChat();
     send({ type: "session.select", directory: dir, ...(sessionID ? { sessionID } : {}) });
   }
 
@@ -515,6 +518,7 @@ function Shell({ locale, setLocale }: { locale: Locale; setLocale: (v: Locale) =
           sessions={sessions}
           bridgeHttp={bridgeHttp}
           onPick={pickDir}
+          onClose={() => setShowOnboard(false)}
         />
       )}
       <SettingsPanel
