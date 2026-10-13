@@ -8,6 +8,7 @@
  */
 
 import type { Animator, AnimLayer } from "./animator.js";
+import { baseTranslate } from "./animator.js";
 import { jittered } from "./prng.js";
 import { T, type Timing } from "./timing.js";
 import type { AvatarPose, WorkingVariant } from "./types.js";
@@ -602,11 +603,17 @@ export function applyWorking(r: PoseOps, variant: WorkingVariant): void {
       case "generic": {
         r.showProp("prop-gear", true);
         if (!r.reduced) {
+          // Rotate di-bake dengan translate dasar agar gear berputar di tempat.
+          const gear = r.el("prop-gear");
+          const gearBase = baseTranslate(gear);
           r.anim.start(
-            r.el("prop-gear"),
+            gear,
             "gear-spin",
             "B",
-            [{ rotate: "0deg" }, { rotate: "360deg" }],
+            [
+              { transform: `${gearBase} rotate(0deg)` },
+              { transform: `${gearBase} rotate(360deg)` },
+            ],
             { duration: 3000, easing: T.ease.linear, iterations: Infinity },
           );
         }
@@ -640,6 +647,8 @@ export function applyWorking(r: PoseOps, variant: WorkingVariant): void {
 function qBubbleLoop(r: PoseOps, escalated: () => boolean): void {
   const q = T.asking.qBubble;
   const bubble = r.el("q-bubble");
+  // Posisi dasar di-bake ke keyframes `transform` agar tidak "terbang".
+  const base = baseTranslate(bubble);
   const cycleMs = (): number =>
     jittered(r.rand, escalated() ? T.asking.escalatedCycleMs : q.cycleMs, q.jitter);
   const cycle = (): void => {
@@ -654,9 +663,9 @@ function qBubbleLoop(r: PoseOps, escalated: () => boolean): void {
       "appear",
       "B",
       [
-        { opacity: 0, scale: "0.4" },
-        { opacity: 1, scale: "1.15", offset: 0.6 },
-        { opacity: 1, scale: "1" },
+        { opacity: 0, transform: `${base} scale(0.4)` },
+        { opacity: 1, transform: `${base} scale(1.15)`, offset: 0.6 },
+        { opacity: 1, transform: `${base} scale(1)` },
       ],
       { duration: q.appearMs, easing: T.ease.pop, fill: "forwards" },
     );
@@ -666,7 +675,10 @@ function qBubbleLoop(r: PoseOps, escalated: () => boolean): void {
       bubble,
       "wobble",
       "B",
-      [{ rotate: `-${q.wobbleDeg}deg` }, { rotate: `${q.wobbleDeg}deg` }],
+      [
+        { transform: `${base} rotate(-${q.wobbleDeg}deg)` },
+        { transform: `${base} rotate(${q.wobbleDeg}deg)` },
+      ],
       {
         duration: q.wobblePeriodMs,
         easing: T.ease.soft,
@@ -683,7 +695,7 @@ function qBubbleLoop(r: PoseOps, escalated: () => boolean): void {
         bubble,
         "fade",
         "B",
-        [{ opacity: 1, scale: "1" }, { opacity: 0, scale: "0.9" }],
+        [{ opacity: 1, transform: `${base} scale(1)` }, { opacity: 0, transform: `${base} scale(0.9)` }],
         { duration: q.fadeMs, easing: T.ease.soft, fill: "forwards" },
       );
       (bubble as HTMLElement).style.opacity = "0";
@@ -1136,8 +1148,9 @@ function zzzLoop(r: PoseOps): void {
 export function applySleeping(r: PoseOps): void {
   r.setEyes("e-sleep");
   r.setMouth("m-o");
-  // Mulut elips mungil saat tidur.
-  (r.el("mouth") as HTMLElement).style.setProperty("scale", "0.75");
+  // Mulut elips mungil saat tidur (transform di-bake agar tidak bergeser).
+  const mouth = r.el("mouth");
+  (mouth as HTMLElement).style.setProperty("transform", `${baseTranslate(mouth)} scale(0.75)`);
   r.setLamp("stem");
   lampPattern(r, "breath");
   // Badan diam: tanpa float.

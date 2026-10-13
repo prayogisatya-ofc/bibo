@@ -6,7 +6,7 @@
  * Satu-satunya angka waktu berasal dari T (timing.ts).
  */
 
-import { Animator, type AnimLayer } from "./animator.js";
+import { Animator, baseTranslate, type AnimLayer } from "./animator.js";
 import { IdleDirector, type DirectorBehavior } from "./director.js";
 import { mouthParams, smoothLevel } from "./mouth.js";
 import {
@@ -121,6 +121,14 @@ export class BotRenderer implements AvatarRenderer, PoseOps {
     const e = this.svg.querySelector(`#${CSS.escape(id)}`);
     if (!e) throw new Error(`avatar: elemen #${id} tidak ditemukan`);
     return e;
+  }
+
+  /**
+   * Nilai `transform` untuk keyframes pada elemen mata: translate dasar
+   * di-bake agar animasi tidak "terbang" (lihat baseTranslate).
+   */
+  private eyeTransform(id: "eye-l" | "eye-r", inner: string): string {
+    return `${baseTranslate(this.el(id))} ${inner}`;
   }
 
   later(ms: number, fn: () => void): void {
@@ -557,12 +565,16 @@ export class BotRenderer implements AvatarRenderer, PoseOps {
           ],
           { duration: T.react.startle.ms, easing: T.ease.out },
         );
-        for (const id of ["eye-l", "eye-r"]) {
+        for (const id of ["eye-l", "eye-r"] as const) {
           this.anim.start(
             this.el(id),
             "startle-eyes",
             layer,
-            [{ scale: "1 0.05" }, { scale: "1 1.2" }, { scale: "1 1" }],
+            [
+              { transform: this.eyeTransform(id, "scale(1, 0.05)") },
+              { transform: this.eyeTransform(id, "scale(1, 1.2)") },
+              { transform: this.eyeTransform(id, "scale(1, 1)") },
+            ],
             { duration: 220, easing: T.ease.out },
           );
         }
@@ -738,7 +750,7 @@ export class BotRenderer implements AvatarRenderer, PoseOps {
     set("body-nod", { translate: "", scale: "", opacity: "", rotate: "" });
     set("antenna", { rotate: "" });
     set("eyes", { translate: "" });
-    set("mouth", { scale: "" });
+    set("mouth", { transform: "" });
     set("sound-arcs", { opacity: "" });
     const bulb = this.el("bulb-core");
     bulb.setAttribute("opacity", "1");
@@ -809,12 +821,16 @@ export class BotRenderer implements AvatarRenderer, PoseOps {
 
   private doBlinkNow(): void {
     const b = T.idle.blink;
-    for (const id of ["eye-l", "eye-r"]) {
+    for (const id of ["eye-l", "eye-r"] as const) {
       this.anim.start(
         this.el(id),
         "blink",
         "A",
-        [{ scale: "1 1" }, { scale: "1 0.08", offset: 0.5 }, { scale: "1 1" }],
+        [
+          { transform: this.eyeTransform(id, "scale(1, 1)") },
+          { transform: this.eyeTransform(id, "scale(1, 0.08)"), offset: 0.5 },
+          { transform: this.eyeTransform(id, "scale(1, 1)") },
+        ],
         { duration: b.closeMs + b.openMs, easing: T.ease.soft },
       );
     }
@@ -828,12 +844,19 @@ export class BotRenderer implements AvatarRenderer, PoseOps {
     const closeMs = this.reducedMotion ? b.closeMs / 2 : slow ? b.slowCloseMs : b.closeMs;
     const openMs = this.reducedMotion ? b.openMs / 2 : b.openMs;
     const one = (cMs: number, oMs: number): void => {
-      for (const id of ["eye-l", "eye-r"]) {
+      for (const id of ["eye-l", "eye-r"] as const) {
         this.anim.start(
           this.el(id),
           "blink",
           "A",
-          [{ scale: "1 1" }, { scale: "1 0.08", offset: cMs / (cMs + oMs) }, { scale: "1 1" }],
+          [
+            { transform: this.eyeTransform(id, "scale(1, 1)") },
+            {
+              transform: this.eyeTransform(id, "scale(1, 0.08)"),
+              offset: cMs / (cMs + oMs),
+            },
+            { transform: this.eyeTransform(id, "scale(1, 1)") },
+          ],
           { duration: cMs + oMs, easing: T.ease.soft },
         );
       }
@@ -1285,27 +1308,34 @@ export class BotRenderer implements AvatarRenderer, PoseOps {
   }
 
   private dizzy(): void {
-    for (const id of ["eye-l", "eye-r"]) {
-      this.anim.start(this.el(id), "dizzy", "C", [{ rotate: "0deg" }, { rotate: "360deg" }], {
-        duration: T.react.poke.dizzyMs,
-        easing: T.ease.soft,
-      });
+    for (const id of ["eye-l", "eye-r"] as const) {
+      this.anim.start(
+        this.el(id),
+        "dizzy",
+        "C",
+        [
+          { transform: this.eyeTransform(id, "rotate(0deg)") },
+          { transform: this.eyeTransform(id, "rotate(360deg)") },
+        ],
+        {
+          duration: T.react.poke.dizzyMs,
+          easing: T.ease.soft,
+        },
+      );
     }
   }
 
   private wakeAnnoyed(): void {
-    // Terbangun kesal: startle → mata setengah terbuka 1 s → kembali tidur.
+    // Terbangun kesal: startle → mata menyipit kesal 1 s → kembali tidur.
+    // (Per CHARACTER.md §9: startle lalu "mata setengah terbuka".)
     this.react("startle");
-    for (const id of ["eye-l", "eye-r"]) {
-      this.anim.start(this.el(id), "wake", "C", [{ scale: "1 0.1" }, { scale: "1 0.5" }], {
-        duration: 300,
-        fill: "forwards",
-      });
-    }
-    this.clater(1000, () => {
-      for (const id of ["eye-l", "eye-r"]) {
-        this.anim.start(this.el(id), "wake", "C", [{ scale: "1 0.1" }], { duration: 300 });
-      }
+    const e0 = this.eyeVariant;
+    this.setEyes("e-wide");
+    this.clater(350, () => {
+      if (this.eye() === "e-wide") this.setEyes("e-focus");
+    });
+    this.clater(1350, () => {
+      if (this.eye() === "e-focus") this.setEyes(e0);
     });
   }
 

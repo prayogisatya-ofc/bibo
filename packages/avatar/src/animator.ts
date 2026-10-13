@@ -10,6 +10,23 @@
 
 export type AnimLayer = "A" | "B" | "C";
 
+/**
+ * Ambil translate dasar dari atribut `transform` SVG sebagai string CSS.
+ * Dipakai untuk "bake" posisi dasar ke keyframes properti `transform`.
+ *
+ * Latar: menganimasikan properti individual (scale/rotate) pada elemen SVG
+ * yang punya atribut transform membuat Chrome salah menempatkan
+ * transform-origin (meski sudah transform-box: fill-box) — elemen "terbang"
+ * atau mengorbit. Dengan properti `transform` yang memuat translate dasar,
+ * origin tepat di tengah elemen dan animasi terjadi di tempat.
+ */
+export function baseTranslate(el: Element): string {
+  const t = el.getAttribute("transform") ?? "";
+  const m = /translate\(\s*(-?[\d.]+)(?:px)?\s*,?\s*(-?[\d.]+)?(?:px)?\s*\)/.exec(t);
+  if (!m) return "";
+  return `translate(${m[1]}px,${m[2] ?? "0"}px)`;
+}
+
 interface Tracked {
   id: string;
   layer: AnimLayer;

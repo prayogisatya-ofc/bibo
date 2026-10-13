@@ -44,7 +44,7 @@ display:block;width:100%;height:auto;overflow:visible}
 #eyes{transform-box:fill-box;transform-origin:50% 50%}
 #bulb{transform-box:fill-box;transform-origin:50% 50%}
 #shadow{transform-box:fill-box;transform-origin:50% 50%}
-#dots g,#q-bubble,#q-bubble-2,#zzz text,#sweat path,#prop-note,#snot,#prop-disc{transform-box:fill-box;transform-origin:center}
+#dots g,#q-bubble,#q-bubble-2,#zzz text,#sweat path,#prop-note,#snot,#prop-disc,#prop-gear,#mouth{transform-box:fill-box;transform-origin:center}
 #sound-arcs g{transform-box:fill-box;transform-origin:center}
 #bulb-ring{transform-box:fill-box;transform-origin:center}
 </style>
