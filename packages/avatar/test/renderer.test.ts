@@ -556,6 +556,34 @@ describe("transisi (§10)", () => {
     r.setPose("idle");
     expect(rec?.cancelled).toBe(false);
   });
+
+  it("sapu varian: desync dua mulut/mata terlihat diperbaiki", () => {
+    mount();
+    // Simulasi desync: dua varian mulut + dua varian mata dipaksa terlihat.
+    const mouth = q("mouth");
+    const flat = mouth.querySelector(".m-flat") as HTMLElement;
+    const smile = mouth.querySelector(".m-smile") as HTMLElement;
+    flat.style.opacity = "1";
+    smile.style.opacity = "1";
+    const eyeL = q("eye-l");
+    const open = eyeL.querySelector(".e-open") as HTMLElement;
+    const worried = eyeL.querySelector(".e-worried") as HTMLElement;
+    open.style.opacity = "1";
+    worried.style.opacity = "1";
+    // setMouth/setEyes ke varian yang SAMA (early-return) tetap menyapu.
+    r.setMouth("m-smile");
+    r.setEyes("e-open");
+    for (const g of Array.from(mouth.children)) {
+      const op = (g as HTMLElement).style.opacity;
+      if ((g as Element).classList.contains("m-smile")) expect(op).toBe("1");
+      else expect(op).toBe("0");
+    }
+    for (const g of Array.from(eyeL.children)) {
+      const op = (g as HTMLElement).style.opacity;
+      if ((g as Element).classList.contains("e-open")) expect(op).toBe("1");
+      else expect(op).toBe("0");
+    }
+  });
 });
 
 describe("reduced motion (§13)", () => {

@@ -163,13 +163,44 @@ export class BotRenderer implements AvatarRenderer, PoseOps {
   }
 
   setEyes(v: string): void {
-    if (v === this.eyeVariant) return;
-    const prev = this.eyeVariant;
-    this.eyeVariant = v;
-    for (const eyeId of ["eye-l", "eye-r"]) {
-      const eye = this.el(eyeId);
-      const prevEl = prev ? eye.querySelector(`.${prev}`) : null;
-      const nextEl = eye.querySelector(`.${v}`);
+    if (v !== this.eyeVariant) {
+      const prev = this.eyeVariant;
+      this.eyeVariant = v;
+      for (const eyeId of ["eye-l", "eye-r"]) {
+        const eye = this.el(eyeId);
+        const prevEl = prev ? eye.querySelector(`.${prev}`) : null;
+        const nextEl = eye.querySelector(`.${v}`);
+        if (prevEl) {
+          if (!this.reducedMotion) {
+            this.anim.start(prevEl, "xfade", "A", [{ opacity: 1 }, { opacity: 0 }], {
+              duration: T.transition.eyeMouthMs,
+              fill: "forwards",
+            });
+          }
+          (prevEl as HTMLElement).style.opacity = "0";
+        }
+        if (nextEl) {
+          if (!this.reducedMotion) {
+            this.anim.start(nextEl, "xfade", "A", [{ opacity: 0 }, { opacity: 1 }], {
+              duration: T.transition.eyeMouthMs,
+              fill: "forwards",
+            });
+          }
+          (nextEl as HTMLElement).style.opacity = "1";
+        }
+      }
+    }
+    // Defensif: seperti mulut — tak boleh ada dua varian mata terlihat.
+    this.sweepVariants("eye", v);
+  }
+
+  setMouth(v: string): void {
+    if (v !== this.mouthVariant) {
+      const prev = this.mouthVariant;
+      this.mouthVariant = v;
+      const mouth = this.el("mouth");
+      const prevEl = prev ? mouth.querySelector(`.${prev}`) : null;
+      const nextEl = mouth.querySelector(`.${v}`);
       if (prevEl) {
         if (!this.reducedMotion) {
           this.anim.start(prevEl, "xfade", "A", [{ opacity: 1 }, { opacity: 0 }], {
@@ -189,32 +220,26 @@ export class BotRenderer implements AvatarRenderer, PoseOps {
         (nextEl as HTMLElement).style.opacity = "1";
       }
     }
+    // Defensif: paksa semua varian lain ke 0. Menutup kelas bug "sisa varian
+    // masih terlihat" apa pun penyebab desync-nya (balapan timer/animasi).
+    this.sweepVariants("mouth", v);
   }
 
-  setMouth(v: string): void {
-    if (v === this.mouthVariant) return;
-    const prev = this.mouthVariant;
-    this.mouthVariant = v;
-    const mouth = this.el("mouth");
-    const prevEl = prev ? mouth.querySelector(`.${prev}`) : null;
-    const nextEl = mouth.querySelector(`.${v}`);
-    if (prevEl) {
-      if (!this.reducedMotion) {
-        this.anim.start(prevEl, "xfade", "A", [{ opacity: 1 }, { opacity: 0 }], {
-          duration: T.transition.eyeMouthMs,
-          fill: "forwards",
-        });
+  /**
+   * Sapu varian mata/mulut: yang bukan varian aktif dipaksa opacity 0 dan
+   * crossfade-nya dimatikan. Idempoten; aman dipanggil tiap setMouth/setEyes.
+   */
+  private sweepVariants(kind: "eye" | "mouth", active: string): void {
+    const roots: Element[] =
+      kind === "mouth"
+        ? [this.el("mouth")]
+        : [this.el("eye-l"), this.el("eye-r")];
+    for (const root of roots) {
+      for (const child of Array.from(root.children)) {
+        if ((child as Element).classList?.contains(active)) continue;
+        this.anim.stop(child as Element, "xfade");
+        (child as HTMLElement).style.opacity = "0";
       }
-      (prevEl as HTMLElement).style.opacity = "0";
-    }
-    if (nextEl) {
-      if (!this.reducedMotion) {
-        this.anim.start(nextEl, "xfade", "A", [{ opacity: 0 }, { opacity: 1 }], {
-          duration: T.transition.eyeMouthMs,
-          fill: "forwards",
-        });
-      }
-      (nextEl as HTMLElement).style.opacity = "1";
     }
   }
 
