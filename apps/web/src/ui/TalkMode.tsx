@@ -116,12 +116,12 @@ export function TalkMode({
           )}
           {!sttSupported && (
             <p className="warn" data-testid="mic-unavailable">
-              Mic tidak tersedia — chat teks tetap jalan.
+              Mic tidak tersedia - chat teks tetap jalan.
             </p>
           )}
           <MicButton size="small" listening={listening} disabled={!sttSupported} onDown={micDown} onUp={micUp} />
-          <div className="talk-hint">
-            <b>{t.talkHint1}</b> · {fill(t.talkHint2, { mode: t.modeChat })}
+          <div className="talk-hint mt-4">
+            <b>{t.talkHint1}</b>
           </div>
         </div>
       )}

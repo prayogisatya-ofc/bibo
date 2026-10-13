@@ -58,12 +58,11 @@ export function Onboarding({
     <div className="modal" role="dialog" aria-label={t.onboardTitle}>
       <div className="modal-box onboard-box">
         <div className="row picker-head">
-          <h2>{t.onboardTitle}</h2>
+          <h2 className="font-bold text-lg">{t.onboardTitle}</h2>
           <IconButton label={t.dialogClose} onClick={onClose} data-testid="onboard-close">
             <XIcon size={16} />
           </IconButton>
         </div>
-        <p className="onboard-hint">{t.onboardHint}</p>
 
         <section className="onboard-section" aria-label={t.onboardTitle}>
           <div className="row onboard-folder-row">

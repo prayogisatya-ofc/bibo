@@ -600,7 +600,7 @@ button:disabled { opacity: 0.5; cursor: default; }
   background: var(--card);
   border-radius: var(--radius-card);
   padding: 20px 24px;
-  font-size: 22px;
+  font-size: 17px;
   font-weight: 700;
   line-height: 1.4;
   box-shadow: var(--shadow-pop);

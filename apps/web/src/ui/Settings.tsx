@@ -147,7 +147,7 @@ export function SettingsPanel({
           role="tabpanel"
           id={`settings-tabpanel-${tab}`}
           aria-labelledby={`settings-tab-${tab}`}
-          className="settings-tabpanel"
+          className="settings-tabpanel p-2"
         >
           {tab === "voice" && (
             <>
@@ -286,8 +286,7 @@ export function SettingsPanel({
           )}
         </section>
 
-        <p className="privacy">{t.privacyNote}</p>
-        <p className="muted">{t.settingsHint}</p>
+        <p className="muted text-sm">{t.settingsHint}</p>
         <Button onClick={onClose}>
           {t.close}
         </Button>
