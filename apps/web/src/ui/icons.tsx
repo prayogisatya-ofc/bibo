@@ -10,6 +10,7 @@ import {
   IconLoader2,
   IconMicrophone,
   IconPlayerStop,
+  IconPlus,
   IconQuestionMark,
   IconSend,
   IconSettings,
@@ -45,6 +46,7 @@ export const SpeakerOffIcon = wrap(IconVolumeOff);
 export const GearIcon = wrap(IconSettings);
 export const SendIcon = wrap(IconSend);
 export const StopIcon = wrap(IconPlayerStop);
+export const PlusIcon = wrap(IconPlus);
 export const CheckIcon = wrap(IconCheck);
 export const XIcon = wrap(IconX);
 export const QuestionIcon = wrap(IconQuestionMark);

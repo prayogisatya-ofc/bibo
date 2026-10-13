@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useT } from "../i18n/index.js";
 import { DirPicker } from "./DirPicker.js";
-import { FolderIcon } from "./icons.js";
+import { FolderIcon, PlusIcon } from "./icons.js";
 
 const DIRS_KEY = "codepet.dir-history";
 
@@ -25,6 +25,11 @@ import type { BridgeMessage } from "@codepet/protocol";
 
 type ListedSession = Extract<BridgeMessage, { type: "session.listed" }>["sessions"][number];
 
+/** Normalisasi path untuk perbandingan (trailing slash, spasi). */
+export function normDir(d: string | undefined): string {
+  return (d ?? "").trim().replace(/\/+$/, "");
+}
+
 export function Onboarding({
   recent, sessions, bridgeHttp, onPick,
 }: {
@@ -38,6 +43,8 @@ export function Onboarding({
   const [pickerOpen, setPickerOpen] = useState(false);
   const local = loadDirHistory();
   const merged = [...recent, ...local.filter((d) => !recent.includes(d))].slice(0, 10);
+  const dirN = normDir(dir);
+  const folderSessions = dirN ? sessions.filter((sn) => normDir(sn.directory) === dirN) : [];
   return (
     <div className="modal" role="dialog" aria-label={t.onboardTitle}>
       <div className="modal-box">
@@ -51,20 +58,17 @@ export function Onboarding({
             aria-label={t.onboardTitle}
             data-testid="dir-input"
             onKeyDown={(e) => {
-              if (e.key === "Enter" && dir.trim()) onPick(dir.trim());
+              if (e.key === "Enter" && dirN) onPick(dirN);
             }}
           />
           <button type="button" onClick={() => setPickerOpen(true)} data-testid="dir-browse" title={t.dirBrowse}>
             <FolderIcon size={16} /> {t.dirBrowse}
           </button>
-          <button type="button" disabled={!dir.trim()} onClick={() => onPick(dir.trim())} data-testid="dir-go">
-            {t.onboardGo}
-          </button>
         </div>
         {pickerOpen && (
           <DirPicker
             bridgeHttp={bridgeHttp}
-            {...(dir.trim() ? { initialDir: dir.trim() } : {})}
+            {...(dirN ? { initialDir: dirN } : {})}
             onSelect={(d) => {
               setDir(d);
               setPickerOpen(false);
@@ -72,18 +76,37 @@ export function Onboarding({
             onClose={() => setPickerOpen(false)}
           />
         )}
-        {sessions.length > 0 && (
+        <h3>{t.sessionInFolder}</h3>
+        {!dirN ? (
+          <p className="muted" data-testid="sess-hint">{t.sessionPickFolderFirst}</p>
+        ) : (
           <>
-            <h3>{t.sessionLabel}</h3>
-            <ul className="recent">
-              {sessions.map((sn) => (
-                <li key={sn.sessionID}>
-                  <button type="button" onClick={() => onPick(sn.directory ?? dir ?? merged[0] ?? "", sn.sessionID)} data-testid={`sess-${sn.sessionID}`}>
-                    {sn.title || sn.sessionID}
-                  </button>
-                </li>
-              ))}
-            </ul>
+            <button
+              type="button"
+              disabled={!dirN}
+              onClick={() => onPick(dirN)}
+              data-testid="sess-new"
+            >
+              <PlusIcon size={14} /> {t.sessionNew}
+            </button>
+            {folderSessions.length > 0 ? (
+              <ul className="recent">
+                {folderSessions.map((sn) => (
+                  <li key={sn.sessionID}>
+                    <button
+                      type="button"
+                      onClick={() => onPick(dirN, sn.sessionID)}
+                      data-testid={`sess-${sn.sessionID}`}
+                      title={t.sessionContinue}
+                    >
+                      {sn.title || sn.sessionID}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="muted" data-testid="sess-empty">{t.sessionNoneInFolder}</p>
+            )}
           </>
         )}
         {merged.length > 0 && (
@@ -92,7 +115,7 @@ export function Onboarding({
             <ul className="recent">
               {merged.map((d) => (
                 <li key={d}>
-                  <button type="button" onClick={() => onPick(d)}>
+                  <button type="button" onClick={() => setDir(d)} data-testid={`recent-${d}`}>
                     {d}
                   </button>
                 </li>

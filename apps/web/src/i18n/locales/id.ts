@@ -53,6 +53,11 @@ export const id = {
   followLabel: "↓ lanjut ikuti",
   dirChangeTitle: "Ganti folder",
   sessionLabel: "Sesi",
+  sessionInFolder: "Sesi di folder ini",
+  sessionNew: "Sesi baru",
+  sessionNoneInFolder: "Belum ada sesi di folder ini.",
+  sessionPickFolderFirst: "Pilih folder dulu untuk melihat sesinya.",
+  sessionContinue: "Lanjutkan",
   newSession: "Sesi baru",
   testVoice: "Halo, ini {name}. Suara test satu dua tiga.",
   // --- fase C: mode ---

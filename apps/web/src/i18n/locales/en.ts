@@ -53,6 +53,11 @@ export const en = {
   followLabel: "↓ follow",
   dirChangeTitle: "Change folder",
   sessionLabel: "Session",
+  sessionInFolder: "Sessions in this folder",
+  sessionNew: "New session",
+  sessionNoneInFolder: "No sessions in this folder yet.",
+  sessionPickFolderFirst: "Pick a folder first to see its sessions.",
+  sessionContinue: "Resume",
   newSession: "New session",
   testVoice: "Hi, this is {name}. Voice test one two three.",
   // --- fase C: modes ---

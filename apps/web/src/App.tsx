@@ -56,8 +56,7 @@ function Shell({ locale, setLocale }: { locale: Locale; setLocale: (v: Locale) =
     return v === "s" || v === "l" ? v : "m";
   });
   const [showOnboard, setShowOnboard] = useState(false);
-  const [showSettings, setShowSettings] = useState(false);
-  const [level, setLevel] = useState(0);
+  const [showSettings, setShowSettings] = useState(false);  const [level, setLevel] = useState(0);
   const [verbosity, setVerbosity] = useState<Verbosity>(() => {
     const v = localStorage.getItem("codepet.verbosity");
     return v === "silent" || v === "cerewet" ? v : "normal";
@@ -150,6 +149,12 @@ function Shell({ locale, setLocale }: { locale: Locale; setLocale: (v: Locale) =
   );
 
   const { status, send } = useBridge(bridgeHttp, onMessage);
+
+  // Muat daftar sesi setiap kali dialog folder/sesi dibuka (baik otomatis
+  // saat pertama konek maupun manual via chip folder).
+  useEffect(() => {
+    if (showOnboard) send({ type: "session.list" });
+  }, [showOnboard, send]);
   const engine = useMemo(() => {
     if (typeof window === "undefined" || !("speechSynthesis" in window)) return undefined;
     const synth = window.speechSynthesis;
@@ -441,7 +446,6 @@ function Shell({ locale, setLocale }: { locale: Locale; setLocale: (v: Locale) =
 
   function openOnboard(): void {
     setShowOnboard(true);
-    send({ type: "session.list" });
   }
 
   const ttsActive = level > 0;
