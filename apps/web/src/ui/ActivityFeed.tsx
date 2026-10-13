@@ -32,7 +32,12 @@ export function ActivityFeed({ items }: { items: FeedItem[] }): JSX.Element | nu
           first = f.ts || now;
           seenAt.current.set(f.id, first);
         }
-        const dur = f.status === "running" ? undefined : formatDur(Math.max(0, now - first), locale);
+        // Durasi final: ts item selesai dari bridge dikurangi awal terlihat.
+        // JANGAN pakai Date.now() saat render — komponen di-render ulang
+        // tiap 500 ms (tick orchestrator) sehingga durasi akan "menghitung
+        // terus" meski tool sudah selesai.
+        const dur =
+          f.status === "running" ? undefined : formatDur(Math.max(0, f.ts - first), locale);
         return (
           <div key={f.id}>
             <button type="button" className="tool-row" onClick={() => setOpen(open === f.id ? undefined : f.id)} aria-expanded={open === f.id}>
