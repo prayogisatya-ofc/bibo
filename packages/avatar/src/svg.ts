@@ -24,7 +24,7 @@ export const BOT_SVG = `<svg id="bot" xmlns="http://www.w3.org/2000/svg" viewBox
 <style>
 #bot{
 --bot-stage:#161616;--bot-body:#F5F7FF;--bot-body-stroke:transparent;--bot-body-glint:#FFFFFF;
---bot-hand:#E6EAFB;--bot-hand-stroke:#CDD4F1;--bot-visor:#1F2540;--bot-eye:#7CF3D6;
+--bot-hand:#9AA3D1;--bot-hand-stroke:#7E88BE;--bot-visor:#1F2540;--bot-eye:#7CF3D6;
 --bot-blush:#FF9DB8;--bot-stem:#C5CCEE;--bot-info:#4C8DFF;--bot-ok:#2EC27E;
 --bot-ask:#FFB020;--bot-bad:#F0524A;--bot-shadow:rgba(0,0,0,.40);
 --bot-sweat:#7AB8FF;--bot-zzz:#8FA0E8;--bot-key:#8FA0E8;
