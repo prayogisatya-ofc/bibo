@@ -4,7 +4,7 @@ import {
   reduceBubble,
   splitSentences,
   type Bubble,
-} from "../src/ui/speechBubble.js";
+} from "../src/ui/bubbleState.js";
 
 describe("splitSentences / bubbleText", () => {
   it("pisah pada . ! ? …", () => {

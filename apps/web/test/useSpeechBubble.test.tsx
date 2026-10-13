@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { act, cleanup, render } from "@testing-library/react";
 import { BUBBLE_FADE_MS, useSpeechBubble } from "../src/ui/useSpeechBubble.js";
-import type { Bubble, BubbleEvent } from "../src/ui/speechBubble.js";
+import type { Bubble, BubbleEvent } from "../src/ui/bubbleState.js";
 
 beforeEach(() => {
   vi.useFakeTimers();

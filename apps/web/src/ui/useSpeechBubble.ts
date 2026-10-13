@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useReducer, useRef } from "react";
-import { reduceBubble, type Bubble, type BubbleEvent } from "./speechBubble.js";
+import { reduceBubble, type Bubble, type BubbleEvent } from "./bubbleState.js";
 
 /** Jeda fade-out setelah ucapan selesai (AGENT-PROMPT-AVATAR-UI §C.4). */
 export const BUBBLE_FADE_MS = 1500;

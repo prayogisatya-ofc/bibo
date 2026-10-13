@@ -1,4 +1,4 @@
-import type { Bubble } from "./speechBubble.js";
+import type { Bubble } from "./bubbleState.js";
 
 /**
  * Bubble ucapan mode Ngobrol: di kanan atas kepala Bibo (di atas kepala pada

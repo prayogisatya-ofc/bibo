@@ -6,7 +6,7 @@ import { AvatarStage } from "./AvatarStage.js";
 import { MicButton } from "./MicButton.js";
 import { MicIcon } from "./icons.js";
 import { SpeechBubble } from "./SpeechBubble.js";
-import type { Bubble } from "./speechBubble.js";
+import type { Bubble } from "./bubbleState.js";
 
 /** Tiga batang ekualiser — tingginya mengikuti speechLevel (hanya saat TTS aktif). */
 function Equalizer({ level }: { level: number }): JSX.Element {
