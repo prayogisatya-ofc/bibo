@@ -51,19 +51,10 @@ export function Onboarding({
         <h2>{t.onboardTitle}</h2>
         <p>{t.onboardHint}</p>
         <div className="row">
-          <input
-            value={dir}
-            onChange={(e) => setDir(e.target.value)}
-            placeholder={t.onboardPlaceholder}
-            aria-label={t.onboardTitle}
-            data-testid="dir-input"
-            onKeyDown={(e) => {
-              if (e.key === "Enter" && dirN) onPick(dirN);
-            }}
-          />
           <button type="button" onClick={() => setPickerOpen(true)} data-testid="dir-browse" title={t.dirBrowse}>
             <FolderIcon size={16} /> {t.dirBrowse}
           </button>
+          {dirN && <span className="muted" data-testid="dir-chosen">{dirN}</span>}
         </div>
         {pickerOpen && (
           <DirPicker

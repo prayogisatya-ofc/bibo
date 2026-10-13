@@ -3,7 +3,6 @@ export const en = {
   onboardTitle: "Pick a project folder",
   onboardHint: "The bridge will create or resume an OpenCode session in this folder.",
   onboardPlaceholder: "/home/you/project",
-  onboardGo: "Start",
   dirBrowse: "Browse",
   dirPickerTitle: "Choose folder",
   dirPickerUp: "Up",

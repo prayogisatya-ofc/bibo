@@ -12,9 +12,18 @@ const sessions = [
 
 function setup(onPick = vi.fn()) {
   render(
-    <Onboarding recent={[]} sessions={sessions} bridgeHttp="http://127.0.0.1:8787" onPick={onPick} />,
+    <Onboarding
+      recent={["/proj/a", "/proj/b", "/proj/c"]}
+      sessions={sessions}
+      bridgeHttp="http://127.0.0.1:8787"
+      onPick={onPick}
+    />,
   );
   return onPick;
+}
+
+function pickFolder(folderTestId: string): void {
+  fireEvent.click(screen.getByTestId(folderTestId));
 }
 
 describe("normDir", () => {
@@ -34,7 +43,7 @@ describe("Onboarding folder+sesi", () => {
 
   it("sesi difilter per folder (termasuk varian trailing slash)", () => {
     setup();
-    fireEvent.change(screen.getByTestId("dir-input"), { target: { value: "/proj/a" } });
+    pickFolder("recent-/proj/a");
     expect(screen.getByTestId("sess-s1")).toBeTruthy();
     expect(screen.getByTestId("sess-s2")).toBeTruthy();
     expect(screen.queryByTestId("sess-s3")).toBeNull();
@@ -42,21 +51,22 @@ describe("Onboarding folder+sesi", () => {
 
   it("klik sesi: onPick(dir, sessionID) untuk lanjutkan", () => {
     const onPick = setup();
-    fireEvent.change(screen.getByTestId("dir-input"), { target: { value: "/proj/a/" } });
+    pickFolder("recent-/proj/a");
     fireEvent.click(screen.getByTestId("sess-s2"));
     expect(onPick).toHaveBeenCalledWith("/proj/a", "s2");
   });
 
   it("tombol sesi baru: onPick(dir) tanpa sessionID", () => {
     const onPick = setup();
-    fireEvent.change(screen.getByTestId("dir-input"), { target: { value: "/proj/b" } });
+    pickFolder("recent-/proj/b");
     fireEvent.click(screen.getByTestId("sess-new"));
     expect(onPick).toHaveBeenCalledWith("/proj/b");
   });
 
   it("folder tanpa sesi: tampil pesan kosong", () => {
     setup();
-    fireEvent.change(screen.getByTestId("dir-input"), { target: { value: "/proj/c" } });
+    pickFolder("recent-/proj/c");
     expect(screen.getByTestId("sess-empty")).toBeTruthy();
+    expect(screen.getByTestId("sess-new")).toBeTruthy();
   });
 });

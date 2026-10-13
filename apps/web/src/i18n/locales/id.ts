@@ -3,7 +3,6 @@ export const id = {
   onboardTitle: "Pilih folder proyek",
   onboardHint: "Bridge akan membuat atau melanjutkan sesi OpenCode di folder ini.",
   onboardPlaceholder: "/home/kamu/proyek",
-  onboardGo: "Mulai",
   dirBrowse: "Jelajahi",
   dirPickerTitle: "Pilih folder",
   dirPickerUp: "Naik",
