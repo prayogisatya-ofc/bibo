@@ -837,15 +837,15 @@ export function applyCelebrate(r: PoseOps): void {
   if (r.reduced) {
     // Konfeti diganti 3 kilau statis.
     r.showProp("sparkles", true);
-    r.placeHand("l", "back");
-    r.placeHand("r", "back");
+    r.placeHand("l", "front");
+    r.placeHand("r", "front");
     r.moveHand("l", -6, -56, 80, T.ease.out);
     r.moveHand("r", 6, -52, 80, T.ease.out);
     return;
   }
   // Tangan di samping badan, berlawanan fase.
-  r.placeHand("l", "back");
-  r.placeHand("r", "back");
+  r.placeHand("l", "front");
+  r.placeHand("r", "front");
   r.moveHand("l", -6, -56, 280, T.ease.pop);
   r.moveHand("r", 6, -52, 280, T.ease.pop);
   const h = T.celebrate.hands;
@@ -1178,8 +1178,8 @@ export function applySleeping(r: PoseOps): void {
   });
   (ant as HTMLElement).style.setProperty("rotate", `${T.sleeping.antennaDroopDeg}deg`);
   // Tangan menepi.
-  r.placeHand("l", "back");
-  r.placeHand("r", "back");
+  r.placeHand("l", "front");
+  r.placeHand("r", "front");
   const ms = r.reduced ? 80 : 600;
   r.moveHand("l", 22, 20, ms, T.ease.soft);
   r.moveHand("r", -22, 24, ms, T.ease.soft);
@@ -1327,8 +1327,8 @@ export function applyOffline(r: PoseOps): void {
     fill: "forwards",
   });
   (ant as HTMLElement).style.setProperty("rotate", `${T.offline.antennaDroopDeg}deg`);
-  r.placeHand("l", "back");
-  r.placeHand("r", "back");
+  r.placeHand("l", "front");
+  r.placeHand("r", "front");
   r.moveHand("l", 22, 16, r.reduced ? 80 : 300, T.ease.soft);
   r.moveHand("r", -22, 20, r.reduced ? 80 : 300, T.ease.soft);
   r.showProp("prop-disc", true);

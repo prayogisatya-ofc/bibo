@@ -50,8 +50,6 @@ display:block;width:100%;height:auto;overflow:visible}
 </style>
 <g id="shadow"><ellipse cx="100" cy="178" rx="50" ry="7" fill="var(--bot-shadow)"/></g>
 <g id="hands-back">
-<g id="hand-l" transform="translate(42,152)"><g class="hand-wave"><ellipse cx="0" cy="0" rx="12" ry="11" fill="var(--bot-hand)" stroke="var(--bot-hand-stroke)" stroke-width="1.5"/></g></g>
-<g id="hand-r" transform="translate(158,148)"><g class="hand-wave"><ellipse cx="0" cy="0" rx="12" ry="11" fill="var(--bot-hand)" stroke="var(--bot-hand-stroke)" stroke-width="1.5"/><g class="mag" opacity="0"><circle cx="13" cy="-17" r="9" fill="rgba(245,247,255,.35)" stroke="var(--bot-visor)" stroke-width="3"/><line x1="19" y1="-10" x2="27" y2="-1" stroke="var(--bot-visor)" stroke-width="3" stroke-linecap="round"/></g></g></g>
 </g>
 <g id="body-float"><g id="body-nod">
 <g id="antenna"><path id="stem" d="M100 62 V46" stroke="var(--bot-stem)" stroke-width="4" stroke-linecap="round" fill="none"/><g id="bulb"><circle id="bulb-ring" cx="100" cy="39" r="8.5" fill="none" stroke="var(--bot-info)" stroke-width="2" opacity="0"/><circle id="bulb-core" cx="100" cy="39" r="8.5" fill="var(--bot-stem)"/><circle id="bulb-glint" cx="97" cy="36" r="2.4" fill="#fff" opacity=".7"/></g></g>
@@ -97,7 +95,10 @@ display:block;width:100%;height:auto;overflow:visible}
 <g id="prop-mini" opacity="0" transform="translate(178,148)"><rect x="-18" y="-16" width="36" height="32" rx="14" fill="var(--bot-body)" stroke="var(--bot-hand-stroke)" stroke-width="1"/><rect x="-12" y="-8" width="24" height="14" rx="7" fill="var(--bot-visor)"/><circle cx="-6" cy="-1" r="2.4" fill="var(--bot-eye)"/><circle cx="6" cy="-1" r="2.4" fill="var(--bot-eye)"/></g>
 <g id="prop-gear" opacity="0" transform="translate(100,20)"><circle r="9.5" fill="none" stroke="var(--bot-ask)" stroke-width="4" stroke-dasharray="3.2 4.3"/><circle r="4" fill="none" stroke="var(--bot-ask)" stroke-width="3"/></g>
 </g>
-<g id="hands-front"></g>
+<g id="hands-front">
+<g id="hand-l" transform="translate(72,148)"><g class="hand-wave"><ellipse cx="0" cy="0" rx="12" ry="11" fill="var(--bot-hand)" stroke="var(--bot-hand-stroke)" stroke-width="1.5"/></g></g>
+<g id="hand-r" transform="translate(128,144)"><g class="hand-wave"><ellipse cx="0" cy="0" rx="12" ry="11" fill="var(--bot-hand)" stroke="var(--bot-hand-stroke)" stroke-width="1.5"/><g class="mag" opacity="0"><circle cx="13" cy="-17" r="9" fill="rgba(245,247,255,.35)" stroke="var(--bot-visor)" stroke-width="3"/><line x1="19" y1="-10" x2="27" y2="-1" stroke="var(--bot-visor)" stroke-width="3" stroke-linecap="round"/></g></g></g>
+</g>
 <g id="fx"></g>
 </svg>`;
 

@@ -79,7 +79,7 @@ export class BotRenderer implements AvatarRenderer, PoseOps {
     l: { x: 0, y: 0 },
     r: { x: 0, y: 0 },
   };
-  private handLayer: Record<HandWhich, "back" | "front"> = { l: "back", r: "back" };
+  private handLayer: Record<HandWhich, "back" | "front"> = { l: "front", r: "front" };
   private propShown = new Map<string, boolean>();
 
   // Speaking overlay.
