@@ -1,48 +1,44 @@
 /**
- * Test-helper: WAAPI palsu yang mencatat semua animate() + rAF terkontrol.
+ * Test-helper: Animator palsu yang mencatat semua start()/stop() + rAF terkontrol.
  *
- * jsdom tidak mengimplementasikan Element.animate maupun requestAnimationFrame,
- * jadi kedua API dipalsukan di sini agar koreografi bisa diverifikasi dengan
- * jam palsu (vi.useFakeTimers): kapan animasi dimulai, keyframes/opsinya,
+ * Animator kini memakai GSAP (bukan WAAPI), jadi mock dipasang di level
+ * Animator.prototype — bukan Element.animate. Bentuk AnimRecord dipertahankan
+ * agar tes perilaku tidak berubah: kapan animasi dimulai, keyframes/opsinya,
  * dan apakah dibatalkan (deteksi kebocoran).
  */
+
+import { Animator, type AnimLayer } from "../src/animator.js";
 
 export interface AnimRecord {
   el: Element;
   keyframes: Keyframe[];
   options: KeyframeAnimationOptions;
-  /** Date.now() (jam palsu) saat animate() dipanggil. */
+  /** Date.now() (jam palsu) saat start() dipanggil. */
   startStamp: number;
   cancelled: boolean;
   finished: boolean;
   paused: boolean;
   playbackRate: number;
+  /** Lapisan animasi ("A"|"B"|"C") — untuk stopLayer berlapis. */
+  layer: AnimLayer;
   /** Live dari animasi (getter), bukan salinan. */
   readonly currentTime: number | null;
   /** Id logis dari Animator (via __animId), bila ada. */
   readonly animId: string | undefined;
 }
 
+/** Animasi palsu: tidak benar-benar menganimasikan, hanya mencatat status. */
 class FakeAnimation {
   currentTime: number | null = 0;
   playbackRate = 1;
   playState: AnimationPlayState = "running";
   onfinish: ((this: Animation, ev: AnimationPlaybackEvent) => unknown) | null = null;
   oncancel: ((this: Animation, ev: AnimationPlaybackEvent) => unknown) | null = null;
-  startTime: number | null = 0;
-  readonly effect: {
-    getTiming: () => { duration: unknown; iterations: unknown };
-  };
+  onremove: ((this: Animation, ev: AnimationPlaybackEvent) => unknown) | null = null;
+  __animId?: string;
   #record: AnimRecord;
   constructor(record: AnimRecord) {
     this.#record = record;
-    const options = record.options;
-    this.effect = {
-      getTiming: () => ({
-        duration: options.duration ?? 0,
-        iterations: options.iterations ?? 1,
-      }),
-    };
   }
   cancel(): void {
     this.#record.cancelled = true;
@@ -52,6 +48,7 @@ class FakeAnimation {
   finish(): void {
     this.#record.finished = true;
     this.playState = "finished";
+    if (this.onfinish) this.onfinish.call(this as unknown as Animation, {} as AnimationPlaybackEvent);
   }
   pause(): void {
     this.#record.paused = true;
@@ -107,35 +104,157 @@ export function reinstallRaf(): void {
 export function installDomFakes(): void {
   if (installed) return;
   installed = true;
-  const proto = Element.prototype as unknown as {
-    animate: (keyframes: unknown, options?: unknown) => Animation;
+
+  // Patch Animator.prototype.start: catat, kembalikan FakeAnimation (tanpa GSAP sungguhan).
+  const proto = Animator.prototype as unknown as {
+    start(el: Element, id: string, layer: AnimLayer, keyframes: Keyframe[], options: KeyframeAnimationOptions): Animation;
+    stop(el: Element, id: string): void;
+    stopLayer(layer?: AnimLayer): void;
+    pauseAll(): void;
+    resumeAll(): void;
+    setRate(rate: number): void;
+    seekAll(ms: number): void;
+    finish(el: Element, id: string): void;
   };
-  proto.animate = function (this: Element, keyframes: unknown, options?: unknown): Animation {
-    const kf = (Array.isArray(keyframes) ? keyframes : []) as Keyframe[];
-    const opts = (
-      typeof options === "number" ? { duration: options } : ((options ?? {}) as object)
-    ) as KeyframeAnimationOptions;
+
+  const origStart = proto.start;
+  const origStop = proto.stop;
+  const origStopLayer = proto.stopLayer;
+  void origStart;
+  void origStop;
+  void origStopLayer;
+
+  // Simpan referensi record per (el, id) untuk penandaan cancelled.
+  const live = new Map<Element, Map<string, AnimRecord>>();
+
+  function syncDataAnim(el: Element): void {
+    const per = live.get(el);
+    if (!per || per.size === 0) el.removeAttribute("data-anim");
+    else el.setAttribute("data-anim", [...per.keys()].join(" "));
+  }
+
+  proto.start = function (
+    this: Animator,
+    el: Element,
+    id: string,
+    layer: AnimLayer,
+    keyframes: Keyframe[],
+    options: KeyframeAnimationOptions,
+  ): Animation {
+    // Batalkan yang lama dulu (seperti Animator asli): tandai cancelled.
+    const perEl = live.get(el);
+    const prev = perEl?.get(id);
+    if (prev) {
+      prev.cancelled = true;
+      perEl?.delete(id);
+    }
+
     let anim!: FakeAnimation;
     const record: AnimRecord = {
-      el: this,
-      keyframes: kf,
-      options: opts,
+      el,
+      keyframes,
+      options,
       startStamp: Date.now(),
       cancelled: false,
       finished: false,
       paused: false,
       playbackRate: 1,
+      layer,
       get currentTime(): number | null {
-        return (anim as unknown as { currentTime?: number | null } | undefined)?.currentTime ?? null;
+        const seek = (record as unknown as { __seekTime?: number }).__seekTime;
+        if (seek !== undefined) return seek;
+        return anim?.currentTime ?? null;
       },
       get animId(): string | undefined {
-        return (anim as unknown as { __animId?: string } | undefined)?.__animId;
+        return anim?.__animId;
       },
     };
     anim = new FakeAnimation(record);
+    anim.__animId = id;
     animRecords.push(record);
+
+    let per = live.get(el);
+    if (!per) {
+      per = new Map();
+      live.set(el, per);
+    }
+    per.set(id, record);
+    syncDataAnim(el);
+
     return anim as unknown as Animation;
   };
+
+  proto.stop = function (this: Animator, el: Element, id: string): void {
+    const rec = live.get(el)?.get(id);
+    if (rec) {
+      rec.cancelled = true;
+      live.get(el)?.delete(id);
+      syncDataAnim(el);
+    }
+  };
+
+  proto.stopLayer = function (this: Animator, layer?: AnimLayer): void {
+    for (const [el, per] of [...live]) {
+      for (const [id, rec] of [...per]) {
+        if (layer === undefined || rec.layer === layer) {
+          rec.cancelled = true;
+          per.delete(id);
+        }
+      }
+      if (per.size === 0) live.delete(el);
+      syncDataAnim(el);
+    }
+  };
+
+  proto.pauseAll = function (this: Animator): void {
+    for (const per of live.values()) {
+      for (const rec of per.values()) {
+        if (!rec.cancelled) rec.paused = true;
+      }
+    }
+  };
+
+  proto.resumeAll = function (this: Animator): void {
+    for (const per of live.values()) {
+      for (const rec of per.values()) {
+        if (!rec.cancelled) rec.paused = false;
+      }
+    }
+  };
+
+  proto.setRate = function (this: Animator, rate: number): void {
+    for (const per of live.values()) {
+      for (const rec of per.values()) {
+        if (!rec.cancelled) rec.playbackRate = rate;
+      }
+    }
+  };
+
+  proto.seekAll = function (this: Animator, ms: number): void {
+    // Model sederhana: tandai paused; currentTime dihitung dari durasi.
+    for (const per of live.values()) {
+      for (const rec of per.values()) {
+        if (rec.cancelled) continue;
+        const dur = typeof rec.options.duration === "number" ? rec.options.duration : 0;
+        const infinite = rec.options.iterations === Infinity;
+        const target = dur === 0 ? ms : infinite ? ms % dur : Math.min(ms, dur);
+        // Simpan sebagai currentTime via closure — gunakan properti ekspansi.
+        (rec as unknown as { __seekTime: number }).__seekTime = target;
+        rec.paused = true;
+      }
+    }
+  };
+
+  proto.finish = function (this: Animator, el: Element, id: string): void {
+    const rec = live.get(el)?.get(id);
+    if (rec) {
+      rec.finished = true;
+      rec.cancelled = true;
+      live.get(el)?.delete(id);
+      syncDataAnim(el);
+    }
+  };
+
   reinstallRaf();
 }
 
@@ -153,12 +272,12 @@ export function resetAnimRecords(): void {
   animRecords.length = 0;
 }
 
-/** Catatan animate() untuk elemen + id logis tertentu (id opsional). */
+/** Catatan start() untuk elemen + id logis tertentu (id opsional). */
 export function recordsFor(el: Element, animId?: string): AnimRecord[] {
   return animRecords.filter((r) => r.el === el && (animId === undefined || r.animId === animId));
 }
 
-/** Catatan animate() di seluruh dokumen untuk id logis tertentu. */
+/** Catatan start() di seluruh dokumen untuk id logis tertentu. */
 export function recordsWithId(animId: string): AnimRecord[] {
   return animRecords.filter((r) => r.animId === animId);
 }
