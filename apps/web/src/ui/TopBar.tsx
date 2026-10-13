@@ -3,6 +3,7 @@ import { FolderIcon, GearIcon, SpeakerIcon, SpeakerOffIcon } from "./icons.js";
 import type { ConnStatus } from "../ws/client.js";
 import type { UiMode } from "./useUiMode.js";
 import { ModelPicker, type ModelCurrent, type ModelOption } from "./ModelPicker.js";
+import { IconButton } from "./components/index.js";
 
 export interface TopBarModelState {
   models: ModelOption[];
@@ -100,25 +101,18 @@ export function TopBar({
           {t.modeTalk}
         </button>
       </div>
-      <button
-        type="button"
-        className={`icon-btn${muted ? " is-on" : ""}`}
+      <IconButton
+        label={muted ? t.unmuteTitle : t.muteTitle}
         onClick={onToggleMute}
-        aria-label={muted ? t.unmuteTitle : t.muteTitle}
-        aria-pressed={muted}
         data-testid="mute-btn"
+        size="sm"
+        className={muted ? "is-on" : ""}
       >
         {muted ? <SpeakerOffIcon /> : <SpeakerIcon />}
-      </button>
-      <button
-        type="button"
-        className="icon-btn"
-        onClick={onOpenSettings}
-        aria-label={t.settingsTitle}
-        data-testid="settings-btn"
-      >
+      </IconButton>
+      <IconButton label={t.settingsTitle} onClick={onOpenSettings} data-testid="settings-btn" size="sm">
         <GearIcon />
-      </button>
+      </IconButton>
     </header>
   );
 }

@@ -3,6 +3,7 @@ import { fill, useT } from "../i18n/index.js";
 import { character } from "../character.js";
 import { type TtsEngine } from "../voice/tts.js";
 import { useFocusTrap } from "./useFocusTrap.js";
+import { Button, Input, Select } from "./components/index.js";
 
 export type Verbosity = "silent" | "normal" | "cerewet";
 
@@ -156,8 +157,7 @@ export function SettingsPanel({
               </label>
               <label>
                 {t.voiceLabel}
-                <select
-                  value={voiceURI ?? ""}
+                <Select value={voiceURI ?? ""}
                   onChange={(e) => {
                     const v = e.target.value || undefined;
                     setVoiceURI(v);
@@ -171,7 +171,7 @@ export function SettingsPanel({
                       {v.name} ({v.lang})
                     </option>
                   ))}
-                </select>
+                </Select>
               </label>
               {engine?.usingDefaultVoice && <p className="warn">{t.voiceDefaultWarn}</p>}
               <label>
@@ -207,23 +207,23 @@ export function SettingsPanel({
                   }}
                 />
               </label>
-              <button type="button" onClick={testVoice} data-testid="test-voice">
+              <Button onClick={testVoice} data-testid="test-voice">
                 {t.testVoiceBtn}
-              </button>
+              </Button>
               <h4 className="settings-sub">{t.micSubhead}</h4>
               <label>
                 {t.sttLangLabel}
-                <select value={sttLang} onChange={(e) => onSttLang(e.target.value)} data-testid="stt-lang">
+                <Select value={sttLang} onChange={(e) => onSttLang(e.target.value)} data-testid="stt-lang">
                   <option value="id-ID">{t.sttId}</option>
                   <option value="en-US">{t.sttEn}</option>
-                </select>
+                </Select>
               </label>
               <label>
                 {t.sendModeLabel}
-                <select value={sendMode} onChange={(e) => onSendMode(e.target.value as "auto" | "confirm")} data-testid="send-mode">
+                <Select value={sendMode} onChange={(e) => onSendMode(e.target.value as "auto" | "confirm")} data-testid="send-mode">
                   <option value="auto">{t.sendModeAuto}</option>
                   <option value="confirm">{t.sendModeConfirm}</option>
-                </select>
+                </Select>
               </label>
               <label>
                 <input type="checkbox" checked={headphone} onChange={(e) => onHeadphone(e.target.checked)} data-testid="headphone" />
@@ -240,18 +240,18 @@ export function SettingsPanel({
             <>
               <label>
                 {t.languageLabel}
-                <select value={locale} onChange={(e) => onLocale(e.target.value as "id" | "en")} data-testid="locale">
+                <Select value={locale} onChange={(e) => onLocale(e.target.value as "id" | "en")} data-testid="locale">
                   <option value="id">Indonesia</option>
                   <option value="en">English</option>
-                </select>
+                </Select>
               </label>
               <label>
                 {t.themeLabel}
-                <select value={theme} onChange={(e) => onTheme(e.target.value as "light" | "dark" | "auto")} data-testid="theme">
+                <Select value={theme} onChange={(e) => onTheme(e.target.value as "light" | "dark" | "auto")} data-testid="theme">
                   <option value="dark">{t.themeDark}</option>
                   <option value="light">{t.themeLight}</option>
                   <option value="auto">{t.themeAuto}</option>
-                </select>
+                </Select>
               </label>
             </>
           )}
@@ -259,38 +259,38 @@ export function SettingsPanel({
           {tab === "avatar" && (
             <label>
               {t.avatarSizeLabel}
-              <select value={avatarSize} onChange={(e) => onAvatarSize(e.target.value as "s" | "m" | "l")} data-testid="avatar-size">
+              <Select value={avatarSize} onChange={(e) => onAvatarSize(e.target.value as "s" | "m" | "l")} data-testid="avatar-size">
                 <option value="s">{t.avatarS}</option>
                 <option value="m">{t.avatarM}</option>
                 <option value="l">{t.avatarL}</option>
-              </select>
+              </Select>
             </label>
           )}
 
           {tab === "behavior" && (
             <label>
               {t.verbosityLabel}
-              <select value={verbosity} onChange={(e) => onVerbosity(e.target.value as Verbosity)} data-testid="verbosity">
+              <Select value={verbosity} onChange={(e) => onVerbosity(e.target.value as Verbosity)} data-testid="verbosity">
                 <option value="silent">{t.verbositySilent}</option>
                 <option value="normal">{t.verbosityNormal}</option>
                 <option value="cerewet">{t.verbosityChatty}</option>
-              </select>
+              </Select>
             </label>
           )}
 
           {tab === "conn" && (
             <label>
               {t.bridgeUrlLabel}
-              <input value={bridgeHttp} onChange={(e) => onBridgeHttp(e.target.value)} inputMode="url" />
+              <Input value={bridgeHttp} onChange={(e) => onBridgeHttp(e.target.value)} inputMode="url" />
             </label>
           )}
         </section>
 
         <p className="privacy">{t.privacyNote}</p>
         <p className="muted">{t.settingsHint}</p>
-        <button type="button" className="btn-close" onClick={onClose}>
+        <Button onClick={onClose}>
           {t.close}
-        </button>
+        </Button>
       </div>
     </div>
   );

@@ -6,5 +6,7 @@ export { Card } from "./Card.js";
 export type { CardProps } from "./Card.js";
 export { Input } from "./Input.js";
 export type { InputProps } from "./Input.js";
+export { Select } from "./Select.js";
+export type { SelectProps } from "./Select.js";
 export { Chip } from "./Chip.js";
 export type { ChipProps } from "./Chip.js";

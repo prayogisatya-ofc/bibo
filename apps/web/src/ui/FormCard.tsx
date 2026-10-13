@@ -3,6 +3,7 @@ import type { FormView } from "@bibo/protocol";
 import { useT } from "../i18n/index.js";
 import { ChevronDownIcon } from "./icons.js";
 import { useFocusTrap } from "./useFocusTrap.js";
+import { Button, IconButton, Input } from "./components/index.js";
 
 interface Field {
   key?: string;
@@ -78,16 +79,9 @@ export function FormCard({
         <strong>{form.title}</strong>
         <span className="spacer" aria-hidden="true" />
         {variant === "popup" && onMinimize && (
-          <button
-            type="button"
-            className="icon-btn"
-            style={{ width: 32, height: 32 }}
-            onClick={onMinimize}
-            aria-label={t.minimize}
-            data-testid="form-minimize"
-          >
+          <IconButton label={t.minimize} onClick={onMinimize} data-testid="form-minimize" size="sm">
             <ChevronDownIcon size={16} />
-          </button>
+          </IconButton>
         )}
       </div>
       {fields.map((f) => {
@@ -102,9 +96,9 @@ export function FormCard({
                 </legend>
                 <p className="voice-hint">{t.formVoiceHint}</p>
                 {f.options.map((o, i) => (
-                  <button key={o.value} type="button" onClick={() => onReply(form.formID, { [key]: o.value })} data-testid={`form-opt-${key}-${o.value}`}>
+                  <Button key={o.value} size="sm" onClick={() => onReply(form.formID, { [key]: o.value })} data-testid={`form-opt-${key}-${o.value}`}>
                     {i + 1}. {o.label ?? o.value}
-                  </button>
+                  </Button>
                 ))}
               </fieldset>
             );
@@ -125,9 +119,9 @@ export function FormCard({
                   {o.label ?? o.value}
                 </label>
               ))}
-              <button type="button" onClick={() => onReply(form.formID, { [key]: multi[key] ?? [] })} data-testid={`form-send-${key}`}>
+              <Button size="sm" variant="primary" onClick={() => onReply(form.formID, { [key]: multi[key] ?? [] })} data-testid={`form-send-${key}`}>
                 {t.formAnswer}
-              </button>
+              </Button>
             </fieldset>
           );
         }
@@ -141,32 +135,32 @@ export function FormCard({
                 data-testid={`form-bool-${key}`}
               />
               {f.title ?? key}
-              <button type="button" onClick={() => onReply(form.formID, { [key]: values[key] ?? false })} data-testid={`form-send-${key}`}>
+              <Button size="sm" variant="primary" onClick={() => onReply(form.formID, { [key]: values[key] ?? false })} data-testid={`form-send-${key}`}>
                 {t.formAnswer}
-              </button>
+              </Button>
             </label>
           );
         }
         return (
           <label key={key}>
             {f.title ?? key}
-            <input
+            <Input
               type="text"
               value={String(values[key] ?? "")}
               onChange={(e) => set(key, e.target.value)}
               data-testid={`form-text-${key}`}
             />
-            <button type="button" onClick={() => onReply(form.formID, { [key]: values[key] ?? "" })} data-testid={`form-send-${key}`}>
+            <Button size="sm" variant="primary" onClick={() => onReply(form.formID, { [key]: values[key] ?? "" })} data-testid={`form-send-${key}`}>
               {t.formAnswer}
-            </button>
+            </Button>
           </label>
         );
       })}
       <div className="perm-actions">
         <span className="spacer" aria-hidden="true" />
-        <button type="button" className="btn-reject" onClick={() => onCancel(form.formID)} data-testid="form-cancel">
+        <Button size="sm" variant="danger" onClick={() => onCancel(form.formID)} data-testid="form-cancel">
           {t.cancel}
-        </button>
+        </Button>
       </div>
     </div>
   );

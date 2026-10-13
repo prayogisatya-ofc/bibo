@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useT } from "../i18n/index.js";
 import { useFocusTrap } from "./useFocusTrap.js";
 import { ArrowUpIcon, FolderIcon, SpinnerIcon, XIcon } from "./icons.js";
+import { Button, IconButton, Input } from "./components/index.js";
 
 interface DirEntry {
   name: string;
@@ -117,15 +118,9 @@ export function DirPicker({
       <div className="modal-box dir-picker" ref={trapRef}>
         <div className="row picker-head">
           <h2>{t.dirPickerTitle}</h2>
-          <button
-            type="button"
-            className="icon-btn"
-            onClick={onClose}
-            aria-label={t.dirPickerClose}
-            data-testid="dir-picker-close"
-          >
-            <XIcon size={18} />
-          </button>
+          <IconButton label={t.dirPickerClose} onClick={onClose} data-testid="dir-picker-close">
+            <XIcon size={16} />
+          </IconButton>
         </div>
         {cur !== null && (
           <nav className="crumbs" aria-label="breadcrumb">
@@ -152,9 +147,9 @@ export function DirPicker({
           {!loading && error !== null && (
             <p className="errors" role="alert">
               {error}{" "}
-              <button type="button" onClick={() => void load(cur ?? "")} data-testid="dir-picker-retry">
+              <Button size="sm" onClick={() => void load(cur ?? "")} data-testid="dir-picker-retry">
                 {t.dirPickerRetry}
-              </button>
+              </Button>
             </p>
           )}
           {!loading && error === null && entries.length === 0 && <p className="muted">{t.dirPickerEmpty}</p>}
@@ -181,8 +176,7 @@ export function DirPicker({
             )}
         </div>
         <div className="row">
-          <button
-            type="button"
+          <Button
             onClick={() => {
               if (canUp && cur !== null) void load(parentOf(cur));
             }}
@@ -190,9 +184,9 @@ export function DirPicker({
             data-testid="dir-picker-up"
           >
             <ArrowUpIcon size={16} /> {t.dirPickerUp}
-          </button>
-          <button
-            type="button"
+          </Button>
+          <Button
+            variant="primary"
             disabled={cur === null}
             onClick={() => {
               if (cur !== null) onSelect(cur);
@@ -200,10 +194,10 @@ export function DirPicker({
             data-testid="dir-picker-select"
           >
             {t.dirPickerSelectHere}
-          </button>
+          </Button>
         </div>
         <div className="row">
-          <input
+          <Input
             value={manual}
             onChange={(e) => setManual(e.target.value)}
             placeholder={t.onboardPlaceholder}
@@ -213,14 +207,13 @@ export function DirPicker({
               if (e.key === "Enter" && manual.trim()) void load(manual.trim());
             }}
           />
-          <button
-            type="button"
+          <Button
             disabled={!manual.trim()}
             onClick={() => void load(manual.trim())}
             data-testid="dir-picker-go"
           >
             {t.dirPickerGo}
-          </button>
+          </Button>
         </div>
         <p className="muted picker-hint">{t.dirPickerManual}</p>
       </div>

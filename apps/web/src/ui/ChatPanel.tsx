@@ -5,6 +5,7 @@ import { useApp } from "../state/store.js";
 import { Markdown } from "./markdown.js";
 import { MicButton } from "./MicButton.js";
 import { SendIcon, StopIcon } from "./icons.js";
+import { Button, IconButton } from "./components/index.js";
 
 const HISTORY_KEY = "bibo.input-history";
 
@@ -173,15 +174,15 @@ export function ChatPanel({
         <div className="busy-choice" role="dialog" aria-label={t.busyChoiceTitle}>
           <p>{t.busyChoiceTitle}</p>
           <div>
-            <button type="button" onClick={() => submit("queue")} autoFocus>
+            <Button size="sm" onClick={() => submit("queue")} autoFocus>
               {t.busyQueue}
-            </button>
-            <button type="button" onClick={() => submit("steer")}>
+            </Button>
+            <Button size="sm" onClick={() => submit("steer")}>
               {t.busySteer}
-            </button>
-            <button type="button" onClick={() => setShowChoice(false)}>
+            </Button>
+            <Button size="sm" variant="ghost" onClick={() => setShowChoice(false)}>
               {t.close}
-            </button>
+            </Button>
           </div>
         </div>
       )}
@@ -201,20 +202,18 @@ export function ChatPanel({
           />
           <MicButton size="small" testId="mic-input-btn" listening={mic.listening} disabled={disabled || mic.disabled} onDown={mic.onDown} onUp={mic.onUp} />
           {busy ? (
-            <button type="button" className="stop-btn" onClick={onStop} data-testid="stop-btn" aria-label={t.stop}>
+            <IconButton label={t.stop} onClick={onStop} data-testid="stop-btn">
               <StopIcon size={18} />
-            </button>
+            </IconButton>
           ) : (
-            <button
-              type="button"
-              className="send-btn"
+            <IconButton
+              label={t.send}
               onClick={() => submit("queue")}
               disabled={disabled || !draft.trim()}
               data-testid="send-btn"
-              aria-label={t.send}
             >
               <SendIcon size={22} />
-            </button>
+            </IconButton>
           )}
         </div>
         <div className="kbd-hints">{t.kbdHints}</div>

@@ -1,5 +1,6 @@
 import { useT } from "../i18n/index.js";
 import { SpinnerIcon } from "./icons.js";
+import { Button, Select } from "./components/index.js";
 
 export interface ModelOption {
   id: string;
@@ -49,9 +50,9 @@ export function ModelPicker({
     return (
       <span className="model-picker is-error" role="alert" title={msg} data-testid="model-picker">
         <span className="model-text">{t.modelLabel}</span>
-        <button type="button" className="model-retry" onClick={onRetry} data-testid="model-retry">
+        <Button size="sm" onClick={onRetry} data-testid="model-retry">
           {t.modelRetry}
-        </button>
+        </Button>
       </span>
     );
   }
@@ -61,8 +62,7 @@ export function ModelPicker({
     : undefined;
   return (
     <span className="model-picker" data-testid="model-picker">
-      <select
-        className="model-select"
+      <Select
         aria-label={t.modelPickerTitle}
         data-testid="model-select"
         value={curValue}
@@ -90,7 +90,7 @@ export function ModelPicker({
             {m.name}
           </option>
         ))}
-      </select>
+      </Select>
     </span>
   );
 }

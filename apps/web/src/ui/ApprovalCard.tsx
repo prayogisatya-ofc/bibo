@@ -4,6 +4,7 @@ import { fill, useT } from "../i18n/index.js";
 import { character } from "../character.js";
 import { ChevronDownIcon, MicIcon, QuestionIcon } from "./icons.js";
 import { useFocusTrap } from "./useFocusTrap.js";
+import { Button, IconButton, Input } from "./components/index.js";
 
 /**
  * Kartu persetujuan izin (PRD §11.2, FR-040..042) — dua varian:
@@ -86,16 +87,9 @@ export function ApprovalCard({
           {badge}
         </span>
         {variant === "popup" && onMinimize && (
-          <button
-            type="button"
-            className="icon-btn"
-            style={{ width: 32, height: 32 }}
-            onClick={onMinimize}
-            aria-label={t.minimize}
-            data-testid="perm-minimize"
-          >
+          <IconButton label={t.minimize} onClick={onMinimize} data-testid="perm-minimize" size="sm">
             <ChevronDownIcon size={16} />
-          </button>
+          </IconButton>
         )}
       </div>
       {perm.patterns.length > 0 && (
@@ -110,45 +104,45 @@ export function ApprovalCard({
           (confirmAlways ? (
             <span className="ok-confirm">
               <span className="always-warn">{t.permAlwaysWarn}</span>
-              <button type="button" onClick={() => onReply(perm.requestID, "always")} data-testid="perm-always-confirm">
+              <Button size="sm" variant="primary" onClick={() => onReply(perm.requestID, "always")} data-testid="perm-always-confirm">
                 {t.permAlwaysYes}
-              </button>
-              <button type="button" onClick={() => setConfirmAlways(false)}>
+              </Button>
+              <Button size="sm" variant="ghost" onClick={() => setConfirmAlways(false)}>
                 {t.cancel}
-              </button>
+              </Button>
             </span>
           ) : (
-            <button type="button" className="link-btn" onClick={() => setConfirmAlways(true)} data-testid="perm-always">
+            <Button size="sm" variant="ghost" onClick={() => setConfirmAlways(true)} data-testid="perm-always">
               {t.permAlways}
-            </button>
+            </Button>
           ))}
         <span className="spacer" aria-hidden="true" />
-        <button type="button" className="btn-reject" onClick={() => onReply(perm.requestID, "reject")} data-testid="perm-reject">
+        <Button size="sm" variant="danger" onClick={() => onReply(perm.requestID, "reject")} data-testid="perm-reject">
           {t.permReject}
-        </button>
+        </Button>
         {perm.risk === "high" ? (
           <span className="ok-confirm">
-            <input
+            <Input
               value={okText}
               onChange={(e) => setOkText(e.target.value)}
               placeholder={t.permOkPlaceholder}
               aria-label={t.permOkAria}
               data-testid="perm-ok-input"
             />
-            <button
-              type="button"
-              className="btn-once"
+            <Button
+              size="sm"
+              variant="primary"
               disabled={okText.trim().toUpperCase() !== "OK"}
               onClick={() => onReply(perm.requestID, "once")}
               data-testid="perm-once"
             >
               {t.permOnce}
-            </button>
+            </Button>
           </span>
         ) : (
-          <button type="button" className="btn-once" onClick={() => onReply(perm.requestID, "once")} data-testid="perm-once">
+          <Button size="sm" variant="primary" onClick={() => onReply(perm.requestID, "once")} data-testid="perm-once">
             {t.permOnce}
-          </button>
+          </Button>
         )}
       </div>
     </div>
