@@ -945,9 +945,10 @@ button:disabled { opacity: 0.5; cursor: default; }
 button.picker-entry:hover { background: var(--hover, rgba(127, 127, 127, 0.15)); }
 .picker-entry.file { color: var(--text-2); cursor: default; }
 .picker-hint { font-size: 0.85rem; margin: 0; }
-/* Tombol bawah dialog pilih folder: padding lega, target sentuh nyaman */
+/* Tombol bawah dialog pilih folder: padding lega, target sentuh nyaman.
+ * :not(.picker-head) agar tombol × di header tak ikut melar. */
 .dir-picker .row { flex-wrap: wrap; align-items: stretch; }
-.dir-picker .row > button:not(.icon-btn) {
+.dir-picker .row:not(.picker-head) > button:not(.icon-btn) {
   padding: 12px 20px;
   font-weight: 800;
   display: inline-flex;
