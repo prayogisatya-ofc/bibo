@@ -91,7 +91,11 @@ export function AvatarStage({
 
   const caption = poseLabel(pose, variant, locale);
   return (
-    <div className="avatar-anim" style={{ width: animSize, height: animSize }}>
+    <div
+      className="avatar-anim avatar-fixed-box"
+      style={{ width: animSize, height: animSize }}
+      data-testid="bibo-box"
+    >
       <div
         className="avatar-live avatar-box"
         ref={boxRef}

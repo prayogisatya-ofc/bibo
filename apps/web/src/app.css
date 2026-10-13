@@ -293,6 +293,26 @@ button:disabled { opacity: 0.5; cursor: default; }
   transition: width var(--mode-anim) ease, height var(--mode-anim) ease;
 }
 .avatar-live svg { display: block; width: 100%; height: auto; }
+
+/* Kotak avatar fixed: rasio 1:1 terjamin, SVG mengisi penuh.
+ * Bisa ditempatkan di mana saja — ukuran via width/height inline atau CSS,
+ * posisi internal selalu proporsional (viewBox 0 0 200 200). */
+.avatar-fixed-box {
+  aspect-ratio: 1 / 1;
+  flex-shrink: 0;
+  position: relative;
+  overflow: hidden;
+}
+.avatar-fixed-box .avatar-box {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.avatar-fixed-box .avatar-box svg {
+  width: 100% !important;
+  height: 100% !important;
+}
 .activity-chip {
   position: absolute;
   bottom: 14px;
