@@ -833,6 +833,20 @@ button:disabled { opacity: 0.5; cursor: default; }
 .modal-box label { display: flex; flex-direction: column; gap: 4px; font-weight: 700; font-size: 14px; }
 .modal-box label:has(> input[type="checkbox"]) { flex-direction: row; align-items: center; gap: 0.5rem; font-weight: 600; }
 .recent { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.3rem; }
+
+/* Pemilih folder (FITUR B): breadcrumb + daftar isi, tanpa ikon emoji. */
+.dir-picker { min-width: min(480px, 92vw); }
+.dir-picker .picker-head { align-items: center; justify-content: space-between; }
+.dir-picker .picker-head h2 { margin: 0; }
+.crumbs { display: flex; flex-wrap: wrap; align-items: center; gap: 0.15rem; font-size: 0.95rem; }
+.crumb-wrap { display: inline-flex; align-items: center; }
+.crumb-sep { color: var(--text-2); margin: 0 0.15rem; }
+.crumb { background: none; border: none; color: var(--accent, inherit); text-decoration: underline; cursor: pointer; padding: 0.15rem 0.25rem; font: inherit; }
+.picker-list { display: flex; flex-direction: column; gap: 0.15rem; max-height: 40vh; overflow-y: auto; border: 1px solid var(--line); border-radius: 8px; padding: 0.4rem; }
+.picker-entry { display: flex; align-items: center; gap: 0.5rem; width: 100%; text-align: left; background: none; border: none; border-radius: 6px; padding: 0.35rem 0.5rem; font: inherit; color: inherit; cursor: pointer; }
+button.picker-entry:hover { background: var(--hover, rgba(127, 127, 127, 0.15)); }
+.picker-entry.file { color: var(--text-2); cursor: default; }
+.picker-hint { font-size: 0.85rem; margin: 0; }
 .privacy { color: var(--text-2); font-size: 0.85rem; }
 
 /* Panel pengaturan berkelompok (tanpa ikon emoji; pemisah berupa header seksi) */

@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { useT } from "../i18n/index.js";
+import { DirPicker } from "./DirPicker.js";
+import { FolderIcon } from "./icons.js";
 
 const DIRS_KEY = "codepet.dir-history";
 
@@ -24,14 +26,16 @@ import type { BridgeMessage } from "@codepet/protocol";
 type ListedSession = Extract<BridgeMessage, { type: "session.listed" }>["sessions"][number];
 
 export function Onboarding({
-  recent, sessions, onPick,
+  recent, sessions, bridgeHttp, onPick,
 }: {
   recent: string[];
   sessions: ListedSession[];
+  bridgeHttp: string;
   onPick: (dir: string, sessionID?: string) => void;
 }): JSX.Element {
   const t = useT();
   const [dir, setDir] = useState("");
+  const [pickerOpen, setPickerOpen] = useState(false);
   const local = loadDirHistory();
   const merged = [...recent, ...local.filter((d) => !recent.includes(d))].slice(0, 10);
   return (
@@ -50,10 +54,24 @@ export function Onboarding({
               if (e.key === "Enter" && dir.trim()) onPick(dir.trim());
             }}
           />
+          <button type="button" onClick={() => setPickerOpen(true)} data-testid="dir-browse" title={t.dirBrowse}>
+            <FolderIcon size={16} /> {t.dirBrowse}
+          </button>
           <button type="button" disabled={!dir.trim()} onClick={() => onPick(dir.trim())} data-testid="dir-go">
             {t.onboardGo}
           </button>
         </div>
+        {pickerOpen && (
+          <DirPicker
+            bridgeHttp={bridgeHttp}
+            {...(dir.trim() ? { initialDir: dir.trim() } : {})}
+            onSelect={(d) => {
+              setDir(d);
+              setPickerOpen(false);
+            }}
+            onClose={() => setPickerOpen(false)}
+          />
+        )}
         {sessions.length > 0 && (
           <>
             <h3>{t.sessionLabel}</h3>

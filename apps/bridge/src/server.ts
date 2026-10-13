@@ -31,6 +31,7 @@ import { classifyRisk } from "./safety/risk.js";
 import { ALWAYS_NOT_ALLOWED, VOICE_NOT_ALLOWED, guardReply, logDecision } from "./safety/guard.js";
 import { ReminderTracker } from "./safety/remind.js";
 import { loadStore, saveStore, rememberDir, type BridgeStoreData } from "./store.js";
+import { DirHttpError, listDir, resolveDirPath } from "./fs/dirs.js";
 
 const VERSION = "0.1.0-m1";
 
@@ -565,6 +566,18 @@ function isSettledError(e: unknown): boolean {
     c.json({ ok: true, bridge: VERSION, opencode: ocVersion() ?? null, status: ocStatus(), rssMB: Math.round(process.memoryUsage().rss / 1048576) }),
   );
   app.get("/bootstrap", (c) => c.json({ token, port: config.port }));
+  // Jelajah folder lokal untuk pemilih folder web (FITUR B).
+  // Hanya baca direktori; tidak ada tulis/hapus. CORS tetap pola lokal saja.
+  app.get("/api/dirs", async (c) => {
+    try {
+      const abs = resolveDirPath(c.req.query("path"));
+      const entries = await listDir(abs);
+      return c.json({ path: abs, entries });
+    } catch (e) {
+      if (e instanceof DirHttpError) return c.json({ error: e.message }, e.status);
+      return c.json({ error: "Gagal membaca folder." }, 500);
+    }
+  });
 
   const server = createServer((req, res) => {
     void (async () => {

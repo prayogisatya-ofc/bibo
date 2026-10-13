@@ -436,6 +436,7 @@ function Shell({ locale, setLocale }: { locale: Locale; setLocale: (v: Locale) =
         <Onboarding
           recent={info.recentDirs}
           sessions={sessions}
+          bridgeHttp={bridgeHttp}
           onPick={pickDir}
         />
       )}
