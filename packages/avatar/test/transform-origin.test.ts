@@ -176,7 +176,7 @@ describe("tangan tidak mengorbit (rotate di-bake)", () => {
     const rec = recordsFor(q("hand-l"), "cheer")[0];
     expect(rec).toBeDefined();
     const kf = JSON.stringify(rec?.keyframes);
-    expect(kf).toContain("translate(72px,148px)");
+    expect(kf).toContain("translate(32px,132px)");
     expect(kf).toContain("rotate(");
     expect(kf).not.toContain('"rotate"');
   });
@@ -188,7 +188,7 @@ describe("tangan tidak mengorbit (rotate di-bake)", () => {
     const rec = recordsFor(q("hand-r"), "rub")[0];
     expect(rec).toBeDefined();
     const kf = JSON.stringify(rec?.keyframes);
-    expect(kf).toContain("translate(128px,144px)");
+    expect(kf).toContain("translate(168px,128px)");
     expect(kf).toContain("rotate(");
     expect(kf).not.toContain('"rotate"');
   });
