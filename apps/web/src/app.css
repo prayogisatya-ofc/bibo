@@ -431,6 +431,8 @@ button:disabled { opacity: 0.5; cursor: default; }
   display: flex;
   flex-direction: column;
   gap: 10px;
+  /* Sejajar dengan input chat (composer-zone 24px) + jarak ke input. */
+  margin: 0 24px 12px;
 }
 .tool-row {
   display: flex;
@@ -838,7 +840,7 @@ button:disabled { opacity: 0.5; cursor: default; }
 .warn { color: var(--risk-medium-text); }
 .muted { color: var(--text-2); }
 .errors { color: var(--bad); }
-.resume { align-self: center; }
+.resume { align-self: center; padding: 10px 22px; }
 .empty { color: var(--text-2); }
 .chat-count { display: none; }
 .modal {
@@ -1016,6 +1018,7 @@ button.picker-entry:hover { background: var(--hover, rgba(127, 127, 127, 0.15));
   .mode-switch button { padding: 7px 14px; font-size: 13px; }
   .chat-log { padding: 14px; }
   .composer-zone, .docked-cards, .changes { padding-left: 14px; padding-right: 14px; }
+  .tool-card { margin-left: 14px; margin-right: 14px; }
   .session-head { padding: 12px 14px; }
   /* Popup izin menjadi bottom sheet */
   .talk-screen { justify-content: flex-start; }

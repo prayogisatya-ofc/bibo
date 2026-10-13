@@ -157,7 +157,15 @@ export function ChatPanel({
         )}
       </div>
       {!stick && (
-        <button type="button" className="resume" onClick={() => setStick(true)}>
+        <button
+          type="button"
+          className="resume"
+          onClick={() => {
+            setStick(true);
+            nearBottom.current = true;
+            if (boxRef.current) boxRef.current.scrollTop = boxRef.current.scrollHeight;
+          }}
+        >
           {t.followLabel}
         </button>
       )}

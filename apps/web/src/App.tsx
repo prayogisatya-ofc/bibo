@@ -42,7 +42,7 @@ function loadStoredModel(): ModelCurrent | null {
 }
 
 function Shell({ locale, setLocale }: { locale: Locale; setLocale: (v: Locale) => void }): JSX.Element {
-  const { agent, chat, feed, diffs, errors, apply, pushUser, pushSystem, clearDiffs } = useApp();
+  const { agent, chat, feed, diffs, errors, apply, pushUser, pushSystem, clearDiffs, clearFeed } = useApp();
   const [bridgeHttp, setBridgeHttp] = useState(() => localStorage.getItem(BRIDGE_KEY) ?? DEFAULT_BRIDGE);
   const [info, setInfo] = useState({ ocStatus: "down" as "up" | "down", ocVersion: undefined as string | undefined, directory: "", sessionID: undefined as string | undefined, recentDirs: [] as string[], agent: undefined as string | undefined, model: undefined as string | undefined });
   const [sessions, setSessions] = useState<Extract<BridgeMessage, { type: "session.listed" }>["sessions"]>([]);
@@ -407,6 +407,12 @@ function Shell({ locale, setLocale }: { locale: Locale; setLocale: (v: Locale) =
   const busy = agent.phase === "busy" || agent.phase === "awaiting";
   const busyRef = useRef(busy);
   busyRef.current = busy;
+  // Riwayat tool (feed) dibersihkan begitu agen selesai menjawab.
+  const prevBusyRef = useRef(busy);
+  useEffect(() => {
+    if (prevBusyRef.current && !busy) clearFeed();
+    prevBusyRef.current = busy;
+  }, [busy, clearFeed]);
   const agentRef = useRef(agent);
   agentRef.current = agent;
   const levelRef = useRef(level);
