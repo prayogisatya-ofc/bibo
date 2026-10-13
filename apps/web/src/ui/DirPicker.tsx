@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useT } from "../i18n/index.js";
 import { useFocusTrap } from "./useFocusTrap.js";
-import { FolderIcon, SpinnerIcon, XIcon } from "./icons.js";
+import { ArrowUpIcon, FolderIcon, SpinnerIcon, XIcon } from "./icons.js";
 
 interface DirEntry {
   name: string;
@@ -189,7 +189,7 @@ export function DirPicker({
             disabled={!canUp}
             data-testid="dir-picker-up"
           >
-            ↑ {t.dirPickerUp}
+            <ArrowUpIcon size={16} /> {t.dirPickerUp}
           </button>
           <button
             type="button"
