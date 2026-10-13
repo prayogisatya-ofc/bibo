@@ -506,6 +506,7 @@ export function applyWorking(r: PoseOps, variant: WorkingVariant): void {
   r.placeHand("l", "front");
   r.placeHand("r", "front");
   // Posisi dasar mengetik: L (72,170), R (128,170).
+  // Base tangan: L (42,152), R (158,148) → offset = target - base.
   const homeL = { x: 30, y: 18 };
   const homeR = { x: -30, y: 22 };
   const moveMs = 300;
