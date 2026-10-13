@@ -160,6 +160,8 @@ export function applyIdle(r: PoseOps): void {
   r.shadowSync(period, true);
   r.antennaFollow(period, true);
   // Tangan ambient: lag L 0,35 s / R 0,7 s terhadap badan.
+  // composite:"add" agar bob MENAMBAH ke posisi dasar (dari moveHand),
+  // bukan menimpanya (tangan tidak "kelempar").
   for (const [which, lag] of [["l", T.idle.hands.lagLms], ["r", T.idle.hands.lagRms]] as const) {
     const hand = r.el(which === "l" ? "hand-l" : "hand-r");
     r.anim.stop(hand, "bob");
@@ -173,7 +175,7 @@ export function applyIdle(r: PoseOps): void {
         { translate: `0px ${-T.idle.hands.amp}px`, offset: 0.5 },
         { translate: "0px 0px" },
       ],
-      { duration: period, delay: lag, easing: T.ease.soft, iterations: Infinity },
+      { duration: period, delay: lag, easing: T.ease.soft, iterations: Infinity, composite: "add" },
     );
   }
 }
@@ -347,7 +349,7 @@ export function applyThinking(r: PoseOps): void {
   r.placeHand("r", "front");
   r.moveHand("r", T.thinking.chin.dx, T.thinking.chin.dy, T.thinking.handToChinMs, T.ease.pop);
   r.later(T.thinking.handToChinMs, () => chinRubLoop(r));
-  // Tangan L ambient.
+  // Tangan L ambient (composite:add agar tidak menimpa posisi dasar).
   const handL = r.el("hand-l");
   r.anim.stop(handL, "bob");
   if (!r.reduced) {
@@ -356,7 +358,7 @@ export function applyThinking(r: PoseOps): void {
       "bob",
       "A",
       [{ translate: "0px 0px" }, { translate: "0px -3px", offset: 0.5 }, { translate: "0px 0px" }],
-      { duration: period, delay: 500, easing: T.ease.soft, iterations: Infinity },
+      { duration: period, delay: 500, easing: T.ease.soft, iterations: Infinity, composite: "add" },
     );
   }
   // Mata melirik kanan-atas ↔ kiri-atas.

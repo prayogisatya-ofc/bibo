@@ -240,16 +240,20 @@ export class Animator {
     // HYBRID: properti individual (rotate/translate/scale) pakai WAAPI —
     // browser menangani transform-box/transform-origin SVG dengan benar.
     // GSAP hanya untuk keyframes 'transform' string & opacity (lebih halus).
-    // PENGECUALIAN: transform string yang mengandung rotate() juga via WAAPI,
-    // karena GSAP menimpa transform-origin CSS (gear jadi orbit bukan spin).
+    // PENGECUALIAN: transform string yang mengandung rotate() atau scale()
+    // juga via WAAPI, karena GSAP menimpa transform-origin CSS (gear jadi
+    // orbit, scale dari pojok bukan dari tengah).
     const usesIndividual = keyframes.some((kf) => {
       const r = kf as Record<string, unknown>;
       if (typeof r["rotate"] === "string" || typeof r["translate"] === "string" || typeof r["scale"] === "string") {
         return true;
       }
-      // Transform string dengan rotate: WAAPI agar origin CSS dihormati.
-      if (typeof r["transform"] === "string" && /rotate\(/.test(r["transform"] as string)) {
-        return true;
+      // Transform string dengan rotate/scale: WAAPI agar origin CSS dihormati.
+      if (typeof r["transform"] === "string") {
+        const tf = r["transform"] as string;
+        if (/rotate\(/.test(tf) || /scale\(/.test(tf) || /scaleX\(/.test(tf) || /scaleY\(/.test(tf)) {
+          return true;
+        }
       }
       return false;
     });
